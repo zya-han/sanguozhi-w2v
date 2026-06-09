@@ -121,10 +121,9 @@ button.ghost:hover { background: #e9d4cd; }
 .bigscore .num { font-size: 3rem; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1.1; }
 .bigscore .cap { color: var(--muted); font-size: .95rem; }
 .bigscore .cap .rd { font-size: .82em; color: var(--meta); }
+.fq { font-size: .82em; color: var(--meta); font-family: system-ui, sans-serif; font-variant-numeric: tabular-nums; }
 
-.common-toggle { display: flex; align-items: center; gap: 8px; justify-content: center;
-  margin: 14px 0 6px; font-size: .88rem; color: var(--muted); cursor: pointer; user-select: none; }
-.common-toggle input { accent-color: var(--accent); width: 16px; height: 16px; }
+.common-note { text-align: center; margin: 12px 0 6px; font-size: .84rem; color: var(--muted); }
 
 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 10px; }
 @media (max-width: 620px) { .cols { grid-template-columns: 1fr; } }
@@ -141,7 +140,7 @@ button.ghost:hover { background: #e9d4cd; }
   gap: 10px; padding: 7px 8px; border-radius: 8px; cursor: pointer;
 }
 .bar-row:hover { background: #f0f6f4; }
-.show-common .bar-row.common { background: var(--common); }
+.bar-row.common { padding-left: 12px; }   /* 공통 단어: 인라인 배경색 + 좌측 색띠(box-shadow) */
 .bar-label { white-space: nowrap; }
 .bar-label .bw { font-size: 1.18rem; }
 .bar-label .rd { font-size: .74rem; color: var(--muted); margin-left: 5px; font-family: system-ui, sans-serif; }

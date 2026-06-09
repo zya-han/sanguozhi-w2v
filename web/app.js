@@ -95,7 +95,14 @@ const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&
 function rdSpan(tok) { const r = tokenToReading.get(tok); return r ? ` <span class="rd">${esc(r)}</span>` : ''; }
 function freqOf(tok) { return FREQ[tokenToIndex.get(tok)] || 0; }                       // 코퍼스 출현 횟수
 function fqSpan(tok) { return ` <span class="fq">${freqOf(tok).toLocaleString()}회</span>`; }
-function commonKey(tok) { const b = tok.replace(/[《》]/g, ''); return b.length >= 2 ? b.slice(-2) : b; }
+// 양쪽 공통 단어에 부여할 색 팔레트(쿨톤 위주, 서로 구분). 항목이 많으면 순환.
+const COMMON_PALETTE = [
+  { bg: '#d3ede7', bar: '#1f8f74' }, { bg: '#d8e6f6', bar: '#2f6fb0' },
+  { bg: '#e3def3', bar: '#5b51b0' }, { bg: '#dceccf', bar: '#5b9a3b' },
+  { bg: '#d0ecef', bar: '#1f8a93' }, { bg: '#f0dcee', bar: '#9a3b8f' },
+  { bg: '#efe6cf', bar: '#94782b' }, { bg: '#dde3ee', bar: '#4a5e8a' },
+  { bg: '#f3dde0', bar: '#a8455a' }, { bg: '#d6e8da', bar: '#2e7d4f' },
+];
 
 // 한글 조사: 앞말의 받침 유무로 선택. 한자가 아니라 화면에 보이는 독음의 끝 음절로 판정.
 function hasBatchim(text) {
@@ -115,13 +122,14 @@ function josaText(text, withB, noB) {
   return b === null ? `${withB}(${noB})` : (b ? withB : noB);
 }
 
-// 막대 행들 (정규화: 최댓값 = 100%)
-function bars(list, commonSet) {
+// 막대 행들 (정규화: 최댓값 = 100%). colorMap: token→{bg,bar} (양쪽 공통 단어 색칠).
+function bars(list, colorMap) {
   const max = list.length ? list[0][1] : 1;
   return list.map(([t, s]) => {
     const pct = Math.max(5, Math.round((s / max) * 100));
-    const cm = commonSet && commonSet.has(commonKey(t)) ? ' common' : '';
-    return `<div class="bar-row${cm}" data-token="${esc(t)}">
+    const c = colorMap && colorMap.get(t);
+    const style = c ? ` style="background:${c.bg};box-shadow:inset 5px 0 0 ${c.bar}"` : '';
+    return `<div class="bar-row${c ? ' common' : ''}" data-token="${esc(t)}"${style}>
       <span class="bar-label"><span class="bw han">${esc(t)}</span>${rdSpan(t)}</span>
       <span class="bar-track"><span class="bar-cover" style="width:${100 - pct}%"></span></span>
       <span class="bar-freq">${freqOf(t).toLocaleString()}회</span>
@@ -144,23 +152,22 @@ function runCmp() {
   const ia = tokenToIndex.get(ta), ib = tokenToIndex.get(tb);
   const sim = dot(ia, ib);
   const la = mostSimilar(ia, 14), lb = mostSimilar(ib, 14);
-  const ka = new Set(la.map(([t]) => commonKey(t)));
-  const kb = new Set(lb.map(([t]) => commonKey(t)));
-  const common = new Set([...ka].filter(k => kb.has(k)));
+  // 두 목록에 모두 나오는 단어 → 단어별 고유 색(양쪽 같은 색)으로 상시 표시.
+  const setB = new Set(lb.map(([t]) => t));
+  const colorMap = new Map();
+  la.map(([t]) => t).filter(t => setB.has(t))
+    .forEach((t, i) => colorMap.set(t, COMMON_PALETTE[i % COMMON_PALETTE.length]));
   box.innerHTML = `
     <div class="bigscore"><div class="num">${sim.toFixed(3)}</div>
-      <div class="cap"><span class="han">${esc(ta)}</span>${rdSpan(ta)} ↔
-        <span class="han">${esc(tb)}</span>${rdSpan(tb)} 코사인 유사도</div></div>
-    <label class="common-toggle"><input type="checkbox" id="cmpCommon">
-      양쪽 공통(끝 두 글자가 같으면 공통)</label>
-    <div class="cols" id="cmpCols">
+      <div class="cap"><span class="han">${esc(ta)}</span>${rdSpan(ta)}${fqSpan(ta)} ↔
+        <span class="han">${esc(tb)}</span>${rdSpan(tb)}${fqSpan(tb)} 코사인 유사도</div></div>
+    <p class="common-note">양쪽 목록에 모두 나오는 단어는 같은 색으로 표시됩니다.</p>
+    <div class="cols">
       <div><div class="col-head"><span class="han">${esc(ta)}</span>${rdSpan(ta)} ${josa(ta, '과', '와')} 비슷한 단어</div>
-        <div class="bars">${bars(la, common)}</div></div>
+        <div class="bars">${bars(la, colorMap)}</div></div>
       <div><div class="col-head"><span class="han">${esc(tb)}</span>${rdSpan(tb)} ${josa(tb, '과', '와')} 비슷한 단어</div>
-        <div class="bars">${bars(lb, common)}</div></div>
+        <div class="bars">${bars(lb, colorMap)}</div></div>
     </div>`;
-  document.getElementById('cmpCommon').addEventListener('change', e =>
-    document.getElementById('cmpCols').classList.toggle('show-common', e.target.checked));
 }
 
 /* ---------- 2. 스파이 찾기 ---------- */

@@ -1,215 +1,187 @@
-"""Stage 1 — 원문 수집 및 本文/裴注 분리.
+"""Stage 1 — 원문 수집 및 本文/裴注 분리 (中文維基文庫 zh.wikisource).
 
-정본: Kanseki Repository KR2a0012 (三國志, 文淵閣四庫全書本 WYG; 陳壽 撰 + 裴松之 注).
-Kanripo 파일은 Mandoku/KR 마크업(org-mode 헤더 + 평문 본문)이다. 관찰된 마크업:
-  - `#+...` org 헤더 (파일당 PROPERTY: JUAN 등)        → 제거
-  - `<pb:...>` 판심 페이지 경계 마커 (2163개)          → 제거
-  - `¶`        목판 행/열 경계 (레이아웃, 문장 아님)    → 제거
-  - `( ... )`  雙行夾注 = 裴松之 注 (반각괄호, 전역 균형) → 注 스트림
-  - 괄호 밖     = 本文 (陳壽)                            → 本文 스트림
-각 卷 끝에는 `[魏蜀吳]志卷N考證` (청대 四庫館臣 校勘 주석) 이 붙으며, 이는 陳壽 本文도
-裴松之 注도 아니므로 kind='kaozheng'로 분리하여 학습에서 제외한다(raw 에는 보존).
-파일 _000 은 御製詩·目録·提要 등 front matter → kind='frontmatter'로 분리.
+정본: zh.wikisource 三國志 — 전체 65卷(魏30·蜀15·吳20), 正字 번체, 표점 포함.
+  (당초 Kanripo KR2a0012는 魏志 30卷만 담겨 蜀/吳書가 누락 → 周瑜 등 다수 개체 부재.
+   wikisource는 전체 65卷을 번체로 제공하므로 교체.)
 
-설계(명세서 §2-6): 별명/단자 정규화·분절 일절 없음. 여기서는 텍스트 추출과 文/注 분리만.
+위키텍스트 마크업:
+  - `{{*|...}}`  = 裴松之 注 (인라인 雙行夾注에 해당)  → 注 스트림(is_peizhu=True)
+  - 그 밖의 텍스트 = 本文(陳壽)                       → 本文 스트림
+  - `==전기명==`  = 傳 단위 섹션 헤더 (드롭)
+  - `[[링크|표시]]`→표시, `《書名》` 유지, `'''굵게'''` 제거, 기타 {{템플릿}} 제거
+표점(。！？)으로 문장 분할 → 각 문장이 윈도 단위 segment (명세 §2.6).
+토큰화 대상은 한자(漢字)만; 구두점은 문장 경계로만 쓰고 토큰에서 제외(Stage 4).
 
-출력:
-  data/raw/provenance.json                      — 출처·판본 메타데이터
-  data/interim/segments.parquet                 — segment_id, text, source, juan, kind, is_peizhu
+출력: data/raw/wikisource/卷NN.wiki (캐시), data/raw/provenance.json,
+      data/interim/segments.parquet (segment_id, text, source, juan, shu, kind, is_peizhu).
 """
 from __future__ import annotations
 
 import json
-import re
-import subprocess
 import sys
+import time
 from pathlib import Path
 
 import pandas as pd
+import regex as re
+import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import ensure_dir, get_logger, load_config, resolve  # noqa: E402
 
 log = get_logger("01_fetch")
 
-PB_RE = re.compile(r"<pb:[^>]*>")
-HEADER_RE = re.compile(r"^#.*$", re.MULTILINE)
-JUAN_PROP_RE = re.compile(r"^#\+PROPERTY:\s*JUAN\s+(.+?)\s*$", re.MULTILINE)
-# 卷 말미 考證 섹션 헤딩: 例) 魏志卷一考證 / 蜀志卷五考證 / 吳志卷二考證
-KAOZHENG_RE = re.compile(r"[魏蜀吳]志卷[一二三四五六七八九十百零〇]+考證")
-# 卷 말미 colophon (考證 직전 또는 本文 말미): 例) 魏志卷一
-COLOPHON_TAIL_RE = re.compile(r"[魏蜀吳]志卷[一二三四五六七八九十百零〇]+$")
-# 卷 머리 서지·찬자 보일러플레이트:
-#   欽定四庫全書 + [魏蜀吳]志卷N + (byline) 晉著作郎…陳壽撰…裴松之注
-# 30권 중 29권에 존재(卷十六은 판각상 머리글 없이 본문 시작 → 앵커 불일치로 자연 보존).
-JUAN_HEADER_RE = re.compile(
-    r"^欽定四庫全書[魏蜀吳]志卷[一二三四五六七八九十百零〇]+(?:.{0,40}?松之注)?"
-)
+# 한자 + 《》 만 보존(《書名》을 토큰화 단계에서 통째로 한 토큰으로 방출하기 위함).
+# 나머지 구두점은 문장 경계로만 쓰고 제거한다.
+KEEP = re.compile(r"[\p{Han}《》]+")
+HAN_ANY = re.compile(r"\p{Han}")
+SECTION_RE = re.compile(r"^=+\s*[^=]+?\s*=+\s*$", re.MULTILINE)
 
 
-def clone_corpus(cfg: dict) -> Path:
-    vendor = ensure_dir(resolve(cfg, "vendor"))
-    dest = vendor / cfg["corpus"]["kanripo_id"]
-    if dest.exists():
-        log.info("Kanripo repo 이미 존재: %s", dest)
-        return dest
-    url = cfg["corpus"]["kanripo_repo"]
-    log.info("clone %s -> %s", url, dest)
-    subprocess.run(["git", "clone", "--depth", "1", url, str(dest)], check=True)
-    return dest
+def fetch_juan_wikitext(cfg: dict, juan: int) -> str:
+    """卷 위키텍스트를 API로 받되, data/raw/wikisource/ 에 캐시."""
+    cache_dir = ensure_dir(resolve(cfg, "raw") / "wikisource")
+    pad = int(cfg["corpus"]["juan_zero_pad"])
+    cache = cache_dir / f"卷{juan:0{pad}d}.wiki"
+    if cache.exists():
+        return cache.read_text(encoding="utf-8")
+    page = f"{cfg['corpus']['page_prefix']}{juan:0{pad}d}"
+    headers = {"User-Agent": "sanguozhi-w2v-research/1.0 (academic; contact via github)"}
+    params = {"action": "parse", "page": page, "prop": "wikitext",
+              "format": "json", "maxlag": 5}
+    for attempt in range(6):
+        r = requests.get(cfg["corpus"]["wikisource_api"], params=params,
+                         headers=headers, timeout=30)
+        if r.status_code == 429 or (r.status_code == 200 and "maxlag" in r.text[:200]):
+            wait = int(r.headers.get("Retry-After", 2 ** attempt + 2))
+            log.warning("卷%d rate-limit(%s), %ds 대기 후 재시도", juan, r.status_code, wait)
+            time.sleep(wait)
+            continue
+        r.raise_for_status()
+        wt = r.json().get("parse", {}).get("wikitext", {}).get("*", "")
+        cache.write_text(wt, encoding="utf-8")
+        time.sleep(1.0)  # 예의상 rate limit
+        return wt
+    raise RuntimeError(f"卷{juan} 반복 rate-limit으로 실패")
 
 
-def clean_markup(raw: str) -> str:
-    """org 헤더·pb 마커·¶ 제거 후 단일 문자열 반환."""
-    t = HEADER_RE.sub("", raw)
-    t = PB_RE.sub("", t)
-    t = t.replace("¶", "")
-    t = t.replace("\n", "")
-    t = t.replace("　", "")  # 전각 공백(편집 들여쓰기) 제거
-    return t
+def split_main_note(wikitext: str) -> list[tuple[str, str]]:
+    """{{...}} 균형 파싱으로 本文/裴注 분리.
 
-
-def split_kaozheng(text: str) -> tuple[str, str]:
-    """本文+注 부분과 考證 부분을 분리. 考證 없으면 (text, '')."""
-    m = KAOZHENG_RE.search(text)
-    if not m:
-        return text, ""
-    main = text[: m.start()]
-    kaozheng = text[m.start():]
-    # 本文 말미 colophon (例: 魏志卷一) 제거
-    main = COLOPHON_TAIL_RE.sub("", main)
-    return main, kaozheng
-
-
-def partition_main_note(text: str):
-    """반각 괄호 깊이로 本文(depth 0) / 裴注(depth>0) 런 분할.
-
-    반환: [(kind, run_text), ...]  kind ∈ {'main','peizhu'}.
-    목판 열-분할로 인접한 `)(` (사이 本文 0글자)는 동일 注로 병합된다:
-    빈 런을 버린 뒤 연속 동일 kind 런을 합친다.
+    `{{*|...}}` → ('peizhu', 내용). 그 외 템플릿 → 드롭. 나머지 → ('main', ...).
+    인라인 注가 本文을 끊으므로, 호출부에서 main 조각을 이어붙여 문장 분할한다.
     """
-    runs: list[tuple[str, list[str]]] = []
-    depth = 0
-    cur_kind = "main"
+    out: list[tuple[str, str]] = []
     buf: list[str] = []
-
-    def flush():
-        if buf:
-            runs.append((cur_kind, "".join(buf)))
-
-    for ch in text:
-        if ch == "(":
-            if depth == 0:
-                flush(); buf.clear(); cur_kind = "peizhu"
-            depth += 1
-            continue
-        if ch == ")":
-            depth = max(0, depth - 1)
-            if depth == 0:
-                flush(); buf.clear(); cur_kind = "main"
-            continue
-        buf.append(ch)
-    flush()
-
-    # 빈 런 제거 + 연속 동일 kind 병합
-    merged: list[tuple[str, str]] = []
-    for kind, txt in runs:
-        if not txt:
-            continue
-        if merged and merged[-1][0] == kind:
-            merged[-1] = (kind, merged[-1][1] + txt)
+    i, n = 0, len(wikitext)
+    while i < n:
+        if wikitext[i:i + 2] == "{{":
+            # 매칭되는 }} 까지 (중첩 허용)
+            depth, j = 0, i
+            while j < n:
+                if wikitext[j:j + 2] == "{{":
+                    depth += 1; j += 2
+                elif wikitext[j:j + 2] == "}}":
+                    depth -= 1; j += 2
+                    if depth == 0:
+                        break
+                else:
+                    j += 1
+            inner = wikitext[i + 2:j - 2]
+            if inner.startswith("*|"):           # 裴注
+                out.append(("main", "".join(buf))); buf = []
+                out.append(("peizhu", inner[2:]))
+            # 그 외 템플릿(헤더/라이선스 등) → 드롭
+            i = j
         else:
-            merged.append((kind, txt))
-    return merged
+            buf.append(wikitext[i]); i += 1
+    out.append(("main", "".join(buf)))
+    return out
 
 
-def build_segments(cfg: dict, repo: Path) -> pd.DataFrame:
-    kid = cfg["corpus"]["kanripo_id"]
-    concat_main = not cfg["corpus"].get("peizhu_splits_bentext", False)
+def clean_wiki(text: str) -> str:
+    """위키 마크업 제거 → 표점 포함 평문."""
+    text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
+    text = re.sub(r"</?(?:onlyinclude|noinclude|includeonly|ref|small|sub|sup)[^>]*>", "", text)
+    text = re.sub(r"__\w+__", "", text)                       # __FORCETOC__ 등
+    text = re.sub(r"\[\[(?:[^\[\]|]*\|)?([^\[\]|]+)\]\]", r"\1", text)  # [[a|b]]→b, [[a]]→a
+    text = re.sub(r"\[\[[^\]]*\]\]", "", text)                 # 잔여 링크([[Category:..]])
+    text = re.sub(r"'{2,}", "", text)                         # ''' '' 강조
+    text = re.sub(r"\{\{[^{}]*\}\}", "", text)                 # 잔여 단순 템플릿
+    text = SECTION_RE.sub("\n", text)                         # ==전기명== 헤더 드롭
+    text = text.replace("　", "").replace("​", "")
+    return text
+
+
+def to_sentences(cleaned: str, delims: str) -> list[str]:
+    """(이미 clean_wiki된) 텍스트를 표점으로 문장 분할. 한자 + 《》만 보존. 빈 문장 제외."""
+    pattern = "[" + re.escape(delims) + "]"
+    sents = []
+    for chunk in re.split(pattern, cleaned):
+        kept = "".join(KEEP.findall(chunk))
+        if HAN_ANY.search(kept):
+            sents.append(kept)
+    return sents
+
+
+def shu_of(juan: int) -> str:
+    return "魏書" if juan <= 30 else "蜀書" if juan <= 45 else "吳書"
+
+
+def build_segments(cfg: dict) -> pd.DataFrame:
+    delims = cfg["corpus"]["sentence_delims"]
+    n_juan = int(cfg["corpus"]["juan_count"])
     rows = []
-    files = sorted(repo.glob(f"{kid}_*.txt"))
-    for fp in files:
-        raw = fp.read_text(encoding="utf-8")
-        jm = JUAN_PROP_RE.search(raw)
-        juan = jm.group(1).strip() if jm else fp.stem.split("_")[-1]
-        idx = fp.stem.split("_")[-1]
-
-        # _000 = front matter 전체
-        if idx == "000":
-            t = clean_markup(raw)
-            if t:
-                rows.append(dict(segment_id=f"{kid}_{idx}_front",
-                                 text=t, source=kid, juan=juan,
-                                 kind="frontmatter", is_peizhu=False))
+    for juan in range(1, n_juan + 1):
+        wt = fetch_juan_wikitext(cfg, juan)
+        if not wt.strip():
+            log.warning("卷%d 위키텍스트 비어있음", juan)
             continue
+        parts = split_main_note(wt)
+        main_clean = clean_wiki("".join(t for k, t in parts if k == "main"))
+        note_cleans = [clean_wiki(t) for k, t in parts if k == "peizhu"]
 
-        cleaned = clean_markup(raw)
-        main_note, kaozheng = split_kaozheng(cleaned)
-
-        parts = partition_main_note(main_note)
-        main_runs = [txt for k, txt in parts if k == "main"]
-        note_runs = [txt for k, txt in parts if k == "peizhu"]
-
-        if concat_main:
-            joined = JUAN_HEADER_RE.sub("", "".join(main_runs), count=1)
-            if joined:
-                rows.append(dict(segment_id=f"{kid}_{idx}_main",
-                                 text=joined, source=kid, juan=juan,
-                                 kind="main", is_peizhu=False))
-        else:
-            if main_runs:
-                main_runs[0] = JUAN_HEADER_RE.sub("", main_runs[0], count=1)
-            for i, txt in enumerate(main_runs):
-                if not txt:
-                    continue
-                rows.append(dict(segment_id=f"{kid}_{idx}_main{i:04d}",
-                                 text=txt, source=kid, juan=juan,
-                                 kind="main", is_peizhu=False))
-        for i, txt in enumerate(note_runs):
-            rows.append(dict(segment_id=f"{kid}_{idx}_note{i:04d}",
-                             text=txt, source=kid, juan=juan,
-                             kind="peizhu", is_peizhu=True))
-        if kaozheng:
-            rows.append(dict(segment_id=f"{kid}_{idx}_kaozheng",
-                             text=kaozheng, source=kid, juan=juan,
-                             kind="kaozheng", is_peizhu=False))
-
-    df = pd.DataFrame(rows)
-    return df
+        jid = f"卷{juan:02d}"
+        shu = shu_of(juan)
+        for si, sent in enumerate(to_sentences(main_clean, delims)):
+            rows.append(dict(segment_id=f"sgz_{jid}_m{si:04d}", text=sent,
+                             source="zh.wikisource:三國志", juan=jid, shu=shu,
+                             kind="main", is_peizhu=False))
+        ni = 0
+        for nc in note_cleans:
+            for sent in to_sentences(nc, delims):
+                rows.append(dict(segment_id=f"sgz_{jid}_n{ni:05d}", text=sent,
+                                 source="zh.wikisource:三國志", juan=jid, shu=shu,
+                                 kind="peizhu", is_peizhu=True))
+                ni += 1
+    return pd.DataFrame(rows)
 
 
 def main():
     cfg = load_config()
-    repo = clone_corpus(cfg)
-    df = build_segments(cfg, repo)
+    df = build_segments(cfg)
+    # 청대 考證·front matter는 wikisource 본문에 포함되지 않으므로 별도 제외 불필요.
 
     interim = ensure_dir(resolve(cfg, "interim"))
-    out = interim / "segments.parquet"
-    df.to_parquet(out, index=False)
+    df.to_parquet(interim / "segments.parquet", index=False)
 
-    # provenance
     raw_dir = ensure_dir(resolve(cfg, "raw"))
-    head = subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD"],
-                          capture_output=True, text=True).stdout.strip()
     prov = {
-        "corpus": "三國志 (正史) — Chen Shou 撰, Pei Songzhi 注",
-        "source": "Kanseki Repository (kanripo)",
-        "repo": cfg["corpus"]["kanripo_repo"],
-        "repo_id": cfg["corpus"]["kanripo_id"],
-        "edition": "文淵閣四庫全書本 (WYG)",
-        "git_head": head,
-        "license": "Kanripo terms; see https://www.kanripo.org/",
-        "note": "괄호 안=裴松之 注, 괄호 밖=陳壽 本文. 考證=청대 四庫館臣 교감(학습 제외). _000=front matter.",
+        "corpus": "三國志 (正史) — Chen Shou 撰, Pei Songzhi 注 (全 65卷)",
+        "source": "中文維基文庫 (zh.wikisource.org) 三國志",
+        "api": cfg["corpus"]["wikisource_api"],
+        "juan": f"卷01–卷{cfg['corpus']['juan_count']:02d} (魏書1-30, 蜀書31-45, 吳書46-65)",
+        "license": "CC BY-SA 4.0 (Wikisource)",
+        "note": "{{*|...}}=裴松之 注, 그 외=陳壽 本文. 표점(。！？)으로 문장 분할, 한자만 토큰화.",
     }
     (raw_dir / "provenance.json").write_text(
         json.dumps(prov, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    # 요약 로그
-    by_kind = df.groupby("kind").agg(n_seg=("text", "size"),
-                                     n_char=("text", lambda s: s.str.len().sum()))
-    log.info("segments.parquet 작성: %d 세그먼트 -> %s", len(df), out)
-    for kind, r in by_kind.iterrows():
-        log.info("  %-11s seg=%5d  chars=%d", kind, int(r.n_seg), int(r.n_char))
+    by = df.groupby(["shu", "kind"]).agg(
+        n=("text", "size"), chars=("text", lambda s: s.str.len().sum()))
+    log.info("segments.parquet: %d 문장 세그먼트", len(df))
+    for (shu, kind), r in by.iterrows():
+        log.info("  %s/%-6s seg=%5d chars=%d", shu, kind, int(r.n), int(r.chars))
 
 
 if __name__ == "__main__":

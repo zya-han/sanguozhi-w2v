@@ -13,9 +13,9 @@ data/interim/
 data/tokenized/
 models/
 # gazetteer.tsv 는 CC BY-NC-SA CBDB 파생물 → 재배포 금지(제외).
-# 단, 직접 작성한 큐레이션 입력(seed_supplement/stoplist)은 추적한다.
 data/gazetteer/gazetteer.tsv
 data/gazetteer/gazetteer_stats.json
+data/gazetteer/seed_supplement.tsv
 
 # Cloned upstream sources
 vendor/

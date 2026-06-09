@@ -89,6 +89,44 @@ def extract_per(con: sqlite3.Connection, dy_codes: list[int],
     return out
 
 
+ZI_RE = re.compile(r"^(.{2,4}?)字[一-鿿]")
+
+
+def common_surnames(con: sqlite3.Connection, threshold: int) -> tuple[set[str], set[str]]:
+    """CBDB 빈출 姓(threshold 인원 이상). 노이즈 글자(曰·子 등) 배제용."""
+    cur = con.execute(
+        "SELECT c_surname_chn, COUNT(*) n FROM BIOG_MAIN "
+        "WHERE c_surname_chn IS NOT NULL AND c_surname_chn<>'' "
+        "GROUP BY c_surname_chn HAVING n>=?", (threshold,))
+    sur = {r[0] for r in cur.fetchall()}
+    return {s for s in sur if len(s) == 1}, {s for s in sur if len(s) == 2}
+
+
+def extract_per_from_zi(con: sqlite3.Connection, cfg: dict, threshold: int) -> list[tuple[str, str]]:
+    """코퍼스 전기 도입부 '{姓名}字{字}'에서 인명 추출(문장 시작 앵커 + 빈출 姓).
+
+    CBDB가 빠뜨린 三國 인물(周瑜·呂蒙 등)을 코퍼스 자체에서 결정론적으로 확보.
+    """
+    sur1, sur2 = common_surnames(con, threshold)
+    norm = pd.read_parquet(resolve(cfg, "interim") / "normalized.parquet")
+    bad2 = set("弟子兄父母妻女姊妹")  # 3자 후보의 2번째 글자가 이러면 친족어 → 배제
+    names = set()
+    for t in norm["text"].astype(str):
+        m = ZI_RE.match(t)
+        if not m:
+            continue
+        nm = m.group(1)
+        if len(nm) >= 3 and nm[:2] in sur2:
+            names.add(nm[:3])
+        elif nm[0] in sur1 and len(nm) <= 3:
+            if len(nm) == 3 and nm[1] in bad2:
+                continue
+            names.add(nm)
+    log.info("코퍼스 '字' 도입부 인명 추출: %d개 (빈출 姓 %d/%d)",
+             len(names), len(sur1), len(sur2))
+    return [(n, "PER") for n in names]
+
+
 def extract_ofi(con: sqlite3.Connection) -> list[tuple[str, str]]:
     cur = con.cursor()
     out = []
@@ -156,6 +194,8 @@ def main():
            + extract_ofi(con)
            + extract_loc(con)
            + load_seed(g.get("seed_supplement")))
+    if g.get("extract_names_from_zi", True):
+        raw += extract_per_from_zi(con, cfg, int(g.get("surname_min_persons", 20)))
     con.close()
 
     # 정제: 괄호주기·공백 제거 → DataFrame

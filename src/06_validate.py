@@ -32,7 +32,8 @@ def main():
     model = Word2Vec.load(str(resolve(cfg, "models") / "w2v_sanguozhi.model"))
 
     # ── 1. 토큰화 정합성 검사 ──
-    must_single = ["諸葛亮", "孔明", "曹操", "劉備", "孫權", "丞相", "太守", "益州"]
+    must_single = ["諸葛亮", "孔明", "曹操", "劉備", "孫權", "周瑜", "呂蒙",
+                   "丞相", "太守", "益州"]
     must_char = ["亮", "操", "備", "羽"]  # 단자 名 — 글자 토큰으로 남아야
     checks = []
     for w in must_single:
@@ -48,6 +49,11 @@ def main():
     ok_alias = tok_freq.get("諸葛亮", 0) > 0 and tok_freq.get("孔明", 0) > 0
     checks.append(("별명 비정규화(諸葛亮·孔明 독립 공존)", ok_alias,
                    f"諸葛亮 {tok_freq.get('諸葛亮',0)}, 孔明 {tok_freq.get('孔明',0)}"))
+    # 《書名》 = 괄호 포함 단일 토큰
+    n_titles = sum(1 for t in tok_freq if t.startswith("《") and t.endswith("》"))
+    ok_title = tok_freq.get("《魏略》", 0) > 0 and n_titles > 0
+    checks.append(("《書名》 괄호포함 단일 토큰", ok_title,
+                   f"《魏略》 {tok_freq.get('《魏略》',0)}, 표제 토큰 {n_titles}종"))
     all_pass = all(c[1] for c in checks)
 
     # ── 2. 커버리지 ──

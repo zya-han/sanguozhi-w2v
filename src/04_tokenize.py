@@ -39,11 +39,26 @@ class MaxMatcher:
         out = []
         i, n = 0, len(text)
         while i < n:
+            ch = text[i]
+            # 《書名》 = 괄호 포함 통째로 한 토큰 (가제티어보다 우선)
+            if ch == "《":
+                j = text.find("》", i + 1)
+                if j != -1:
+                    out.append(text[i:j + 1])  # 《…》 brackets 포함
+                    i = j + 1
+                    continue
+                i += 1  # 닫는 》 없는 고립 《 는 버림
+                continue
+            if ch == "》":
+                i += 1  # 고립 》 버림
+                continue
+            # 전방 최장일치 (단, 《 직전까지만; 토큰 내부에 《 포함 금지)
             matched = None
             hi = min(self.maxlen, n - i)
-            # 최장(길이 hi)부터 2까지 시도 — 첫 매칭이 최장일치
             for L in range(hi, 1, -1):
                 cand = text[i:i + L]
+                if "《" in cand or "》" in cand:
+                    continue
                 if cand in self.vocab:
                     matched = cand
                     break
@@ -51,7 +66,7 @@ class MaxMatcher:
                 out.append(matched)
                 i += len(matched)
             else:
-                out.append(text[i])  # 글자 1개 = 토큰 1개
+                out.append(ch)  # 글자 1개 = 토큰 1개
                 i += 1
         return out
 

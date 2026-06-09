@@ -5,12 +5,16 @@
 설계 원칙·비목표는 [`sanguozhi_word2vec_spec.md`](sanguozhi_word2vec_spec.md) 참조.
 
 ## 핵심 설계 (요약)
+- **코퍼스 = 전체 65卷**(魏書30·蜀書15·吳書20), zh.wikisource 正字 번체, 표점 포함.
 - **기본 토큰 = 글자**. 비개체 텍스트는 통계 분절·subword 하지 않음(허사 분포 보존).
 - **개체 병합 = 가제티어 결정론적 최장일치**만. 학습형 NER 없음.
+  - 가제티어: CBDB(인명·관직)+CHGIS 지명 + **코퍼스 전기 도입부 "{姓名}字{字}" 결정론적 추출**
+    (CBDB가 누락한 三國 인물 周瑜·呂蒙·荀彧 등을 빈출 姓 앵커로 확보).
+- **《書名》= 괄호 포함 단일 토큰**: 《魏略》·《江表傳》 등 인용 史書를 통째로 한 토큰.
 - **별명 비정규화**: 諸葛亮(名)·孔明(字)·武侯(諡)는 각각 독립 토큰.
 - **단자 名 미병합**: 亮·操·備는 동형이의라 글자 토큰 유지.
-- **本文(陳壽)/裴注(裴松之)** 플래그 보존, 윈도가 文/注·segment 경계를 넘지 않음.
-- **자형**: 四庫 WYG본은 正字 번체 → OpenCC 미적용(于/於·云/雲 등 고전 의미 구분 보존).
+- **本文(陳壽)/裴注(裴松之)** 플래그 보존, 표점 문장 단위 segment → 윈도가 文/注·문장 경계를 넘지 않음.
+- **자형**: 正字 번체 → OpenCC 미적용(于/於·云/雲 등 고전 의미 구분 보존).
 
 ## 환경 구축
 ```bash
@@ -22,13 +26,14 @@ pip install -r requirements.txt
 ## 실행 (순서대로)
 ```bash
 conda activate ./.conda
-python src/01_fetch_corpus.py     # Kanripo KR2a0012 클론 → 本文/裴注 분리 → segments.parquet
+python src/01_fetch_corpus.py     # zh.wikisource 三國志 65卷 → 本文/裴注 분리·문장분할 → segments.parquet
 python src/02_normalize.py        # 正字 보존 정규화 → normalized.parquet
-python src/03_build_gazetteer.py  # CBDB(PER/OFI/LOC) + 보충시드 + sanity 필터 → gazetteer.tsv
-python src/04_tokenize.py         # 결정론적 최장일치 토큰화 → corpus.jsonl
+python src/03_build_gazetteer.py  # CBDB+CHGIS+코퍼스 字추출 + 보충시드 + sanity 필터 → gazetteer.tsv
+python src/04_tokenize.py         # 결정론적 최장일치 토큰화(《書名》 통째 토큰) → corpus.jsonl
 python src/05_train_w2v.py        # Word2Vec 학습 → models/w2v_sanguozhi.model, vocab.tsv
 python src/06_validate.py         # 정합성·커버리지 검증 → reports/validation.md
 ```
+> Stage 1은 wikisource API로 65卷을 받아 `data/raw/wikisource/卷NN.wiki`에 캐시한다(재실행 시 캐시 사용).
 모든 설정은 [`config.yaml`](config.yaml) 한 곳에서 조정(소스 URL·시대경계·하이퍼파라미터·시드).
 
 ### CBDB SQLite 준비 (Stage 3 전제)
@@ -51,9 +56,12 @@ m.wv.most_similar("劉備")   # → 關羽 …
 ## 데이터 소스 / 라이선스 (인용 필수)
 | 데이터 | 소스 | 라이선스 |
 |---|---|---|
-| 원문 三國志 | Kanseki Repository `kanripo/KR2a0012` (文淵閣四庫全書本) | Kanripo 이용약관 (https://www.kanripo.org) |
+| 원문 三國志 (전체 65卷) | 中文維基文庫 zh.wikisource `三國志/卷01–卷65` | **CC BY-SA 4.0** |
 | 인명·관직 | CBDB `cbdb-project/cbdb_sqlite` | **CC BY-NC-SA 4.0** (비상업, 동일조건 공유) |
 | 지명 | CBDB ADDR_CODES (= CHGIS 연계) / TGAZ | CHGIS (Harvard & Fudan) |
+
+> 당초 정본으로 검토한 Kanripo `KR2a0012`는 카탈로그 표기(65卷)와 달리 **魏志 30卷만** 담겨 있어
+> (蜀·吳書 누락) zh.wikisource 전체본으로 교체했다.
 
 > CBDB는 **CC BY-NC-SA 4.0**이므로 파생물(가제티어)도 동일 조건. `data/`·`vendor/`·`models/`는
 > `.gitignore` 처리되어 재배포되지 않으며, 코드와 provenance만 추적된다.

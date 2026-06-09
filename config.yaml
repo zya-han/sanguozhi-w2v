@@ -18,9 +18,15 @@ paths:
 # Stage 1 — 원문 수집
 # ----------------------------------------------------------------------------
 corpus:
-  # 정본: Kanseki Repository 三國志 (晉 陳壽, 裴松之 注 포함)
-  kanripo_repo:    "https://github.com/kanripo/KR2a0012.git"
-  kanripo_id:      "KR2a0012"
+  # 정본: 中文維基文庫(zh.wikisource) 三國志 — 전체 65卷(魏30·蜀15·吳20), 正字 번체.
+  #   裴松之 注 = {{*|...}} 템플릿으로 명시 구분. 표점(標點) 포함 → 문장 경계 사용.
+  #   (당초 Kanripo KR2a0012는 魏志 30卷만 담겨 蜀/吳書 누락 → wikisource로 교체.)
+  source:          "wikisource"
+  wikisource_api:  "https://zh.wikisource.org/w/api.php"
+  page_prefix:     "三國志/卷"
+  juan_count:      65            # 卷01~卷65 (魏1-30, 蜀31-45, 吳46-65)
+  juan_zero_pad:   2
+  sentence_delims: "。！？"       # 표점 문장 경계(명세 §2.6). 句讀 자동화 아님.
   # 裴松之 注 학습 포함 여부 (항상 is_peizhu 플래그로 구분 보존; False면 학습에서 제외)
   include_peizhu_in_training: true
   # 교차검증 보조 (선택)
@@ -49,6 +55,10 @@ gazetteer:
   # 後漢~三國 왕조 코드 (DYNASTIES 실측): 25=東漢,3=三國,26=魏,53=蜀,42=吳,83=漢(generic)
   dynasty_codes:   [25, 3, 26, 53, 42, 83]
   min_surface_len: 2                       # 2자 미만 제거 (단자 名 병합 금지)
+  # CBDB는 三國 인물 커버리지가 빈약(周瑜·呂蒙·荀彧 부재) → 코퍼스 자체의 전기 도입부
+  # "{姓名}字{字}"를 CBDB 빈출 姓 앵커로 결정론적 추출(학습형 NER 아님). 문장 시작 앵커.
+  extract_names_from_zi: true
+  surname_min_persons: 20                  # 이 인원수 이상 보유한 姓만 앵커로 사용(노이즈 제거)
   # LOC: CBDB ADDR_CODES(=CHGIS 연계)에서 지명 추출. CHGIS 연도는 후대 행정인스턴스라
   # 신뢰 불가 → 코퍼스 출현 필터로 三國 스코핑. (TGAZ API는 보조 교차검증용, 선택)
   require_corpus_occurrence: true          # 코퍼스에 실제 등장하는 표면형만 유지(三國 스코핑)
@@ -65,9 +75,9 @@ gazetteer:
 # ----------------------------------------------------------------------------
 word2vec:
   sg:              1        # skip-gram
-  # 386k 토큰·4.6k vocab 소규모 코퍼스 → 50차원이 가장 선명·일관(실험으로 확인).
-  # 200차원은 파라미터>토큰으로 과파라미터화되어 신호 희석. 50~100 권장.
-  vector_size:     50
+  # 386k 토큰·4.6k vocab 소규모 코퍼스 → 50~100 권장(200은 과파라미터화).
+  # 50차원이 가장 선명하나, 구조 표현력 위해 100차원 채택.
+  vector_size:     100
   window:          5
   min_count:       3
   negative:        10

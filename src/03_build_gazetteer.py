@@ -29,7 +29,8 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import REPO_ROOT, ensure_dir, get_logger, load_config, resolve  # noqa: E402
+from common import (REPO_ROOT, ensure_dir, get_logger, load_config,  # noqa: E402
+                    make_script_normalizer, resolve)
 
 log = get_logger("03_gazetteer")
 
@@ -214,11 +215,10 @@ def main():
         df = df[~df["surface"].isin(stop)]
         log.info("stoplist 적용: %d → %d 표면형", n0, len(df))
 
-    # (선택) 자형 정규화 — CBDB는 번체라 기본 null
-    if g.get("opencc_config"):
-        import opencc
-        cc = opencc.OpenCC(g["opencc_config"])
-        df["surface"] = df["surface"].map(cc.convert)
+    # 자형 정규화 — 코퍼스와 동일 설정(normalize)으로 가제티어도 통일(번체+간체 정합).
+    nm = cfg.get("normalize", {})
+    normalize = make_script_normalizer(nm.get("corpus_opencc"), nm.get("opencc_protect", ""))
+    df["surface"] = df["surface"].map(normalize)
 
     # 유형 우선순위(PER>OFI>LOC)로 중복 제거: 동일 표면형은 한 유형만
     prio = {"PER": 0, "OFI": 1, "LOC": 2}

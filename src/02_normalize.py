@@ -19,7 +19,7 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import get_logger, load_config, resolve  # noqa: E402
+from common import get_logger, load_config, make_script_normalizer, resolve  # noqa: E402
 
 log = get_logger("02_normalize")
 
@@ -64,13 +64,15 @@ def main():
     df = pd.read_parquet(interim / "segments.parquet")
 
     if norm.get("corpus_opencc"):
-        log.warning("corpus_opencc=%s 설정됨 — 고전 의미 손상 위험. 의도한 것인지 확인 요망.",
-                    norm["corpus_opencc"])
-        import opencc
-        cc = opencc.OpenCC(norm["corpus_opencc"])
-        df["text"] = df["text"].map(cc.convert)
+        protect = norm.get("opencc_protect", "")
+        normalize = make_script_normalizer(norm["corpus_opencc"], protect)
+        before = df["text"].copy()
+        df["text"] = df["text"].map(normalize)
+        n_changed = int((before != df["text"]).sum())
+        log.info("자형 정규화(%s, 보호 %d자): %d/%d 세그먼트 변경 — 혼합 자형 통일, 고전 의미 보존.",
+                 norm["corpus_opencc"], len(set(protect)), n_changed, len(df))
     else:
-        log.info("코퍼스 OpenCC 미적용 (正字 번체 보존) — 권장 설정.")
+        log.info("코퍼스 OpenCC 미적용 (正字 번체 보존).")
 
     vmap = load_variant_map(norm.get("variant_map"))
     if vmap:

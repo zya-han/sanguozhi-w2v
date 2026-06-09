@@ -30,7 +30,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import (REPO_ROOT, ensure_dir, get_logger, load_config,  # noqa: E402
-                    make_script_normalizer, resolve)
+                    load_variant_map, make_script_normalizer, resolve)
 
 log = get_logger("03_gazetteer")
 
@@ -215,9 +215,11 @@ def main():
         df = df[~df["surface"].isin(stop)]
         log.info("stoplist 적용: %d → %d 표면형", n0, len(df))
 
-    # 자형 정규화 — 코퍼스와 동일 설정(normalize)으로 가제티어도 통일(번체+간체 정합).
+    # 자형 정규화 — 코퍼스와 동일 설정(normalize)으로 가제티어도 통일(簡↔繁·異體字).
     nm = cfg.get("normalize", {})
-    normalize = make_script_normalizer(nm.get("corpus_opencc"), nm.get("opencc_protect", ""))
+    normalize = make_script_normalizer(
+        nm.get("corpus_opencc"), nm.get("opencc_protect", ""),
+        load_variant_map(nm.get("variant_map")))
     df["surface"] = df["surface"].map(normalize)
 
     # 유형 우선순위(PER>OFI>LOC)로 중복 제거: 동일 표면형은 한 유형만

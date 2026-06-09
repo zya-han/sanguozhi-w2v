@@ -130,10 +130,11 @@ button.ghost:hover { background: #e9d4cd; }
 /* 결과 — 비교 큰 점수 */
 .result { margin-top: 18px; }
 .result:empty { margin: 0; }
-.bigscore { text-align: center; margin: 10px 0 2px; }
-.bigscore .num { font-size: 3rem; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.bigscore { text-align: center; margin: 12px 0 2px; }
 .bigscore .cap { color: var(--muted); font-size: .95rem; }
 .bigscore .cap .rd { font-size: .82em; color: var(--meta); }
+.bigscore .simlabel { color: var(--muted); font-size: .9rem; margin-top: 4px; }
+.bigscore .num { font-size: 3rem; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1.15; margin-top: 2px; }
 .fq { font-size: .82em; color: var(--meta); font-family: system-ui, sans-serif; font-variant-numeric: tabular-nums; }
 
 .common-note { text-align: center; margin: 12px 0 6px; font-size: .84rem; color: var(--muted); }
@@ -150,10 +151,12 @@ button.ghost:hover { background: #e9d4cd; }
 .bars { display: flex; flex-direction: column; }
 .bar-row {
   display: grid; grid-template-columns: minmax(86px, auto) 1fr auto auto; align-items: center;
-  gap: 10px; padding: 7px 8px; border-radius: 8px; cursor: pointer;
+  gap: 10px; padding: 7px 8px 7px 13px; border-radius: 8px; cursor: pointer;  /* 좌측 패딩 고정 → 공통/비공통 정렬 일치 */
 }
 .bar-row:hover { background: #f0f6f4; }
-.bar-row.common { padding-left: 12px; }   /* 공통 단어: 인라인 배경색 + 좌측 색띠(box-shadow) */
+.bar-row.has-rank { grid-template-columns: auto minmax(80px, auto) 1fr auto auto; }
+.bar-rank { font-size: .82rem; color: var(--muted); min-width: 30px; text-align: right;
+  font-variant-numeric: tabular-nums; font-family: system-ui, sans-serif; }
 .bar-label { white-space: nowrap; }
 .bar-label .bw { font-size: 1.18rem; }
 .bar-label .rd { font-size: .74rem; color: var(--muted); margin-left: 5px; font-family: system-ui, sans-serif; }
@@ -178,6 +181,7 @@ button.ghost:hover { background: #e9d4cd; }
 .spybox .scores .lo { color: var(--gold); font-weight: 600; }
 
 .qword { font-size: 1.1rem; margin: .2em 0 .6em; }
+.qword .rd { font-size: .72em; color: var(--muted); font-family: system-ui, sans-serif; }
 .warn { color: var(--accent); }
 
 .load-status { text-align: center; color: var(--accent); font-weight: 600; padding: 30px; }

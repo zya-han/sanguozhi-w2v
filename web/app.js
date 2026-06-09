@@ -102,6 +102,9 @@ const COMMON_PALETTE = [
   { bg: '#d0ecef', bar: '#1f8a93' }, { bg: '#f0dcee', bar: '#9a3b8f' },
   { bg: '#efe6cf', bar: '#94782b' }, { bg: '#dde3ee', bar: '#4a5e8a' },
   { bg: '#f3dde0', bar: '#a8455a' }, { bg: '#d6e8da', bar: '#2e7d4f' },
+  { bg: '#eddcd0', bar: '#a3623a' }, { bg: '#e6d8ee', bar: '#7b3fa0' },
+  { bg: '#d6e9ef', bar: '#3a85a8' }, { bg: '#e4eccb', bar: '#7d9a2e' },
+  { bg: '#f1d8da', bar: '#b03a46' }, { bg: '#dfe6d6', bar: '#5e7a4a' },
 ];
 
 // 한글 조사: 앞말의 받침 유무로 선택. 한자가 아니라 화면에 보이는 독음의 끝 음절로 판정.
@@ -123,14 +126,16 @@ function josaText(text, withB, noB) {
 }
 
 // 막대 행들 (정규화: 최댓값 = 100%). colorMap: token→{bg,bar} (양쪽 공통 단어 색칠).
-function bars(list, colorMap) {
+// withRank=true면 좌측에 순위(1위·2위…) 표시.
+function bars(list, colorMap, withRank) {
   const max = list.length ? list[0][1] : 1;
-  return list.map(([t, s]) => {
+  return list.map(([t, s], i) => {
     const pct = Math.max(5, Math.round((s / max) * 100));
     const c = colorMap && colorMap.get(t);
     const style = c ? ` style="background:${c.bg};box-shadow:inset 5px 0 0 ${c.bar}"` : '';
-    return `<div class="bar-row${c ? ' common' : ''}" data-token="${esc(t)}"${style}>
-      <span class="bar-label"><span class="bw han">${esc(t)}</span>${rdSpan(t)}</span>
+    const rank = withRank ? `<span class="bar-rank">${i + 1}위</span>` : '';
+    return `<div class="bar-row${withRank ? ' has-rank' : ''}${c ? ' common' : ''}" data-token="${esc(t)}"${style}>
+      ${rank}<span class="bar-label"><span class="bw han">${esc(t)}</span>${rdSpan(t)}</span>
       <span class="bar-track"><span class="bar-cover" style="width:${100 - pct}%"></span></span>
       <span class="bar-freq">${freqOf(t).toLocaleString()}회</span>
       <span class="bar-score">${s.toFixed(3)}</span></div>`;
@@ -151,22 +156,24 @@ function runCmp() {
   if (!tb) return notFound(box, document.getElementById('cmpB').value);
   const ia = tokenToIndex.get(ta), ib = tokenToIndex.get(tb);
   const sim = dot(ia, ib);
-  const la = mostSimilar(ia, 14), lb = mostSimilar(ib, 14);
+  const N = 30;
+  const la = mostSimilar(ia, N), lb = mostSimilar(ib, N);
   // 두 목록에 모두 나오는 단어 → 단어별 고유 색(양쪽 같은 색)으로 상시 표시.
   const setB = new Set(lb.map(([t]) => t));
   const colorMap = new Map();
   la.map(([t]) => t).filter(t => setB.has(t))
     .forEach((t, i) => colorMap.set(t, COMMON_PALETTE[i % COMMON_PALETTE.length]));
+  const head = (tok) => `<span class="han">${esc(tok)}</span>${rdSpan(tok)}${josa(tok, '과', '와')} 가장 비슷한 단어 상위 ${N}개`;
   box.innerHTML = `
-    <div class="bigscore"><div class="num">${sim.toFixed(3)}</div>
+    <div class="bigscore">
       <div class="cap"><span class="han">${esc(ta)}</span>${rdSpan(ta)}${fqSpan(ta)} ↔
-        <span class="han">${esc(tb)}</span>${rdSpan(tb)}${fqSpan(tb)} 코사인 유사도</div></div>
+        <span class="han">${esc(tb)}</span>${rdSpan(tb)}${fqSpan(tb)}</div>
+      <div class="simlabel">코사인 유사도</div>
+      <div class="num">${sim.toFixed(3)}</div></div>
     <p class="common-note">양쪽 목록에 모두 나오는 단어는 같은 색으로 표시됩니다.</p>
     <div class="cols">
-      <div><div class="col-head"><span class="han">${esc(ta)}</span>${rdSpan(ta)} ${josa(ta, '과', '와')} 비슷한 단어</div>
-        <div class="bars">${bars(la, colorMap)}</div></div>
-      <div><div class="col-head"><span class="han">${esc(tb)}</span>${rdSpan(tb)} ${josa(tb, '과', '와')} 비슷한 단어</div>
-        <div class="bars">${bars(lb, colorMap)}</div></div>
+      <div><div class="col-head">${head(ta)}</div><div class="bars">${bars(la, colorMap, true)}</div></div>
+      <div><div class="col-head">${head(tb)}</div><div class="bars">${bars(lb, colorMap, true)}</div></div>
     </div>`;
 }
 
@@ -207,8 +214,8 @@ function runSim(term) {
   const t = pickFirst(r);
   if (!t) return notFound(box, term);
   const sims = mostSimilar(tokenToIndex.get(t), topn);
-  box.innerHTML = `<div class="qword"><span class="han">${esc(t)}</span>${rdSpan(t)} ${josa(t, '과', '와')} 비슷한 단어 ${topn}</div>
-    <div class="bars">${bars(sims)}</div>`;
+  box.innerHTML = `<div class="qword"><span class="han">${esc(t)}</span>${rdSpan(t)}<span class="fq">(${freqOf(t).toLocaleString()}회)</span>${josa(t, '과', '와')} 가장 비슷한 단어 상위 ${topn}개</div>
+    <div class="bars">${bars(sims, null, true)}</div>`;
 }
 
 /* ---------- 자동완성 (빈도순) ---------- */

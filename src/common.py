@@ -42,26 +42,50 @@ def set_seed(cfg: dict) -> None:
         pass
 
 
-def make_script_normalizer(opencc_config: str | None, protect: str = ""):
-    """글자 단위 OpenCC 변환기 — 단, protect 글자와 《》는 변환하지 않는다.
+def load_variant_map(path) -> dict:
+    """異體字 매핑 TSV(변이형\\t표준형) 로드. 주석(#)·빈 줄 무시."""
+    if not path:
+        return {}
+    p = Path(path)
+    if not p.is_absolute():
+        p = REPO_ROOT / p
+    if not p.exists():
+        return {}
+    m = {}
+    for line in p.read_text(encoding="utf-8").splitlines():
+        line = line.rstrip("\n")
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split("\t")
+        if len(parts) >= 2 and parts[0] and parts[1]:
+            m[parts[0]] = parts[1]
+    return m
 
-    혼합 자형(번체+간체 오염) 코퍼스를 번체로 통일하되, 고전 의미가 s2t 타깃과
-    구분되는 글자(于≠於·云≠雲·后≠後·里≠裏·征≠徵 …)는 보호한다.
-    opencc_config가 None이면 항등 함수 반환.
+
+def make_script_normalizer(opencc_config: str | None, protect: str = "",
+                           variant_map: dict | None = None):
+    """글자 단위 자형 정규화기.
+
+    1) OpenCC opencc_config(예: s2t)로 簡→繁 통일. 단, protect 글자·《》는 변환 안 함
+       (고전 의미가 s2t 타깃과 구분: 于≠於·云≠雲·后≠後·里≠裏·征≠徵 …).
+    2) 그 뒤 variant_map으로 異體字(일본 신자체 등)를 표준형으로 통합(呉→吳·靣→面 …).
+    opencc_config·variant_map 모두 비면 항등 함수.
     """
-    if not opencc_config:
-        return lambda s: s
-    import opencc
-    cc = opencc.OpenCC(opencc_config)
+    variant_map = variant_map or {}
     protect_set = set(protect) | set("《》")
+    cc = None
+    if opencc_config:
+        import opencc as _opencc
+        cc = _opencc.OpenCC(opencc_config)
+    if cc is None and not variant_map:
+        return lambda s: s
     cache: dict[str, str] = {}
 
     def conv_char(c: str) -> str:
-        if c in protect_set:
-            return c
         r = cache.get(c)
         if r is None:
-            r = cc.convert(c)
+            r = c if (c in protect_set or cc is None) else cc.convert(c)
+            r = variant_map.get(r, r)   # s2t 후 異體字 통합
             cache[c] = r
         return r
 

@@ -62,7 +62,7 @@
   <!-- 두 단어 비교 -->
   <section class="card panel" data-panel="compare">
     <h2>두 단어 비교</h2>
-    <p class="hint">두 단어가 《삼국지》에서 얼마나 비슷한 맥락에 쓰였는지(코사인 유사도)와, 각 단어와 비슷한 단어를 나란히 봅니다.
+    <p class="hint">두 단어가 《삼국지》에서 얼마나 비슷한 맥락에 쓰였는지 보기 위해, 각 단어와 비슷한 환경에서 출현한 단어들의 목록을 나란히 놓고 비교합니다.
       <a class="ex" data-ex="compare" data-a="荀彧" data-b="郭嘉">예시: <span class="han">荀彧</span> vs <span class="han">郭嘉</span></a></p>
     <div class="grid2">
       <div class="field"><label>단어 1</label><input type="text" id="cmpA" placeholder="예: 荀彧" autocomplete="off">
@@ -94,9 +94,9 @@
   <section class="card panel" data-panel="similar" hidden>
     <h2>비슷한 단어 찾기</h2>
     <p class="hint">한 단어와 가장 비슷한 맥락에 쓰인 단어들을 유사도 순으로 봅니다.
-      <a class="ex" data-ex="similar" data-a="曹操">예시: <span class="han">曹操</span></a></p>
+      <a class="ex" data-ex="similar" data-a="劉備">예시: <span class="han">劉備</span></a></p>
     <div class="field"><label>단어</label>
-      <input type="text" id="simInput" placeholder="예: 曹操 또는 조조" autocomplete="off">
+      <input type="text" id="simInput" placeholder="예: 劉備 또는 유비" autocomplete="off">
       <div class="suggest" id="simInputSuggest" hidden></div></div>
     <label class="slider">개수 <span id="simTopnVal">20</span>
       <input type="range" id="simTopn" min="5" max="50" value="20" step="1"></label>

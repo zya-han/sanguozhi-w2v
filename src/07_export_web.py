@@ -34,7 +34,8 @@ def fix_special_readings(bare: str, reading: str) -> str:
     특수음:
       - 僕射의 射는 '사'가 아니라 '야' → 복야·상서좌복야
       - 祭酒의 祭는 '제'가 아니라 '좨' → 좨주·군사좨주
-      - 邯鄲의 邯은 '감'이 아니라 '한' → 한단·한단순"""
+      - 邯鄲의 邯은 '감'이 아니라 '한' → 한단·한단순
+      - 行狀의 狀은 '상'이 아니라 '장' → 행장(先賢行狀)"""
     if len(reading) != len(bare):
         return reading                       # 1:1 매핑이 아니면 손대지 않음
     out = list(reading)
@@ -45,6 +46,8 @@ def fix_special_readings(bare: str, reading: str) -> str:
             out[i] = "좨"
         elif ch == "邯" and i + 1 < len(bare) and bare[i + 1] == "鄲":
             out[i] = "한"
+        elif ch == "狀" and i > 0 and bare[i - 1] == "行":
+            out[i] = "장"
     return "".join(out)
 
 

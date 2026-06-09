@@ -95,6 +95,24 @@ const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&
 function rdSpan(tok) { const r = tokenToReading.get(tok); return r ? ` <span class="rd">${esc(r)}</span>` : ''; }
 function commonKey(tok) { const b = tok.replace(/[《》]/g, ''); return b.length >= 2 ? b.slice(-2) : b; }
 
+// 한글 조사: 앞말의 받침 유무로 선택. 한자가 아니라 화면에 보이는 독음의 끝 음절로 판정.
+function hasBatchim(text) {
+  if (!text) return null;
+  const c = text.charCodeAt(text.length - 1);
+  if (c < 0xAC00 || c > 0xD7A3) return null;     // 한글 음절이 아니면 판정 불가
+  return (c - 0xAC00) % 28 !== 0;                // 종성(받침) 인덱스 0 = 없음
+}
+// 토큰 뒤 조사(독음 기준). 판정 불가 시 받침형으로.
+function josa(tok, withB, noB) {
+  const b = hasBatchim(tokenToReading.get(tok) || tok);
+  return b === false ? noB : withB;
+}
+// 임의 텍스트 뒤 조사. 판정 불가 시 "withB(noB)" 병기.
+function josaText(text, withB, noB) {
+  const b = hasBatchim(text);
+  return b === null ? `${withB}(${noB})` : (b ? withB : noB);
+}
+
 // 막대 행들 (정규화: 최댓값 = 100%)
 function bars(list, commonSet) {
   const max = list.length ? list[0][1] : 1;
@@ -108,7 +126,7 @@ function bars(list, commonSet) {
   }).join('');
 }
 function notFound(box, term) {
-  box.innerHTML = `<p class="warn">‘${esc(term)}’ 을(를) 어휘에서 찾지 못했습니다. 한자 또는 한글 음으로 다시 입력해 주세요.</p>`;
+  box.innerHTML = `<p class="warn">‘${esc(term)}’ ${josaText(term, '을', '를')} 어휘에서 찾지 못했습니다. 한자 또는 한글 음으로 다시 입력해 주세요.</p>`;
 }
 function pickFirst(r) { return r.token || (r.candidates && r.candidates[0]); }
 
@@ -133,9 +151,9 @@ function runCmp() {
     <label class="common-toggle"><input type="checkbox" id="cmpCommon">
       양쪽 공통(끝 두 글자가 같으면 공통)</label>
     <div class="cols" id="cmpCols">
-      <div><div class="col-head"><span class="han">${esc(ta)}</span>${rdSpan(ta)} 과 비슷한 단어</div>
+      <div><div class="col-head"><span class="han">${esc(ta)}</span>${rdSpan(ta)} ${josa(ta, '과', '와')} 비슷한 단어</div>
         <div class="bars">${bars(la, common)}</div></div>
-      <div><div class="col-head"><span class="han">${esc(tb)}</span>${rdSpan(tb)} 과 비슷한 단어</div>
+      <div><div class="col-head"><span class="han">${esc(tb)}</span>${rdSpan(tb)} ${josa(tb, '과', '와')} 비슷한 단어</div>
         <div class="bars">${bars(lb, common)}</div></div>
     </div>`;
   document.getElementById('cmpCommon').addEventListener('change', e =>
@@ -179,7 +197,7 @@ function runSim(term) {
   const t = pickFirst(r);
   if (!t) return notFound(box, term);
   const sims = mostSimilar(tokenToIndex.get(t), topn);
-  box.innerHTML = `<div class="qword"><span class="han">${esc(t)}</span>${rdSpan(t)} 와 비슷한 단어 ${topn}</div>
+  box.innerHTML = `<div class="qword"><span class="han">${esc(t)}</span>${rdSpan(t)} ${josa(t, '과', '와')} 비슷한 단어 ${topn}</div>
     <div class="bars">${bars(sims)}</div>`;
 }
 

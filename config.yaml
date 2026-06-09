@@ -1,0 +1,76 @@
+# ============================================================================
+# 《三國志》(正史) 개체 인식 토큰화 + Word2Vec — 단일 설정 파일
+# 모든 단계가 이 파일을 읽는다. 명세서 §2 확정 설계 결정은 변경 금지.
+# ============================================================================
+
+seed: 42
+
+paths:
+  vendor:        vendor                       # 클론한 업스트림 소스
+  raw:           data/raw
+  interim:       data/interim
+  gazetteer:     data/gazetteer
+  tokenized:     data/tokenized
+  models:        models
+  reports:       reports
+
+# ----------------------------------------------------------------------------
+# Stage 1 — 원문 수집
+# ----------------------------------------------------------------------------
+corpus:
+  # 정본: Kanseki Repository 三國志 (晉 陳壽, 裴松之 注 포함)
+  kanripo_repo:    "https://github.com/kanripo/KR2a0012.git"
+  kanripo_id:      "KR2a0012"
+  # 裴松之 注 학습 포함 여부 (항상 is_peizhu 플래그로 구분 보존; False면 학습에서 제외)
+  include_peizhu_in_training: true
+  # 교차검증 보조 (선택)
+  daizhige_repo:   "https://github.com/garychowcmu/daizhigev20.git"
+  ctext_urn:       "ctext:sanguozhi"
+
+# ----------------------------------------------------------------------------
+# Stage 2 — 정규화
+# ----------------------------------------------------------------------------
+normalize:
+  # 결정: 四庫본 코퍼스는 이미 正字 번체. OpenCC s2t는 고전 의미를 손상하므로
+  # (于→於 644, 云→雲 417, 咸熙→鹹熙 …) 코퍼스에는 적용하지 않는다(=null).
+  # 자형 정합은 가제티어를 코퍼스에 맞추는 방식으로 달성한다(gazetteer.opencc_config).
+  corpus_opencc:   null       # null이면 코퍼스 OpenCC 미적용 (권장).
+  variant_map:     null       # 큐레이션 異體字 TSV(원\t정) 경로(선택). 진짜 이체자만, S↔T 금지.
+
+# ----------------------------------------------------------------------------
+# Stage 3 — 가제티어
+# ----------------------------------------------------------------------------
+gazetteer:
+  cbdb_repo:       "https://github.com/cbdb-project/cbdb_sqlite.git"
+  # 클론 후 vendor/cbdb_sqlite/*.sqlite3 자동 탐색 (HuggingFace latest.zip에서 받음)
+  # 시대 필터 경계 (CE). 後漢~三國. (BIOG_MAIN 연도 중첩 판정에 사용)
+  year_start:      25
+  year_end:        280
+  # 後漢~三國 왕조 코드 (DYNASTIES 실측): 25=東漢,3=三國,26=魏,53=蜀,42=吳,83=漢(generic)
+  dynasty_codes:   [25, 3, 26, 53, 42, 83]
+  min_surface_len: 2                       # 2자 미만 제거 (단자 名 병합 금지)
+  # LOC: CBDB ADDR_CODES(=CHGIS 연계)에서 지명 추출. CHGIS 연도는 후대 행정인스턴스라
+  # 신뢰 불가 → 코퍼스 출현 필터로 三國 스코핑. (TGAZ API는 보조 교차검증용, 선택)
+  require_corpus_occurrence: true          # 코퍼스에 실제 등장하는 표면형만 유지(三國 스코핑)
+  stoplist: "data/gazetteer/stoplist.txt"  # §3.4 sanity 필터: CBDB 유입 비개체어 제외
+  # CBDB가 누락한 canonical 三國 字·號·諡 등 보충 시드(검증 §6 충족). 출처 표기.
+  seed_supplement: "data/gazetteer/seed_supplement.tsv"
+  # CBDB는 正體(번체) 보관 → 코퍼스와 동일 자형. 변환 불필요(null). 충돌 위험 회피.
+  opencc_config:   null
+  # 보조 교차검증용 TGAZ (사용 안해도 무방)
+  tgaz_base:       "https://chgis.hudci.org/tgaz"
+
+# ----------------------------------------------------------------------------
+# Stage 5 — Word2Vec (권장 기본값)
+# ----------------------------------------------------------------------------
+word2vec:
+  sg:              1        # skip-gram
+  # 386k 토큰·4.6k vocab 소규모 코퍼스 → 50차원이 가장 선명·일관(실험으로 확인).
+  # 200차원은 파라미터>토큰으로 과파라미터화되어 신호 희석. 50~100 권장.
+  vector_size:     50
+  window:          5
+  min_count:       3
+  negative:        10
+  epochs:          15
+  workers:         1        # 재현성 (변경 금지 권장)
+  seed:            42

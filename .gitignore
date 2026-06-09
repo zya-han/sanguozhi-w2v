@@ -1,0 +1,29 @@
+# Repo-local conda environment
+.conda/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# Large data & artifacts (provenance + scripts are tracked; bulk data is not)
+data/raw/
+data/interim/
+data/tokenized/
+models/
+# gazetteer.tsv 는 CC BY-NC-SA CBDB 파생물 → 재배포 금지(제외).
+# 단, 직접 작성한 큐레이션 입력(seed_supplement/stoplist)은 추적한다.
+data/gazetteer/gazetteer.tsv
+data/gazetteer/gazetteer_stats.json
+
+# Cloned upstream sources
+vendor/
+*.sqlite
+*.sqlite3
+
+# OS
+.DS_Store
+
+# 핸드오프 명세서 (내부 문서, 미추적)
+sanguozhi_word2vec_spec.md

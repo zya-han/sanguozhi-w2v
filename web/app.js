@@ -93,6 +93,8 @@ function resolve(raw) {
 /* ---------- 렌더 헬퍼 ---------- */
 const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 function rdSpan(tok) { const r = tokenToReading.get(tok); return r ? ` <span class="rd">${esc(r)}</span>` : ''; }
+function freqOf(tok) { return FREQ[tokenToIndex.get(tok)] || 0; }                       // 코퍼스 출현 횟수
+function fqSpan(tok) { return ` <span class="fq">${freqOf(tok).toLocaleString()}회</span>`; }
 function commonKey(tok) { const b = tok.replace(/[《》]/g, ''); return b.length >= 2 ? b.slice(-2) : b; }
 
 // 한글 조사: 앞말의 받침 유무로 선택. 한자가 아니라 화면에 보이는 독음의 끝 음절로 판정.
@@ -122,6 +124,7 @@ function bars(list, commonSet) {
     return `<div class="bar-row${cm}" data-token="${esc(t)}">
       <span class="bar-label"><span class="bw han">${esc(t)}</span>${rdSpan(t)}</span>
       <span class="bar-track"><span class="bar-cover" style="width:${100 - pct}%"></span></span>
+      <span class="bar-freq">${freqOf(t).toLocaleString()}회</span>
       <span class="bar-score">${s.toFixed(3)}</span></div>`;
   }).join('');
 }
@@ -164,7 +167,7 @@ function runCmp() {
 let spyTokens = [];
 function renderSpyChips() {
   document.getElementById('spyChips').innerHTML = spyTokens.map((t, i) =>
-    `<span class="chip"><span class="han">${esc(t)}</span>${rdSpan(t)}<span class="x" data-i="${i}">✕</span></span>`
+    `<span class="chip"><span class="han">${esc(t)}</span>${rdSpan(t)}${fqSpan(t)}<span class="x" data-i="${i}">✕</span></span>`
   ).join('');
   document.querySelectorAll('#spyChips .x').forEach(x =>
     x.addEventListener('click', () => { spyTokens.splice(+x.dataset.i, 1); renderSpyChips(); }));
@@ -181,7 +184,7 @@ function runSpy() {
   const { worst, scored } = doesntMatch(idx);
   scored.sort((a, b) => a[1] - b[1]);
   const list = scored.map(([i, s]) =>
-    `<span class="${i === worst ? 'lo' : ''}">${esc(TOKENS[i])}(${esc(tokenToReading.get(TOKENS[i]) || '')}) ${s.toFixed(3)}</span>`
+    `<span class="${i === worst ? 'lo' : ''}"><span class="han">${esc(TOKENS[i])}</span>(${esc(tokenToReading.get(TOKENS[i]) || '')}, ${freqOf(TOKENS[i]).toLocaleString()}회) ${s.toFixed(3)}</span>`
   ).join(' · ');
   box.innerHTML = `<div class="spybox">
     <div class="quote">우리 중에 스파이가 있는 것 같아…</div>

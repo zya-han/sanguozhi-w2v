@@ -5,12 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>정사 《삼국지》 단어 탐색</title>
 <meta name="description" content="陳壽 정사 三國志(裴松之 注 포함)로 학습한 Word2Vec 임베딩을 브라우저에서 직접 탐색합니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header class="site-head">
   <h1>정사 《삼국지》 단어 탐색</h1>
-  <p class="subtitle">陳壽 정사 《三國志》(裴松之 注 포함)로 학습한 Word2Vec 모델로 한자 단어의 쓰임을 비교합니다.
+  <p class="subtitle">진수의 《삼국지》 원문(배송지 주 포함)으로 학습한 Word2Vec 모델로 한자 단어의 쓰임을 비교합니다.
   <strong>한글 독음으로도 검색</strong>할 수 있어요.</p>
   <p class="meta">vector_size=100 · skip-gram · 어휘 <span id="vocabCount">…</span>개 · 전부 브라우저에서 계산(서버 없음)</p>
 </header>
@@ -26,8 +29,8 @@
   <!-- 두 단어 비교 -->
   <section class="card panel" data-panel="compare">
     <h2>두 단어 비교</h2>
-    <p class="hint">두 단어가 三國志에서 얼마나 비슷한 맥락에 쓰였는지(코사인 유사도)와, 각 단어와 비슷한 단어를 나란히 봅니다.
-      <a class="ex" data-ex="compare" data-a="荀彧" data-b="郭嘉">예시: 荀彧 vs 郭嘉</a></p>
+    <p class="hint">두 단어가 《삼국지》에서 얼마나 비슷한 맥락에 쓰였는지(코사인 유사도)와, 각 단어와 비슷한 단어를 나란히 봅니다.
+      <a class="ex" data-ex="compare" data-a="荀彧" data-b="郭嘉">예시: <span class="han">荀彧</span> vs <span class="han">郭嘉</span></a></p>
     <div class="grid2">
       <div class="field"><label>단어 1</label><input type="text" id="cmpA" placeholder="예: 荀彧" autocomplete="off">
         <div class="suggest" id="cmpASuggest" hidden></div></div>
@@ -42,7 +45,7 @@
   <section class="card panel" data-panel="spy" hidden>
     <h2>🕵️ 스파이 찾기 <span class="sub">(어몽어스)</span></h2>
     <p class="hint">단어 3개 이상을 모으면, 무리에서 가장 이질적인 단어 — 스파이 — 를 찾아냅니다.
-      <a class="ex" data-ex="spy" data-list="周瑜·魯肅·呂蒙·諸葛亮">예시: 周瑜·魯肅·呂蒙·諸葛亮</a></p>
+      <a class="ex" data-ex="spy" data-list="周瑜·魯肅·呂蒙·諸葛亮">예시: <span class="han">周瑜·魯肅·呂蒙·諸葛亮</span></a></p>
     <div class="field"><label>단어 추가</label>
       <input type="text" id="spyInput" placeholder="한자/한글 입력 후 선택" autocomplete="off">
       <div class="suggest" id="spyInputSuggest" hidden></div></div>
@@ -58,7 +61,7 @@
   <section class="card panel" data-panel="similar" hidden>
     <h2>비슷한 단어 찾기</h2>
     <p class="hint">한 단어와 가장 비슷한 맥락에 쓰인 단어들을 유사도 순으로 봅니다.
-      <a class="ex" data-ex="similar" data-a="曹操">예시: 曹操</a></p>
+      <a class="ex" data-ex="similar" data-a="曹操">예시: <span class="han">曹操</span></a></p>
     <div class="field"><label>단어</label>
       <input type="text" id="simInput" placeholder="예: 曹操 또는 조조" autocomplete="off">
       <div class="suggest" id="simInputSuggest" hidden></div></div>
@@ -74,7 +77,7 @@
 
 <footer class="site-foot">
   <p><strong>데이터 출처</strong> ·
-  원문 三國志 65卷: <a href="https://zh.wikisource.org/wiki/三國志" rel="noopener">中文維基文庫</a> (CC BY-SA 4.0) ·
+  원문 <span class="han">三國志</span> 65<span class="han">卷</span>: <a href="https://zh.wikisource.org/wiki/三國志" rel="noopener"><span class="han">中文維基文庫</span></a> (CC BY-SA 4.0) ·
   인명·관직: <a href="https://github.com/cbdb-project" rel="noopener">CBDB</a> (CC BY-NC-SA 4.0) ·
   지명: CHGIS (Harvard &amp; Fudan).</p>
   <p>CBDB 기반 파생물이므로 <strong>비상업·출처표기·동일조건(CC BY-NC-SA 4.0)</strong> 하에 이용하세요.</p>

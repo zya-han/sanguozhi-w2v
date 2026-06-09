@@ -17,14 +17,21 @@
   --gold: #56d2bb;          /* 스파이 강조: 밝은 청록(아쿠아) */
 }
 * { box-sizing: border-box; }
+/* 전체 고딕체(Noto Sans KR), 한자(CJK)만 명조체(Noto Serif KR) — 둘 다 웹폰트로 임베드(<head>).
+   본문 속 래핑 없는 한자는 unicode-range 가상 폰트(HanSerif)로 로컬 명조 폴백,
+   .han 으로 감싼 한자는 임베드한 Noto Serif KR 로 일관 적용(로컬 폰트 유무와 무관). */
+@font-face {
+  font-family: 'HanSerif';
+  src: local('Noto Serif KR'), local('NotoSerifKR-Regular'), local('AppleMyungjo'),
+       local('Nanum Myeongjo'), local('NanumMyeongjo'), local('Songti SC'), local('SimSun');
+  unicode-range: U+3008-3011, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+20000-2A6DF, U+2F800-2FA1F;
+}
 body {
   margin: 0; background: var(--bg); color: var(--ink);
-  font-family: system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  font-family: 'HanSerif', 'Noto Sans KR', system-ui, "Apple SD Gothic Neo", sans-serif;
   line-height: 1.6;
 }
-.han, h1, h2, .bw, input[type=text], .chip, .qword, .simbar, .sg {
-  font-family: "Noto Serif KR", "Nanum Myeongjo", "Songti SC", serif;
-}
+.han { font-family: 'Noto Serif KR', 'HanSerif', "Nanum Myeongjo", serif; }
 
 /* 헤더 */
 .site-head { max-width: 880px; margin: 0 auto; padding: 38px 18px 10px; text-align: center; }
@@ -103,6 +110,7 @@ button.ghost:hover { background: #e9d4cd; }
   padding: 7px 9px 7px 15px; font-size: 1.08rem; color: var(--ink);
 }
 .chip .rd { font-size: .68em; color: var(--muted); font-family: system-ui, sans-serif; }
+.chip .fq { font-size: .62em; color: var(--meta); font-family: system-ui, sans-serif; font-variant-numeric: tabular-nums; }
 .chip .x { cursor: pointer; color: var(--accent); font-weight: 700; padding: 0 4px; line-height: 1; }
 .chip .x:hover { color: var(--accent-dk); }
 
@@ -129,14 +137,16 @@ button.ghost:hover { background: #e9d4cd; }
 /* 막대 행 */
 .bars { display: flex; flex-direction: column; }
 .bar-row {
-  display: grid; grid-template-columns: minmax(86px, auto) 1fr auto; align-items: center;
-  gap: 12px; padding: 7px 8px; border-radius: 8px; cursor: pointer;
+  display: grid; grid-template-columns: minmax(86px, auto) 1fr auto auto; align-items: center;
+  gap: 10px; padding: 7px 8px; border-radius: 8px; cursor: pointer;
 }
-.bar-row:hover { background: #faf4e9; }
+.bar-row:hover { background: #f0f6f4; }
 .show-common .bar-row.common { background: var(--common); }
 .bar-label { white-space: nowrap; }
 .bar-label .bw { font-size: 1.18rem; }
 .bar-label .rd { font-size: .74rem; color: var(--muted); margin-left: 5px; font-family: system-ui, sans-serif; }
+.bar-freq { font-size: .8rem; color: var(--meta); font-variant-numeric: tabular-nums;
+  font-family: system-ui, sans-serif; min-width: 46px; text-align: right; }
 .bar-track {
   position: relative; height: 17px; border-radius: 9px; overflow: hidden;
   background: linear-gradient(90deg, var(--bar-a), var(--bar-b));
@@ -150,7 +160,7 @@ button.ghost:hover { background: #e9d4cd; }
   padding: 28px 22px; text-align: center; margin-top: 8px;
 }
 .spybox .quote { color: #a4c3c1; font-size: 1rem; margin-bottom: 14px; }
-.spybox .who { font-family: "Noto Serif KR", serif; font-size: 3rem; color: var(--gold); line-height: 1.1; }
+.spybox .who { font-size: 3rem; font-weight: 700; color: var(--gold); line-height: 1.1; }
 .spybox .who .rd { display: block; font-size: .3em; color: #9ee6d7; margin-top: 6px; font-family: system-ui, sans-serif; }
 .spybox .scores { color: #92b1ad; font-size: .86rem; margin-top: 16px; }
 .spybox .scores .lo { color: var(--gold); font-weight: 600; }

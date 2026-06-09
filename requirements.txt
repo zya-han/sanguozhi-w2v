@@ -6,3 +6,4 @@ pandas>=2.0
 pyarrow>=15.0
 requests>=2.31
 PyYAML>=6.0
+hanja>=0.13          # Stage 7: 한자→한글 독음(웹 탐색기 검색용)

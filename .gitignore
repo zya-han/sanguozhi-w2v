@@ -16,6 +16,8 @@ models/
 data/gazetteer/gazetteer.tsv
 data/gazetteer/gazetteer_stats.json
 data/gazetteer/seed_supplement.tsv
+# 웹 탐색기(web/) 전체 미추적 — 모델(CBDB 파생) 추출물 포함, src/07·08로 재생성.
+web/
 
 # Cloned upstream sources
 vendor/

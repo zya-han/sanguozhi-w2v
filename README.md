@@ -32,6 +32,7 @@ python src/03_build_gazetteer.py  # CBDB+CHGIS+코퍼스 字추출 + 보충시�
 python src/04_tokenize.py         # 결정론적 최장일치 토큰화(《書名》 통째 토큰) → corpus.jsonl
 python src/05_train_w2v.py        # Word2Vec 학습 → models/w2v_sanguozhi.model, vocab.tsv
 python src/06_validate.py         # 정합성·커버리지 검증 → reports/validation.md
+python src/07_export_web.py       # 모델 → web/data/{vectors.bin,vocab.json,readings.json} (웹 탐색기용)
 ```
 > Stage 1은 wikisource API로 65卷을 받아 `data/raw/wikisource/卷NN.wiki`에 캐시한다(재실행 시 캐시 사용).
 모든 설정은 [`config.yaml`](config.yaml) 한 곳에서 조정(소스 URL·시대경계·하이퍼파라미터·시드).
@@ -52,6 +53,27 @@ m = Word2Vec.load("models/w2v_sanguozhi.model")
 m.wv.most_similar("丞相")   # → 倉曹·掾·令史 … (丞相府 속관)
 m.wv.most_similar("劉備")   # → 關羽 …
 ```
+
+## 웹 탐색기 (`web/`)
+브라우저에서 임베딩을 직접 탐색하는 **서버리스 정적 페이지**. 백엔드 없이 벡터(L2 정규화 float32, ~2.4MB)를
+통째로 받아 JS로 코사인을 계산한다. 기능: ① 유사어 검색(topn 조절) ② 두 단어 비교 ③ 스파이 찾기(`doesnt_match`).
+한자(`荀彧`)·한글 음(`순욱`) 겸용 검색.
+
+```bash
+python src/07_export_web.py        # 모델 → web/data/* 추출 (먼저 1회)
+cd web && python -m http.server    # http://localhost:8000 에서 확인
+```
+- `src/07_export_web.py`는 추출 직후 JS식 내적 결과를 `most_similar`와 대조해 일치를 검증한다.
+- `web/`(HTML·JS·CSS)만 추적, `web/data/`는 모델 추출물이라 `.gitignore`(재생성 가능).
+- **배포**: `web/`를 정적 호스팅(예: `zyahan.blog` 하위 경로)에 업로드. 상대경로라 어느 경로에서도 동작.
+  `.bin`에 gzip/brotli 권장. CBDB 파생물이므로 페이지는 **비상업·CC BY-NC-SA 4.0** 표기를 유지한다.
+
+### 단일 HTML 한 장 (`src/08`)
+외부 파일 없이 CSS·JS·벡터(base64 내장)까지 한 파일에 담아 `file://`로 더블클릭만으로 열린다(서버 불필요).
+```bash
+python src/08_bundle_html.py       # web/{index.html,style.css,app.js}+data → web/sanguozhi_explorer.html (~3.4MB)
+```
+`web/index.html`·`style.css`·`app.js`를 그대로 인라인하므로 멀티파일 버전과 코드가 1:1 동일하다.
 
 ## 데이터 소스 / 라이선스 (인용 필수)
 | 데이터 | 소스 | 라이선스 |

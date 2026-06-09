@@ -16,8 +16,9 @@ models/
 data/gazetteer/gazetteer.tsv
 data/gazetteer/gazetteer_stats.json
 data/gazetteer/seed_supplement.tsv
-# 웹 탐색기(web/) 전체 미추적 — 모델(CBDB 파생) 추출물 포함, src/07·08로 재생성.
-web/
+# 웹 탐색기: 프런트엔드 소스(html·css·js)는 추적. 추출물은 미추적(src/07·08로 재생성).
+web/data/
+web/sanguozhi_explorer.html
 
 # Cloned upstream sources
 vendor/

@@ -31,9 +31,10 @@ READING_OVERRIDES: dict[str, str] = {}
 
 def fix_special_readings(bare: str, reading: str) -> str:
     """문맥 의존 특수음 교정. 한자 1자 = 독음 1음절 가정(순수 한자 토큰).
-    관직 특수음:
+    특수음:
       - 僕射의 射는 '사'가 아니라 '야' → 복야·상서좌복야
-      - 祭酒의 祭는 '제'가 아니라 '좨' → 좨주·군사좨주"""
+      - 祭酒의 祭는 '제'가 아니라 '좨' → 좨주·군사좨주
+      - 邯鄲의 邯은 '감'이 아니라 '한' → 한단·한단순"""
     if len(reading) != len(bare):
         return reading                       # 1:1 매핑이 아니면 손대지 않음
     out = list(reading)
@@ -42,6 +43,8 @@ def fix_special_readings(bare: str, reading: str) -> str:
             out[i] = "야"
         elif ch == "祭" and i + 1 < len(bare) and bare[i + 1] == "酒":
             out[i] = "좨"
+        elif ch == "邯" and i + 1 < len(bare) and bare[i + 1] == "鄲":
+            out[i] = "한"
     return "".join(out)
 
 

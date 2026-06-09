@@ -29,6 +29,22 @@ log = get_logger("07_export_web")
 READING_OVERRIDES: dict[str, str] = {}
 
 
+def fix_special_readings(bare: str, reading: str) -> str:
+    """문맥 의존 특수음 교정. 한자 1자 = 독음 1음절 가정(순수 한자 토큰).
+    관직 특수음:
+      - 僕射의 射는 '사'가 아니라 '야' → 복야·상서좌복야
+      - 祭酒의 祭는 '제'가 아니라 '좨' → 좨주·군사좨주"""
+    if len(reading) != len(bare):
+        return reading                       # 1:1 매핑이 아니면 손대지 않음
+    out = list(reading)
+    for i, ch in enumerate(bare):
+        if ch == "射" and i > 0 and bare[i - 1] == "僕":
+            out[i] = "야"
+        elif ch == "祭" and i + 1 < len(bare) and bare[i + 1] == "酒":
+            out[i] = "좨"
+    return "".join(out)
+
+
 def _bonum(ch: str, translate) -> str:
     """단자(單字)의 본음(本音) — 두음법칙 미적용 독음.
     어두가 아니면 두음이 적용되지 않으므로, 앞에 중립 글자(之)를 붙여
@@ -51,7 +67,7 @@ def build_reading(token: str, translate) -> str:
         if len(bare) == 1:
             return _bonum(bare, translate)
         # 다자 토큰: 어두 두음법칙은 정상(劉備→유비, 諸葛亮→제갈량)
-        return translate(bare, "substitution")
+        return fix_special_readings(bare, translate(bare, "substitution"))
     except Exception:
         return ""
 

@@ -5,7 +5,7 @@
 한자 텍스트를 다듬어 학습했기 때문에, `荀彧`과 가까운 단어로 `程昱`·`荀攸` 같은 인물이 떠오르고
 `丞相`의 이웃으로 그 속관(屬官)들이 나옵니다.
 
-> **라이브 데모** — [zyahan.blog/sanguozhi-word-explorer/](https://zyahan.blog/sanguozhi-word-explorer/) 에서 탐색기를 직접 사용해 볼 수 있습니다.
+> **라이브 데모** — [zyahan.blog/sanguozhi-word-explorer](https://zyahan.blog/sanguozhi-word-explorer) 에서 탐색기를 직접 사용해 볼 수 있습니다.
 
 ## 웹 탐색기
 

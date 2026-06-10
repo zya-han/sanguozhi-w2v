@@ -26,7 +26,12 @@ from common import ensure_dir, get_logger, load_config, resolve  # noqa: E402
 log = get_logger("07_export_web")
 
 # 기본 독음이 어색한 고유명사 수동 오버라이드(소수). 필요 시 확장.
-READING_OVERRIDES: dict[str, str] = {}
+# 樂은 문맥마다 락/악/요로 갈려(樂浪=낙랑·樂安=낙안 ↔ 樂進=악진) 일반 규칙이 위험 → 토큰 단위로.
+READING_OVERRIDES: dict[str, str] = {
+    "樂進": "악진",     # 인명: 樂=악
+    "樂綝": "악침",     # 인명(樂進의 아들): 樂=악
+    "樂人": "악인",     # 악공·음악인: 樂=악
+}
 
 
 def fix_special_readings(bare: str, reading: str) -> str:
@@ -35,7 +40,9 @@ def fix_special_readings(bare: str, reading: str) -> str:
       - 僕射의 射는 '사'가 아니라 '야' → 복야·상서좌복야
       - 祭酒의 祭는 '제'가 아니라 '좨' → 좨주·군사좨주
       - 邯鄲의 邯은 '감'이 아니라 '한' → 한단·한단순
-      - 行狀의 狀은 '상'이 아니라 '장' → 행장(先賢行狀)"""
+      - 行狀의 狀은 '상'이 아니라 '장' → 행장(先賢行狀)
+      - 寧은 hanja가 비어두에서 '령'으로 잘못 주므로 '녕'으로 교정(어두는 두음 '영' 유지)
+        → 甘寧 감녕·管寧 관녕·安寧 안녕, 寧國 영국(어두)은 그대로."""
     if len(reading) != len(bare):
         return reading                       # 1:1 매핑이 아니면 손대지 않음
     out = list(reading)
@@ -48,6 +55,8 @@ def fix_special_readings(bare: str, reading: str) -> str:
             out[i] = "한"
         elif ch == "狀" and i > 0 and bare[i - 1] == "行":
             out[i] = "장"
+        elif ch == "寧" and not (i == 0 and len(bare) > 1):  # 어두(다자) 외에는 '녕'
+            out[i] = "녕"
     return "".join(out)
 
 
@@ -71,7 +80,8 @@ def build_reading(token: str, translate) -> str:
     bare = token.strip("《》")
     try:
         if len(bare) == 1:
-            return _bonum(bare, translate)
+            # 단자도 특수음 교정 적용(寧→녕 등). 본음 계산 후 보정.
+            return fix_special_readings(bare, _bonum(bare, translate))
         # 다자 토큰: 어두 두음법칙은 정상(劉備→유비, 諸葛亮→제갈량)
         return fix_special_readings(bare, translate(bare, "substitution"))
     except Exception:

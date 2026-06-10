@@ -57,6 +57,8 @@ def fix_special_readings(bare: str, reading: str) -> str:
             out[i] = "장"
         elif ch == "寧" and not (i == 0 and len(bare) > 1):  # 어두(다자) 외에는 '녕'
             out[i] = "녕"
+        elif ch == "劭":          # hanja가 '초'로 잘못 줌 → 항상 '소'(應劭 응소·劉劭 유소)
+            out[i] = "소"
     return "".join(out)
 
 

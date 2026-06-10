@@ -146,6 +146,30 @@ function notFound(box, term) {
 }
 function pickFirst(r) { return r.token || (r.candidates && r.candidates[0]); }
 
+/* ---------- 결과 내보내기(현재 URL 클립보드 복사) ---------- */
+function exportBtn() {
+  return `<div class="export-row"><button type="button" class="export-btn">🔗 결과 내보내기</button></div>`;
+}
+function fallbackCopy(text, done) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); done(true); } catch (e) { done(false); }
+  document.body.removeChild(ta);
+}
+function copyResultLink(btn) {
+  const url = location.href;
+  const done = (ok) => {
+    const orig = btn.textContent;
+    btn.textContent = ok ? '✓ 링크가 복사되었습니다' : '복사 실패 — 직접 복사해 주세요';
+    btn.classList.toggle('copied', ok);
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1600);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => done(true)).catch(() => fallbackCopy(url, done));
+  } else fallbackCopy(url, done);
+}
+
 /* ---------- 1. 두 단어 비교 ---------- */
 function runCmp() {
   const box = document.getElementById('cmpResult');
@@ -164,7 +188,7 @@ function runCmp() {
   la.map(([t]) => t).filter(t => setB.has(t))
     .forEach((t, i) => colorMap.set(t, COMMON_PALETTE[i % COMMON_PALETTE.length]));
   const head = (tok) => `<span class="han">${esc(tok)}</span>${rdSpan(tok)}${josa(tok, '과', '와')} 가장 비슷한 단어 상위 ${N}개`;
-  box.innerHTML = `
+  box.innerHTML = `${exportBtn()}
     <div class="bigscore">
       <div class="cap"><span class="han">${esc(ta)}</span>${rdSpan(ta)}${fqSpan(ta)} ↔
         <span class="han">${esc(tb)}</span>${rdSpan(tb)}${fqSpan(tb)}</div>
@@ -175,6 +199,7 @@ function runCmp() {
       <div><div class="col-head">${head(ta)}</div><div class="bars">${bars(la, colorMap, true)}</div></div>
       <div><div class="col-head">${head(tb)}</div><div class="bars">${bars(lb, colorMap, true)}</div></div>
     </div>`;
+  setURL({ task: 'compare', cmpA: ta, cmpB: tb });
 }
 
 /* ---------- 2. 스파이 찾기 ---------- */
@@ -200,10 +225,11 @@ function runSpy() {
   const list = scored.map(([i, s]) =>
     `<span class="${i === worst ? 'lo' : ''}"><span class="han">${esc(TOKENS[i])}</span>(${esc(tokenToReading.get(TOKENS[i]) || '')}, ${freqOf(TOKENS[i]).toLocaleString()}회) ${s.toFixed(3)}</span>`
   ).join(' · ');
-  box.innerHTML = `<div class="spybox">
+  box.innerHTML = `${exportBtn()}<div class="spybox">
     <div class="quote">우리 중에 스파이가 있는 것 같아…</div>
     <div class="who"><span class="han">${esc(TOKENS[worst])}</span><span class="rd">${esc(tokenToReading.get(TOKENS[worst]) || '')}</span></div>
     <div class="scores">무리 평균과의 유사도: ${list}</div></div>`;
+  setURL({ task: 'spy', spy: spyTokens.join('·') });
 }
 
 /* ---------- 3. 비슷한 단어 찾기 ---------- */
@@ -214,8 +240,9 @@ function runSim(term) {
   const t = pickFirst(r);
   if (!t) return notFound(box, term);
   const sims = mostSimilar(tokenToIndex.get(t), topn);
-  box.innerHTML = `<div class="qword"><span class="han">${esc(t)}</span>${rdSpan(t)}<span class="fq">(${freqOf(t).toLocaleString()}회)</span>${josa(t, '과', '와')} 가장 비슷한 단어 상위 ${topn}개</div>
+  box.innerHTML = `${exportBtn()}<div class="qword"><span class="han">${esc(t)}</span>${rdSpan(t)}<span class="fq">(${freqOf(t).toLocaleString()}회)</span>${josa(t, '과', '와')} 가장 비슷한 단어 상위 ${topn}개</div>
     <div class="bars">${bars(sims, null, true)}</div>`;
+  setURL({ task: 'similar', q: t, topn });
 }
 
 /* ---------- 자동완성 (빈도순) ---------- */
@@ -267,6 +294,48 @@ function attachSuggest(inputId, boxId, onSelect) {
 function showTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
   document.querySelectorAll('.panel').forEach(p => p.hidden = p.dataset.panel !== name);
+}
+
+/* ---------- URL 딥링크 (?task=compare&cmpA=…&cmpB=… 등) ---------- */
+function setURL(params) {
+  const qs = new URLSearchParams(params).toString();
+  // file:// 등에서 replaceState가 막혀도 검색 기능은 멈추지 않도록 보호.
+  try { history.replaceState(null, '', qs ? '?' + qs : location.pathname); } catch (e) { /* noop */ }
+}
+function applyURL() {
+  const p = new URLSearchParams(location.search);
+  let task = p.get('task');
+  if (!task) {                                  // task 미지정 시 파라미터로 추론
+    if (p.get('spy')) task = 'spy';
+    else if (p.get('cmpA') && p.get('cmpB')) task = 'compare';
+    else if (p.get('q') || p.get('word')) task = 'similar';
+    else return;
+  }
+  if (task === 'compare') {
+    showTab('compare');
+    const a = p.get('cmpA') || '', b = p.get('cmpB') || '';
+    document.getElementById('cmpA').value = a;
+    document.getElementById('cmpB').value = b;
+    if (a && b) runCmp();
+  } else if (task === 'similar') {
+    showTab('similar');
+    const topn = parseInt(p.get('topn'), 10);
+    if (topn >= 5 && topn <= 50) {
+      document.getElementById('simTopn').value = topn;
+      document.getElementById('simTopnVal').textContent = topn;
+    }
+    const q = p.get('q') || p.get('word') || '';
+    if (q) { document.getElementById('simInput').value = q; runSim(q); }
+  } else if (task === 'spy') {
+    showTab('spy');
+    spyTokens = [];
+    (p.get('spy') || '').split(/[·,\s]+/).filter(Boolean).forEach(w => {
+      const t = pickFirst(resolve(w));
+      if (t && !spyTokens.includes(t)) spyTokens.push(t);
+    });
+    renderSpyChips();
+    if (spyTokens.length >= 3) runSpy();
+  }
 }
 
 /* ---------- 막대/칩 클릭 → 비슷한 단어 탭으로 이동 ---------- */
@@ -323,9 +392,15 @@ function wire() {
   attachSuggest('simInput', 'simInputSuggest', t => { document.getElementById('simInput').value = t; runSim(t); });
 
   ['cmpResult', 'simResult'].forEach(delegateBars);
+
+  // 결과 내보내기 버튼(현재 URL 복사) — 위임 처리
+  document.addEventListener('click', e => {
+    const b = e.target.closest('.export-btn');
+    if (b) copyResultLink(b);
+  });
 }
 
-load().then(wire).catch(err => {
+load().then(() => { wire(); applyURL(); }).catch(err => {
   const s = document.getElementById('loadStatus');
   if (s) s.textContent = '데이터 로드 실패: ' + err.message;
 });

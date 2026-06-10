@@ -133,6 +133,11 @@ button.ghost:hover { background: #e9d4cd; }
 /* 결과 — 비교 큰 점수 */
 .result { margin-top: 18px; }
 .result:empty { margin: 0; }
+.export-row { display: flex; justify-content: flex-end; margin-bottom: 6px; }
+.export-btn { background: var(--accent-soft); color: var(--accent); border: none; border-radius: 8px;
+  padding: 6px 13px; font-size: .82rem; cursor: pointer; font-family: inherit; transition: .15s; }
+.export-btn:hover { background: #c9e7df; }
+.export-btn.copied { background: var(--accent); color: #fff; }
 .bigscore { text-align: center; margin: 12px 0 2px; }
 .bigscore .cap { color: var(--muted); font-size: .95rem; }
 .bigscore .cap .rd { font-size: .82em; color: var(--meta); }

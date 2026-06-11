@@ -215,6 +215,8 @@ def clean_wiki(text: str) -> str:
     text = re.sub(r"</?(?:onlyinclude|noinclude|includeonly|ref|references|small|sub|sup"
                   r"|div|span|center|u|br)[^>]*>", "", text)
     text = re.sub(r"__\w+__", "", text)                       # __FORCETOC__ 등
+    # 분류/파일 링크는 언랩 전에 통째 제거 — [[Category:香港…]]이 본문에 누출되는 버그 방지
+    text = re.sub(r"\[\[\s*(?:Category|category|File|Image|分類|文件)\s*:[^\]]*\]\]", "", text)
     text = re.sub(r"\[\[(?:[^\[\]|]*\|)?([^\[\]|]+)\]\]", r"\1", text)  # [[a|b]]→b, [[a]]→a
     text = re.sub(r"\[\[[^\]]*\]\]", "", text)                 # 잔여 링크([[Category:..]])
     text = re.sub(r"'{2,}", "", text)                         # ''' '' 강조

@@ -125,6 +125,10 @@ LANGCONV_RE = re.compile(r"-\{(.*?)\}-", re.S)
 TMPL_INNER_RE = re.compile(r"\{\{([^{}|]*)((?:\|[^{}]*)?)\}\}")
 UNWRAP_NAMES = {"propernoun", "專", "標", "deeppink", "green", "yl", "quote"}
 FIRST_ARG_NAMES = {"另", "參"}   # {{另|本文字|교감주}} → 本文字만 (주는 후대 교감)
+# 本文(上書·制詔 등)을 색상으로만 감싼 래퍼 — 내용은 本文이므로 살리되, 안에 박힌
+# {{*|師古曰…}}注는 보존해 split_main_note가 peizhu로 분리하게 한다(漢書·三國志 실측).
+# TMPL_INNER_RE는 중첩 {{}}가 있으면 매칭 못 해 → 균형 괄호 스캔(unwrap_wrappers)으로 처리.
+WRAPPER_NAMES = {"blue", "red", "green", "deeppink", "purple", "brown", "orange", "gray", "grey"}
 
 
 def pick_langconv(m: re.Match) -> str:
@@ -140,18 +144,54 @@ def pick_langconv(m: re.Match) -> str:
     return choices.get("zh-hant") or choices.get("zh") or next(iter(choices.values()), "")
 
 
+def unwrap_wrappers(text: str, names: set) -> str:
+    """색상 래퍼 {{name|本文}}을 균형 괄호로 벗겨 本文만 남긴다(중첩 {{*|}}注는 보존).
+
+    {{blue|本文{{*|師古曰…}}本文2}}처럼 注가 박힌 本文 래퍼를 살리기 위해 수동 스캔으로
+    바깥 래퍼만 제거한다(TMPL_INNER_RE는 내부 중첩 {{}}가 있으면 매칭 못 함). 래퍼가 아닌
+    템플릿({{*|}}·헤더 등)은 그대로 둬 split_main_note가 注 분리·드롭을 처리하게 한다.
+    """
+    out, i, n = [], 0, len(text)
+    while i < n:
+        if text[i:i + 2] == "{{":
+            depth, j = 0, i
+            while j < n:
+                if text[j:j + 2] == "{{":
+                    depth += 1; j += 2
+                elif text[j:j + 2] == "}}":
+                    depth -= 1; j += 2
+                    if depth == 0:
+                        break
+                else:
+                    j += 1
+            inner = text[i + 2:j - 2]
+            name, _, rest = inner.partition("|")
+            if name.strip().lower() in names:
+                out.append(unwrap_wrappers(rest, names))   # 本文만(중첩 래퍼도 재귀)
+            else:
+                out.append(text[i:j])                       # {{*|}}·헤더 등은 그대로
+            i = j
+        else:
+            out.append(text[i])
+            i += 1
+    return "".join(out)
+
+
 def preprocess_wikitext(wikitext: str) -> str:
-    """split_main_note 전 전처리 (史記 등에서 실측된 마크업; 三國志에는 영향 없음).
+    """split_main_note 전 전처리 (史記·漢書 등에서 실측된 마크업; 三國志에는 영향 없음).
 
     1. `<ref>校勘記</ref>` 제거 — 後人 교감, 原文 아님.
     2. 언어변환 `-{…}-` → 번체 분기 선택 (간체 분기의 `{{!|代替字|IDS}}`도 함께 버려짐).
-    3. 내용 보유 템플릿 언랩(안쪽부터): {{ProperNoun|X}}·{{專|X}}·{{標|X}}·{{deepPink|X}}·
+    3. 색상 래퍼 {{blue|…}}·{{red|…}}(上書·制詔 등 本文; 내부 {{*|}}注 보존) 균형 언랩 —
+       漢書는 治安策·至言·詔書 등 ~3.2만字 本文이 여기 들어 있어 드롭하면 손실(三國志도 동일).
+    4. 내용 보유 템플릿 언랩(안쪽부터): {{ProperNoun|X}}·{{專|X}}·{{標|X}}·{{deepPink|X}}·
        {{green|X}}·{{YL|X}}·{{Quote|X}} → X (다중 인자는 이어붙임: {{ProperNoun|江|淮}}→江淮),
        {{WavyBookMark|X}} → 《X》, {{!|X|IDS}}·{{另|X|주}}·{{參|X|주}} → X.
-       그 외 템플릿은 보존 → split_main_note({{*|}}·{{註|}})와 드롭이 처리.
+       그 외 템플릿은 보존 → split_main_note({{*|}}·{{註|}}·{{annotate|}})와 드롭이 처리.
     """
     wikitext = REF_RE.sub("", wikitext)
     wikitext = LANGCONV_RE.sub(pick_langconv, wikitext)
+    wikitext = unwrap_wrappers(wikitext, WRAPPER_NAMES)
 
     def repl(m: re.Match) -> str:
         name = m.group(1).strip().lower()
@@ -175,8 +215,9 @@ def preprocess_wikitext(wikitext: str) -> str:
 def split_main_note(wikitext: str) -> list[tuple[str, str]]:
     """{{...}} 균형 파싱으로 本文/注 분리.
 
-    `{{*|...}}`·`{{註|...}}` → ('peizhu', 내용). 그 외 템플릿 → 드롭. 나머지 → ('main', ...).
-    인라인 注가 本文을 끊으므로, 호출부에서 main 조각을 이어붙여 문장 분할한다.
+    `{{*|...}}`·`{{註|...}}`·`{{annotate|...}}` → ('peizhu', 내용). 그 외 템플릿 → 드롭.
+    나머지 → ('main', ...). 인라인 注가 本文을 끊으므로 호출부에서 main 조각을 이어붙인다.
+    (漢書 顏注는 {{*|師古曰…}}, 番號注 〔一〕는 {{annotate|<poem>…劉德曰…</poem>}}로 수록.)
     """
     out: list[tuple[str, str]] = []
     buf: list[str] = []
@@ -195,12 +236,15 @@ def split_main_note(wikitext: str) -> list[tuple[str, str]]:
                 else:
                     j += 1
             inner = wikitext[i + 2:j - 2]
-            if inner.startswith("*|"):           # 인라인 注(裴注·三家注 등)
+            if inner.startswith("*|"):           # 인라인 注(裴注·三家注·顏注 等)
                 out.append(("main", "".join(buf))); buf = []
                 out.append(("peizhu", inner[2:]))
             elif inner.startswith("註|"):        # 年表 등 소주(小註)
                 out.append(("main", "".join(buf))); buf = []
                 out.append(("peizhu", inner[2:]))
+            elif inner.startswith("annotate|"):  # 番號注 〔一〕(漢書 顏注 등)
+                out.append(("main", "".join(buf))); buf = []
+                out.append(("peizhu", inner[len("annotate|"):]))
             # 그 외 템플릿(헤더/라이선스 등) → 드롭
             i = j
         else:

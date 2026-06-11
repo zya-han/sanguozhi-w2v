@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>《사기》 단어 탐색기</title>
+<meta name="description" content="사마천의 《사기》(삼가주 일부 포함)에서 학습한 Word2Vec 임베딩 탐색기 — 한자 단어의 쓰임을 코사인 유사도로 비교하고, 비슷한 단어·스파이를 찾아보세요.">
+<!-- Open Graph / SNS 공유 카드 -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="《사기》 단어 탐색기">
+<meta property="og:title" content="《사기》 단어 탐색기">
+<meta property="og:description" content="사마천의 《사기》(삼가주 일부 포함)에서 학습한 Word2Vec 임베딩 탐색기 — 한자 단어의 쓰임을 코사인 유사도로 비교하고, 비슷한 단어·스파이를 찾아보세요.">
+<meta property="og:url" content="https://zyahan.blog/shiji-word-explorer">
+<meta property="og:image" content="https://zyahan.blog/assets/images/shiji-explorer-og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="《사기》 단어 탐색기 — Word2Vec 임베딩 탐색기">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="《사기》 단어 탐색기">
+<meta name="twitter:description" content="사마천의 《사기》(삼가주 일부 포함)에서 학습한 Word2Vec 임베딩 탐색기 — 한자 단어의 쓰임을 코사인 유사도로 비교하고, 비슷한 단어·스파이를 찾아보세요.">
+<meta name="twitter:image" content="https://zyahan.blog/assets/images/shiji-explorer-og-image.png">
+<!-- Canonical -->
+<link rel="canonical" href="https://zyahan.blog/shiji-word-explorer">
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="../style.css">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BGPF88VHK2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-BGPF88VHK2');
+</script>
+</head>
+<body>
+<header class="site-head">
+  <a class="blog-link" href="https://zyahan.blog" rel="noopener">미남과 오컬트와 자살</a>
+  <h1>《사기》 단어 탐색기</h1>
+  <p class="subtitle">사마천의 《사기》(三家注 일부 포함)에서 학습한 Word2Vec 모델로 한문 단어의 쓰임을 비교합니다.
+  <strong>한글 독음으로도 검색</strong>할 수 있어요.</p>
+  <p class="meta">vector_size=100 · skip-gram · 어휘 <span id="vocabCount">…</span>개</p>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-tab="compare">두 단어 비교</button>
+  <button class="tab" data-tab="spy">🕵️ 스파이 찾기</button>
+  <button class="tab" data-tab="similar">비슷한 단어 찾기</button>
+</nav>
+
+<main id="app" hidden>
+
+  <!-- 해석 방법과 한계 (처음 사용자용 안내) -->
+  <details class="card guide">
+    <summary>📖 처음이신가요? — 결과 읽는 법과 한계 (코사인 유사도란?)</summary>
+    <div class="guide-body">
+      <h4>이 도구는 무엇을 보여주나요?</h4>
+      <p>《사기》 본문에서 각 단어가 <strong>어떤 말들과 함께 등장하는지</strong>(문맥)를 컴퓨터가 학습한 것입니다.
+      낱말의 ‘뜻’을 아는 게 아니라, <strong>쓰임새가 닮은 단어</strong>를 찾아 줍니다. 그래서
+      <span class="han">匈奴</span>(흉노)의 이웃으로 <span class="han">單于</span>(선우)·<span class="han">月氏</span>(월지) 같은
+      북방 민족 관련 단어들이 떠오르고, ‘승상’ 옆에는 다른 벼슬 이름들이 모입니다.</p>
+
+      <h4>코사인 유사도란?</h4>
+      <p>두 단어가 <strong>얼마나 비슷한 문맥</strong>에서 쓰였는지를 0~1 사이 숫자로 나타낸 값입니다.
+      1에 가까울수록 거의 같은 자리에서 쓰였다는 뜻, 0에 가까우면 서로 다른 맥락이라는 뜻이에요.
+      딱 정해진 합격선은 없으니, <strong>같은 검색 안에서 위쪽일수록 더 닮았다</strong> 정도로 읽으면 됩니다.</p>
+
+      <h4>‘비슷하다’가 ‘친했다’는 아니에요</h4>
+      <p>유사도가 높다고 둘이 친하거나 같은 편이라는 뜻은 아닙니다. <strong>같은 종류로 자주 언급된다</strong>는
+      의미라, 라이벌이나 적장도 비슷한 전투·기록 맥락에 나오면 가깝게 묶일 수 있습니다.</p>
+
+      <h4>⚠️ 적게 나온 단어는 조심하세요</h4>
+      <p>단어 옆 ‘<strong>N회</strong>’는 《사기》에 그 단어가 등장한 횟수입니다. 몇 번밖에 안 나온 단어는
+      컴퓨터가 <strong>충분히 보지 못해</strong> 결과가 불안정합니다 — 유사어가 우연일 수 있어요.
+      <strong>수십~수백 회 이상</strong> 등장한 단어일수록 결과를 믿을 만합니다.</p>
+
+      <h4>그 밖에 알아둘 점</h4>
+      <p>· 이 모델은 오직 <strong>사마천 《사기》(三家注 일부 포함)</strong> 원문만 압니다. 다른 사서나
+      역사적 사실 전체를 반영하지 않으며, 원문의 서술 습관·치우침이 그대로 담깁니다.<br>
+      · 한 글자 이름(<span class="han">信</span>·<span class="han">良</span> 등)은 다른 뜻과 겹쳐 흐려질 수 있어 따로 묶지 않고,
+      <span class="han">張良</span>처럼 두 글자 이상 고유명사만 한 단어로 인식합니다.<br>
+      · ‘스파이 찾기’는 무리의 평균과 가장 덜 닮은 단어를 고르는 <strong>놀이</strong>입니다. 정답이 아니라 재미로 즐겨 주세요.</p>
+    </div>
+  </details>
+
+  <!-- 두 단어 비교 -->
+  <section class="card panel" data-panel="compare">
+    <h2>두 단어 비교</h2>
+    <p class="hint">두 단어가 《사기》에서 얼마나 비슷한 맥락에 쓰였는지 보기 위해, 각 단어와 비슷한 환경에서 출현한 단어들의 목록을 나란히 놓고 비교합니다.
+      <a class="ex" data-ex="compare" data-a="孔子" data-b="仲尼">예시: <span class="han">孔子</span> vs <span class="han">仲尼</span></a></p>
+    <div class="grid2">
+      <div class="field"><label>단어 1</label><input type="text" id="cmpA" placeholder="예: 孔子" autocomplete="off">
+        <div class="suggest" id="cmpASuggest" hidden></div></div>
+      <div class="field"><label>단어 2</label><input type="text" id="cmpB" placeholder="예: 仲尼" autocomplete="off">
+        <div class="suggest" id="cmpBSuggest" hidden></div></div>
+    </div>
+    <button class="primary" id="cmpBtn">비교하기</button>
+    <div id="cmpResult" class="result"></div>
+  </section>
+
+  <!-- 스파이 찾기 -->
+  <section class="card panel" data-panel="spy" hidden>
+    <h2>🕵️ 스파이 찾기 <span class="sub">(어몽어스)</span></h2>
+    <p class="hint">단어 3개 이상을 모으면, 무리에서 가장 이질적인 단어 — 스파이 — 를 찾아냅니다.
+      <a class="ex" data-ex="spy" data-list="平原君·孟嘗君·春申君·信陵君·武安君">예시: <span class="han">平原君·孟嘗君·春申君·信陵君·武安君</span></a></p>
+    <div class="field"><label>단어 추가</label>
+      <input type="text" id="spyInput" placeholder="한자/한글 입력 후 선택" autocomplete="off">
+      <div class="suggest" id="spyInputSuggest" hidden></div></div>
+    <div id="spyChips" class="chips-row"></div>
+    <div class="btn-row">
+      <button class="primary" id="spyBtn">스파이 지목!</button>
+      <button class="ghost" id="spyClear">비우기</button>
+    </div>
+    <div id="spyResult" class="result"></div>
+  </section>
+
+  <!-- 비슷한 단어 찾기 -->
+  <section class="card panel" data-panel="similar" hidden>
+    <h2>비슷한 단어 찾기</h2>
+    <p class="hint">한 단어와 가장 비슷한 맥락에 쓰인 단어들을 유사도 순으로 봅니다.
+      <a class="ex" data-ex="similar" data-a="匈奴">예시: <span class="han">匈奴</span></a></p>
+    <div class="field"><label>단어</label>
+      <input type="text" id="simInput" placeholder="예: 匈奴 또는 흉노" autocomplete="off">
+      <div class="suggest" id="simInputSuggest" hidden></div></div>
+    <label class="slider">개수 <span id="simTopnVal">20</span>
+      <input type="range" id="simTopn" min="5" max="50" value="20" step="1"></label>
+    <button class="primary" id="simBtn">비슷한 단어 보기</button>
+    <div id="simResult" class="result"></div>
+  </section>
+
+</main>
+
+<p id="loadStatus" class="load-status">모델 데이터를 불러오는 중…</p>
+
+<footer class="site-foot">
+  <p><strong>데이터 출처</strong> ·
+  원문 <span class="han">史記</span> 130<span class="han">卷</span>(<span class="han">三家注</span> 일부 포함): <a href="https://zh.wikisource.org/wiki/史記" rel="noopener"><span class="han">中文維基文庫</span></a> (CC BY-SA 4.0) ·
+  인명·관직: <a href="https://github.com/cbdb-project" rel="noopener">CBDB</a> (CC BY-NC-SA 4.0) ·
+  지명: CHGIS (Harvard &amp; Fudan).</p>
+  <p>CBDB 기반 파생물이므로 <strong>비상업·출처표기·동일조건(CC BY-NC-SA 4.0)</strong> 하에 이용하세요.</p>
+  <p class="credits">제작 <a href="https://zyahan.blog" rel="noopener">주아</a> &amp; Claude Code ·
+  모델 저장소 <a href="https://github.com/zya-han/sanguozhi-w2v" rel="noopener">github.com/zya-han/sanguozhi-w2v</a> ·
+  <span class="ver">v1.0.0</span> · 최종 수정 2026-06-12</p>
+</footer>
+
+<script src="../app.js"></script>
+</body>
+</html>

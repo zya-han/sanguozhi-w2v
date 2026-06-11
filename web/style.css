@@ -25,6 +25,10 @@ h1 { font-size: 2rem; margin: 0 0 .35em; letter-spacing: .01em; }
 .subtitle { color: var(--muted); margin: 0 auto .5em; max-width: 640px; }
 .subtitle strong { color: var(--accent); }
 .meta { color: var(--meta); font-size: .86rem; margin: 0; }
+.series-nav { color: var(--muted); font-size: .86rem; margin: 10px 0 0; }
+.series-nav .current { color: var(--ink); font-weight: 600; }
+.series-nav a { color: var(--accent); text-decoration: none; }
+.series-nav a:hover { text-decoration: underline; }
 
 /* 탭 */
 .tabs { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;

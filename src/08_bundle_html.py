@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import base64
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -60,6 +61,14 @@ def main():
         f"<script>\n{safe(js)}\n</script>"
     )
     html = html.replace('<script src="../app.js"></script>', embed)
+
+    # 사서 간 상대 링크(../<id>/index.html)는 로컬 미리보기용. 번들은 블로그에 단일
+    # 페이지로 배포되므로 절대 URL(https://zyahan.blog/<id>-word-explorer)로 바꾼다.
+    html = re.sub(
+        r'href="\.\./([a-z0-9_]+)/index\.html"',
+        r'href="https://zyahan.blog/\1-word-explorer"',
+        html,
+    )
 
     cid = Path(cfg["word2vec"]["model_name"]).stem.replace("w2v_", "")  # w2v_shiji.model → shiji
     out = web / f"{cid}_explorer.html"

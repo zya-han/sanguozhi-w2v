@@ -1,19 +1,19 @@
-"""Stage 1 — 원문 수집 및 本文/裴注 분리 (中文維基文庫 zh.wikisource).
+"""Stage 1 — 원문 수집 및 本文/注 분리 (中文維基文庫 zh.wikisource).
 
-정본: zh.wikisource 三國志 — 전체 65卷(魏30·蜀15·吳20), 正字 번체, 표점 포함.
-  (당초 Kanripo KR2a0012는 魏志 30卷만 담겨 蜀/吳書가 누락 → 周瑜 등 다수 개체 부재.
-   wikisource는 전체 65卷을 번체로 제공하므로 교체.)
+코퍼스 불문 공용: `corpus.book_title`의 `<書名>/卷…` 실페이지를 allpages API로 발견한다
+(卷 네이밍이 사서마다 제각각 — 三國志 卷01, 史記 卷001, 後漢書 卷1 — 이라 range 구성 불가).
 
 위키텍스트 마크업:
-  - `{{*|...}}`  = 裴松之 注 (인라인 雙行夾注에 해당)  → 注 스트림(is_peizhu=True)
-  - 그 밖의 텍스트 = 本文(陳壽)                       → 本文 스트림
+  - `{{*|...}}`  = 注 (裴松之注·李賢注 등 인라인 雙行夾注)  → 注 스트림(is_peizhu=True)
+    (史記·漢書처럼 注 미수록 사서는 자동으로 main만 나온다)
+  - 그 밖의 텍스트 = 本文                                  → 本文 스트림
   - `==전기명==`  = 傳 단위 섹션 헤더 (드롭)
   - `[[링크|표시]]`→표시, `《書名》` 유지, `'''굵게'''` 제거, 기타 {{템플릿}} 제거
 표점(。！？)으로 문장 분할 → 각 문장이 윈도 단위 segment (명세 §2.6).
 토큰화 대상은 한자(漢字)만; 구두점은 문장 경계로만 쓰고 토큰에서 제외(Stage 4).
 
-출력: data/raw/wikisource/卷NN.wiki (캐시), data/raw/provenance.json,
-      data/interim/segments.parquet (segment_id, text, source, juan, shu, kind, is_peizhu).
+출력: data/<id>/raw/wikisource/<제목>.wiki (캐시), data/<id>/raw/provenance.json,
+      data/<id>/interim/segments.parquet (segment_id, text, source, juan, shu, kind, is_peizhu).
 """
 from __future__ import annotations
 
@@ -38,23 +38,77 @@ HAN_ANY = re.compile(r"\p{Han}")
 SECTION_RE = re.compile(r"^=+\s*[^=]+?\s*=+\s*$", re.MULTILINE)
 
 
-def fetch_juan_wikitext(cfg: dict, juan: int) -> str:
-    """卷 위키텍스트를 API로 받되, data/raw/wikisource/ 에 캐시."""
+UA = {"User-Agent": "han-w2v-research/1.0 (academic; contact via github)"}
+
+
+def list_juan_pages(cfg: dict) -> list[str]:
+    """`<書名>/卷…` 페이지를 allpages API로 발견, 卷 번호 자연 정렬.
+
+    리다이렉트도 포함해 수집한다 — 일부 卷은 편명 페이지(史記/卷092→史記/淮陰侯列傳)로의
+    리다이렉트로만 존재한다. 대신 리다이렉트 타깃을 해석해 같은 본문을 가리키는 중복
+    (漢書 卷NNN上/下→卷NNN 등)은 낮은 卷 번호 하나만 남긴다. fetch는 redirects=1로 따라간다.
+    """
+    book = cfg["corpus"]["book_title"]
+    api = cfg["corpus"]["wikisource_api"]
+    pages, cont = [], None
+    while True:
+        params = {"action": "query", "list": "allpages",
+                  "apprefix": f"{book}/卷", "apnamespace": 0,
+                  "apfilterredir": "all", "aplimit": "max", "format": "json"}
+        if cont:
+            params["apcontinue"] = cont
+        r = requests.get(api, params=params, headers=UA, timeout=30)
+        r.raise_for_status()
+        j = r.json()
+        pages += [p["title"] for p in j["query"]["allpages"]]
+        cont = j.get("continue", {}).get("apcontinue")
+        if not cont:
+            break
+    # 자연 정렬: 卷 뒤 숫자 + 上中下
+    ord_ = {"上": 0, "中": 1, "下": 2}
+
+    def key(t):
+        m = re.search(r"卷(\d+)([上中下])?", t)
+        return (int(m.group(1)) if m else 9999, ord_.get(m.group(2) if m else None, -1))
+
+    pages = sorted(pages, key=key)
+
+    # 리다이렉트 타깃 해석(배치) → canonical 본문 기준 중복 제거
+    target = {}
+    for i in range(0, len(pages), 50):
+        chunk = pages[i:i + 50]
+        r = requests.get(api, params={"action": "query", "titles": "|".join(chunk),
+                                      "redirects": 1, "format": "json"},
+                         headers=UA, timeout=30)
+        r.raise_for_status()
+        for rd in r.json().get("query", {}).get("redirects", []):
+            target[rd["from"]] = rd["to"]
+        time.sleep(0.5)
+    seen, out = set(), []
+    for t in pages:
+        canon = target.get(t, t)
+        if canon in seen:
+            log.info("중복 본문 생략: %s (= %s)", t, canon)
+            continue
+        seen.add(canon)
+        out.append(t)
+    return out
+
+
+def fetch_juan_wikitext(cfg: dict, title: str) -> str:
+    """페이지 위키텍스트를 API로 받되, data/<id>/raw/wikisource/ 에 캐시."""
     cache_dir = ensure_dir(resolve(cfg, "raw") / "wikisource")
-    pad = int(cfg["corpus"]["juan_zero_pad"])
-    cache = cache_dir / f"卷{juan:0{pad}d}.wiki"
+    cache = cache_dir / (title.replace("/", "_") + ".wiki")
     if cache.exists():
         return cache.read_text(encoding="utf-8")
-    page = f"{cfg['corpus']['page_prefix']}{juan:0{pad}d}"
-    headers = {"User-Agent": "sanguozhi-w2v-research/1.0 (academic; contact via github)"}
-    params = {"action": "parse", "page": page, "prop": "wikitext",
-              "format": "json", "maxlag": 5}
+    params = {"action": "parse", "page": title, "prop": "wikitext",
+              "format": "json", "redirects": 1, "maxlag": 5}
     for attempt in range(6):
         r = requests.get(cfg["corpus"]["wikisource_api"], params=params,
-                         headers=headers, timeout=30)
+                         headers=UA, timeout=30)
         if r.status_code == 429 or (r.status_code == 200 and "maxlag" in r.text[:200]):
             wait = int(r.headers.get("Retry-After", 2 ** attempt + 2))
-            log.warning("卷%d rate-limit(%s), %ds 대기 후 재시도", juan, r.status_code, wait)
+            log.warning("%s rate-limit(%s), %ds 대기 후 재시도", title, r.status_code, wait)
             time.sleep(wait)
             continue
         r.raise_for_status()
@@ -62,13 +116,66 @@ def fetch_juan_wikitext(cfg: dict, juan: int) -> str:
         cache.write_text(wt, encoding="utf-8")
         time.sleep(1.0)  # 예의상 rate limit
         return wt
-    raise RuntimeError(f"卷{juan} 반복 rate-limit으로 실패")
+    raise RuntimeError(f"{title} 반복 rate-limit으로 실패")
+
+
+REF_RE = re.compile(r"<ref[^>/]*>.*?</ref>|<ref[^>]*/>", re.S)
+LANGCONV_RE = re.compile(r"-\{(.*?)\}-", re.S)
+# 본문 내용을 감싸기만 하는 템플릿(專名號·표시·색상·인용 등) — 내용을 살린다.
+TMPL_INNER_RE = re.compile(r"\{\{([^{}|]*)((?:\|[^{}]*)?)\}\}")
+UNWRAP_NAMES = {"propernoun", "專", "標", "deeppink", "green", "yl", "quote"}
+FIRST_ARG_NAMES = {"另", "參"}   # {{另|本文字|교감주}} → 本文字만 (주는 후대 교감)
+
+
+def pick_langconv(m: re.Match) -> str:
+    """`-{zh:脩;zh-hans:修;zh-hant:脩;}-` 언어변환 → zh-hant > zh > 첫 값. `-{於}-` → 於."""
+    inner = m.group(1)
+    if ":" not in inner:
+        return inner
+    choices = {}
+    for part in inner.split(";"):
+        k, sep, v = part.strip().partition(":")
+        if sep:
+            choices[k.strip()] = v
+    return choices.get("zh-hant") or choices.get("zh") or next(iter(choices.values()), "")
+
+
+def preprocess_wikitext(wikitext: str) -> str:
+    """split_main_note 전 전처리 (史記 등에서 실측된 마크업; 三國志에는 영향 없음).
+
+    1. `<ref>校勘記</ref>` 제거 — 後人 교감, 原文 아님.
+    2. 언어변환 `-{…}-` → 번체 분기 선택 (간체 분기의 `{{!|代替字|IDS}}`도 함께 버려짐).
+    3. 내용 보유 템플릿 언랩(안쪽부터): {{ProperNoun|X}}·{{專|X}}·{{標|X}}·{{deepPink|X}}·
+       {{green|X}}·{{YL|X}}·{{Quote|X}} → X (다중 인자는 이어붙임: {{ProperNoun|江|淮}}→江淮),
+       {{WavyBookMark|X}} → 《X》, {{!|X|IDS}}·{{另|X|주}}·{{參|X|주}} → X.
+       그 외 템플릿은 보존 → split_main_note({{*|}}·{{註|}})와 드롭이 처리.
+    """
+    wikitext = REF_RE.sub("", wikitext)
+    wikitext = LANGCONV_RE.sub(pick_langconv, wikitext)
+
+    def repl(m: re.Match) -> str:
+        name = m.group(1).strip().lower()
+        pos = [a for a in m.group(2).lstrip("|").split("|") if "=" not in a] \
+            if m.group(2) else []
+        if name in UNWRAP_NAMES:
+            return "".join(pos)
+        if name in FIRST_ARG_NAMES or name == "!":
+            return pos[0] if pos else "\n"
+        if name == "wavybookmark":
+            return "《" + "".join(pos) + "》"
+        return m.group(0)
+
+    prev = None
+    while prev != wikitext:
+        prev = wikitext
+        wikitext = TMPL_INNER_RE.sub(repl, wikitext)
+    return wikitext
 
 
 def split_main_note(wikitext: str) -> list[tuple[str, str]]:
-    """{{...}} 균형 파싱으로 本文/裴注 분리.
+    """{{...}} 균형 파싱으로 本文/注 분리.
 
-    `{{*|...}}` → ('peizhu', 내용). 그 외 템플릿 → 드롭. 나머지 → ('main', ...).
+    `{{*|...}}`·`{{註|...}}` → ('peizhu', 내용). 그 외 템플릿 → 드롭. 나머지 → ('main', ...).
     인라인 注가 本文을 끊으므로, 호출부에서 main 조각을 이어붙여 문장 분할한다.
     """
     out: list[tuple[str, str]] = []
@@ -88,7 +195,10 @@ def split_main_note(wikitext: str) -> list[tuple[str, str]]:
                 else:
                     j += 1
             inner = wikitext[i + 2:j - 2]
-            if inner.startswith("*|"):           # 裴注
+            if inner.startswith("*|"):           # 인라인 注(裴注·三家注 등)
+                out.append(("main", "".join(buf))); buf = []
+                out.append(("peizhu", inner[2:]))
+            elif inner.startswith("註|"):        # 年表 등 소주(小註)
                 out.append(("main", "".join(buf))); buf = []
                 out.append(("peizhu", inner[2:]))
             # 그 외 템플릿(헤더/라이선스 등) → 드롭
@@ -100,15 +210,20 @@ def split_main_note(wikitext: str) -> list[tuple[str, str]]:
 
 
 def clean_wiki(text: str) -> str:
-    """위키 마크업 제거 → 표점 포함 평문."""
+    """위키 마크업 제거 → 표점 포함 평문. 줄바꿈은 문장 flush 경계로 보존."""
     text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
-    text = re.sub(r"</?(?:onlyinclude|noinclude|includeonly|ref|small|sub|sup)[^>]*>", "", text)
+    text = re.sub(r"</?(?:onlyinclude|noinclude|includeonly|ref|references|small|sub|sup"
+                  r"|div|span|center|u|br)[^>]*>", "", text)
     text = re.sub(r"__\w+__", "", text)                       # __FORCETOC__ 등
     text = re.sub(r"\[\[(?:[^\[\]|]*\|)?([^\[\]|]+)\]\]", r"\1", text)  # [[a|b]]→b, [[a]]→a
     text = re.sub(r"\[\[[^\]]*\]\]", "", text)                 # 잔여 링크([[Category:..]])
     text = re.sub(r"'{2,}", "", text)                         # ''' '' 강조
     text = re.sub(r"\{\{[^{}]*\}\}", "", text)                 # 잔여 단순 템플릿
     text = SECTION_RE.sub("\n", text)                         # ==전기명== 헤더 드롭
+    # 표(年表) 마크업: 표 시작/끝/행 구분 드롭, 셀 경계는 줄바꿈 → 셀 단위 문장 flush
+    text = re.sub(r"^(?:\{\||\|\}|\|-).*$", "", text, flags=re.M)
+    text = text.replace("||", "\n").replace("!!", "\n")
+    text = re.sub(r"^[|!]", "", text, flags=re.M)
     text = text.replace("　", "").replace("​", "")
     return text
 
@@ -120,6 +235,7 @@ def to_sentences(cleaned: str, openers: set, closers: set) -> list[str]:
       연속 닫는 부호(。」)는 함께 붙는다.
     - 여는 부호(「『): 그 '앞'에서 분리 — 다음(인용) 세그먼트의 첫 토큰으로 붙는다.
     - 문장 내 부호(，、；：)는 경계가 아니라 세그먼트에 남아 토큰 겸 병합 barrier가 된다.
+    - 줄바꿈(문단·표 셀 경계)에서도 flush — 표점 없는 문단/셀이 이웃과 병합되지 않게.
     공백만 제거. 한자가 없는 세그먼트는 제외.
     """
     sents = []
@@ -134,7 +250,10 @@ def to_sentences(cleaned: str, openers: set, closers: set) -> list[str]:
     i, n = 0, len(cleaned)
     while i < n:
         ch = cleaned[i]
-        if ch in openers:                 # 여는 부호 앞에서 분리
+        if ch == "\n":                    # 문단/셀 경계에서 flush
+            flush()
+            i += 1
+        elif ch in openers:               # 여는 부호 앞에서 분리
             flush()
             cur.append(ch)
             i += 1
@@ -150,35 +269,44 @@ def to_sentences(cleaned: str, openers: set, closers: set) -> list[str]:
     return sents
 
 
-def shu_of(juan: int) -> str:
-    return "魏書" if juan <= 30 else "蜀書" if juan <= 45 else "吳書"
+def shu_of(cfg: dict, juan_no: int) -> str:
+    """卷 번호 → 志/書 구분. config `corpus.shu_map`([[마지막卷, 이름], …]) 없으면 '本'."""
+    for upto, name in cfg["corpus"].get("shu_map") or []:
+        if juan_no <= int(upto):
+            return name
+    return "本"
 
 
 def build_segments(cfg: dict) -> pd.DataFrame:
     openers = set(cfg["corpus"]["sentence_open"])
     closers = set(cfg["corpus"]["sentence_close"])
-    n_juan = int(cfg["corpus"]["juan_count"])
+    cid = cfg["corpus"].get("id", "corpus")
+    book = cfg["corpus"]["book_title"]
+    titles = list_juan_pages(cfg)
+    log.info("allpages 발견: %s 卷 페이지 %d개 (%s … %s)",
+             book, len(titles), titles[0], titles[-1])
     rows = []
-    for juan in range(1, n_juan + 1):
-        wt = fetch_juan_wikitext(cfg, juan)
+    for title in titles:
+        wt = fetch_juan_wikitext(cfg, title)
         if not wt.strip():
-            log.warning("卷%d 위키텍스트 비어있음", juan)
+            log.warning("%s 위키텍스트 비어있음", title)
             continue
-        parts = split_main_note(wt)
+        parts = split_main_note(preprocess_wikitext(wt))
         main_clean = clean_wiki("".join(t for k, t in parts if k == "main"))
         note_cleans = [clean_wiki(t) for k, t in parts if k == "peizhu"]
 
-        jid = f"卷{juan:02d}"
-        shu = shu_of(juan)
+        jid = title.split("/", 1)[1] if "/" in title else title   # 예: 卷001
+        m = re.search(r"卷(\d+)", title)
+        shu = shu_of(cfg, int(m.group(1)) if m else 0)
         for si, sent in enumerate(to_sentences(main_clean, openers, closers)):
-            rows.append(dict(segment_id=f"sgz_{jid}_m{si:04d}", text=sent,
-                             source="zh.wikisource:三國志", juan=jid, shu=shu,
+            rows.append(dict(segment_id=f"{cid}_{jid}_m{si:04d}", text=sent,
+                             source=f"zh.wikisource:{book}", juan=jid, shu=shu,
                              kind="main", is_peizhu=False))
         ni = 0
         for nc in note_cleans:
             for sent in to_sentences(nc, openers, closers):
-                rows.append(dict(segment_id=f"sgz_{jid}_n{ni:05d}", text=sent,
-                                 source="zh.wikisource:三國志", juan=jid, shu=shu,
+                rows.append(dict(segment_id=f"{cid}_{jid}_n{ni:05d}", text=sent,
+                                 source=f"zh.wikisource:{book}", juan=jid, shu=shu,
                                  kind="peizhu", is_peizhu=True))
                 ni += 1
     return pd.DataFrame(rows)
@@ -193,13 +321,15 @@ def main():
     df.to_parquet(interim / "segments.parquet", index=False)
 
     raw_dir = ensure_dir(resolve(cfg, "raw"))
+    book = cfg["corpus"]["book_title"]
+    juans = df["juan"].drop_duplicates().tolist()
     prov = {
-        "corpus": "三國志 (正史) — Chen Shou 撰, Pei Songzhi 注 (全 65卷)",
-        "source": "中文維基文庫 (zh.wikisource.org) 三國志",
+        "corpus": cfg["corpus"].get("provenance", book),
+        "source": f"中文維基文庫 (zh.wikisource.org) {book}",
         "api": cfg["corpus"]["wikisource_api"],
-        "juan": f"卷01–卷{cfg['corpus']['juan_count']:02d} (魏書1-30, 蜀書31-45, 吳書46-65)",
+        "juan": f"{len(juans)}卷, allpages 발견 ({juans[0]}–{juans[-1]})",
         "license": "CC BY-SA 4.0 (Wikisource)",
-        "note": "{{*|...}}=裴松之 注, 그 외=陳壽 本文. 표점(。！？)으로 문장 분할, 한자만 토큰화.",
+        "note": "{{*|...}}=注(있는 경우), 그 외=本文. 표점으로 문장 분할, 한자만 토큰화.",
     }
     (raw_dir / "provenance.json").write_text(
         json.dumps(prov, ensure_ascii=False, indent=2), encoding="utf-8")

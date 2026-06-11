@@ -32,10 +32,14 @@ def main():
     model = Word2Vec.load(str(resolve(cfg, "models")
                               / cfg["word2vec"].get("model_name", "w2v_sanguozhi.model")))
 
-    # ── 1. 토큰화 정합성 검사 ──
-    must_single = ["諸葛亮", "孔明", "曹操", "劉備", "孫權", "周瑜", "呂蒙",
-                   "丞相", "太守", "益州"]
-    must_char = ["亮", "操", "備", "羽"]  # 단자 名 — 글자 토큰으로 남아야
+    # ── 1. 토큰화 정합성 검사 (센티넬은 사서별 config `validate`) ──
+    vcfg = cfg.get("validate", {})
+    must_single = vcfg.get("must_single",
+                           ["諸葛亮", "孔明", "曹操", "劉備", "孫權", "周瑜", "呂蒙",
+                            "丞相", "太守", "益州"])
+    must_char = vcfg.get("must_char", ["亮", "操", "備", "羽"])  # 단자 名 — 글자 토큰으로 남아야
+    alias_a, alias_b = vcfg.get("alias_pair", ["諸葛亮", "孔明"])
+    title_probe = vcfg.get("title_probe", "《魏略》")
     checks = []
     for w in must_single:
         present = tok_freq.get(w, 0) > 0
@@ -46,15 +50,15 @@ def main():
         # 단자가 토큰으로 존재하고, 가제티어에 단자로 포함되지 않아야
         ok = (tok_freq.get(w, 0) > 0) and (w not in gaz_set)
         checks.append((f"단자 名 '{w}' 미병합", ok, f"글자토큰 빈도 {tok_freq.get(w,0)}, 가제티어 포함 {'O(문제!)' if w in gaz_set else 'X'}"))
-    # 별명 비정규화: 諸葛亮(名)과 孔明(字)이 서로 다른 토큰으로 공존
-    ok_alias = tok_freq.get("諸葛亮", 0) > 0 and tok_freq.get("孔明", 0) > 0
-    checks.append(("별명 비정규화(諸葛亮·孔明 독립 공존)", ok_alias,
-                   f"諸葛亮 {tok_freq.get('諸葛亮',0)}, 孔明 {tok_freq.get('孔明',0)}"))
+    # 별명 비정규화: 名과 字가 서로 다른 토큰으로 공존
+    ok_alias = tok_freq.get(alias_a, 0) > 0 and tok_freq.get(alias_b, 0) > 0
+    checks.append((f"별명 비정규화({alias_a}·{alias_b} 독립 공존)", ok_alias,
+                   f"{alias_a} {tok_freq.get(alias_a,0)}, {alias_b} {tok_freq.get(alias_b,0)}"))
     # 《書名》 = 괄호 포함 단일 토큰
     n_titles = sum(1 for t in tok_freq if t.startswith("《") and t.endswith("》"))
-    ok_title = tok_freq.get("《魏略》", 0) > 0 and n_titles > 0
+    ok_title = tok_freq.get(title_probe, 0) > 0 and n_titles > 0
     checks.append(("《書名》 괄호포함 단일 토큰", ok_title,
-                   f"《魏略》 {tok_freq.get('《魏略》',0)}, 표제 토큰 {n_titles}종"))
+                   f"{title_probe} {tok_freq.get(title_probe,0)}, 표제 토큰 {n_titles}종"))
     all_pass = all(c[1] for c in checks)
 
     # ── 2. 커버리지 ──
@@ -76,7 +80,8 @@ def main():
 
     # ── most_similar 예시 ──
     sim_examples = {}
-    for probe in ["諸葛亮", "曹操", "劉備", "孫權", "丞相", "太守", "益州", "荆州"]:
+    for probe in vcfg.get("sim_probes",
+                          ["諸葛亮", "曹操", "劉備", "孫權", "丞相", "太守", "益州", "荆州"]):
         if probe in model.wv:
             sim_examples[probe] = model.wv.most_similar(probe, topn=8)
 
@@ -85,9 +90,10 @@ def main():
     pei_tok = sum(len(r["tokens"]) for r in recs if r["is_peizhu"])
 
     # ── 리포트 작성 ──
+    book = cfg["corpus"].get("book_title", "三國志")
     L = []
-    L.append("# 검증 리포트 — 《三國志》 개체 인식 토큰화 + Word2Vec\n")
-    L.append(f"- 코퍼스 토큰: **{total_tok:,}** (本文 {main_tok:,} / 裴注 {pei_tok:,})")
+    L.append(f"# 검증 리포트 — 《{book}》 개체 인식 토큰화 + Word2Vec\n")
+    L.append(f"- 코퍼스 토큰: **{total_tok:,}** (本文 {main_tok:,} / 注 {pei_tok:,})")
     L.append(f"- 어휘(vocab, min_count={cfg['word2vec']['min_count']}): **{len(model.wv):,}**")
     L.append(f"- 가제티어 표면형: {len(gaz_set):,} → 코퍼스 적중: **{len(gaz_hit):,}** "
              f"(개체 토큰 출현 {n_entity_tok_occ:,}회, 전체의 {100*n_entity_tok_occ/total_tok:.1f}%)\n")
@@ -120,10 +126,10 @@ def main():
         L.append(f"- **{probe}**: {items}")
 
     L.append("\n## 4. 명시된 한계 (명세 §2.4, §6)")
-    L.append("- **단자(單字) 名 미병합**: 亮·操·備 등은 동형이의(亮=밝다)라 WSD 없이 안전 분리 불가 → 글자 토큰 유지.")
-    L.append("- **개체 희소성**: CBDB의 三國 인물 커버리지가 제한적이고 본문 언급이 적은 개체는 빈도가 낮아 "
-             "(曹操 등) 임베딩이 불안정할 수 있음. 위 희소 개체 수 참조.")
-    L.append("- **별명 비정규화(의도적)**: 諸葛亮(名)·孔明(字)·武侯(諡)는 각각 독립 토큰 — 서로 다른 화용 분포 관측이 연구 목적.")
+    L.append(f"- **단자(單字) 名 미병합**: {'·'.join(must_char)} 등은 동형이의라 WSD 없이 안전 분리 불가 → 글자 토큰 유지.")
+    L.append("- **개체 희소성**: CBDB의 해당 시대 인물 커버리지가 제한적이고 본문 언급이 적은 개체는 빈도가 낮아 "
+             "임베딩이 불안정할 수 있음. 위 희소 개체 수 참조.")
+    L.append(f"- **별명 비정규화(의도적)**: {alias_a}(名)·{alias_b}(字) 등 名·字·諡는 각각 독립 토큰 — 서로 다른 화용 분포 관측이 연구 목적.")
     L.append("- **가제티어 정밀도**: CBDB OFFICE/ADDR에서 유입된 비개체어는 stoplist로 제거했으나 일부 저빈도 잔재 가능.")
     L.append("- **자형**: 코퍼스(四庫 WYG)는 正字 번체 그대로 보존(OpenCC 미적용) — 于/於·云/雲 등 고전 의미 구분 유지.")
 

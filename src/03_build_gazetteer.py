@@ -190,10 +190,13 @@ def main():
     db = find_cbdb(cfg)
     con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
 
+    user_entries = load_seed(g.get("user_dict"))
+    user_surfaces = {s for s, _ in user_entries}
     raw = (extract_per(con, g["dynasty_codes"], g["year_start"], g["year_end"])
            + extract_ofi(con)
            + extract_loc(con)
-           + load_seed(g.get("seed_supplement")))
+           + load_seed(g.get("seed_supplement"))
+           + user_entries)
     if g.get("extract_names_from_zi", True):
         raw += extract_per_from_zi(con, cfg, int(g.get("surname_min_persons", 20)))
     con.close()
@@ -211,8 +214,10 @@ def main():
     stop = load_stoplist(g.get("stoplist"))
     if stop:
         n0 = len(df)
-        df = df[~df["surface"].isin(stop)]
-        log.info("stoplist 적용: %d → %d 표면형", n0, len(df))
+        # 사용자 사전 항목은 stoplist 면제
+        df = df[~df["surface"].isin(stop) | df["surface"].isin(user_surfaces)]
+        log.info("stoplist 적용: %d → %d 표면형 (user_dict %d 면제)",
+                 n0, len(df), len(user_surfaces))
 
     # 자형 정규화 — 코퍼스와 동일 설정(normalize)으로 가제티어도 통일(簡↔繁·異體字).
     nm = cfg.get("normalize", {})
@@ -222,7 +227,7 @@ def main():
     df["surface"] = df["surface"].map(normalize)
 
     # 유형 우선순위(PER>OFI>LOC)로 중복 제거: 동일 표면형은 한 유형만
-    prio = {"PER": 0, "ERA": 1, "OFI": 2, "LOC": 3}
+    prio = {"PER": 0, "APP": 1, "ERA": 2, "OFI": 3, "LOC": 4}
     df["_p"] = df["type"].map(prio).fillna(9)
     df = df.sort_values("_p").drop_duplicates(subset=["surface"], keep="first")
     df = df.drop(columns="_p")

@@ -73,6 +73,8 @@ gazetteer:
   stoplist: "data/gazetteer/stoplist.txt"  # §3.4 sanity 필터: CBDB 유입 비개체어 제외
   # CBDB가 누락한 canonical 三國 字·號·諡 등 보충 시드(검증 §6 충족). 출처 표기.
   seed_supplement: "data/gazetteer/seed_supplement.tsv"
+  # 사용자가 직접 큐레이션한 병합 대상(敬稱·別稱 등). git 추적, stoplist 면제.
+  user_dict: "data/gazetteer/user_dict.tsv"
   # CBDB는 正體(번체) 보관 → 코퍼스와 동일 자형. 변환 불필요(null). 충돌 위험 회피.
   opencc_config:   null
   # 보조 교차검증용 TGAZ (사용 안해도 무방)

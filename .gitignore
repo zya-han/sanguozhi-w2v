@@ -34,6 +34,7 @@ vendor/
 
 # 핸드오프 명세서 (내부 문서, 미추적)
 sanguozhi_word2vec_spec.md
+docs/ADDING_A_CORPUS.md
 
 # 개인 튜토리얼 노트북 (배포 제외)
 tutorial.ipynb

@@ -78,7 +78,7 @@ python src/08_bundle_html.py      # 단일 HTML 한 장으로 묶기(web/sanguoz
 
 > **다른 사서에도 적용** — 같은 코드로 《史記》《漢書》《後漢書》 등 다른 正史 코퍼스를 만들 수 있습니다.
 > 코퍼스는 `config/<id>.yaml` + 환경변수로 전환하며(`CORPUS_CONFIG=config/houhanshu.yaml python src/01_…`),
-> 데이터·모델은 `data/<id>/`·`models/<id>/`로 분리됩니다. 절차는 [`docs/ADDING_A_CORPUS.md`](docs/ADDING_A_CORPUS.md) 참조.
+> 데이터·모델은 `data/<id>/`·`models/<id>/`로 분리됩니다.
 
 > **CBDB 준비 (Stage 3 전제)** — `src/03`은 `vendor/cbdb_sqlite/*.sqlite3`를 자동 탐색합니다. 없으면
 > [`cbdb-project/cbdb_sqlite`](https://github.com/cbdb-project/cbdb_sqlite)를 클론해 최신 SQLite를 받아 두세요.

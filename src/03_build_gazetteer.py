@@ -90,8 +90,8 @@ def extract_per(con: sqlite3.Connection, dy_codes: list[int],
     return out
 
 
-# 문장 시작 인명: 한자만(부호 불포함) 2~4자 + 字 + 한자
-ZI_RE = re.compile(r"^(\p{Han}{2,4}?)字\p{Han}")
+# 전기 도입부 인명: 한자만(부호 불포함) 2~4자 + 字 + 한자. 문장 내 어디서나.
+ZI_RE = re.compile(r"(\p{Han}{2,4}?)字\p{Han}")
 
 
 def common_surnames(con: sqlite3.Connection, threshold: int) -> tuple[set[str], set[str]]:
@@ -114,16 +114,14 @@ def extract_per_from_zi(con: sqlite3.Connection, cfg: dict, threshold: int) -> l
     bad2 = set("弟子兄父母妻女姊妹")  # 3자 후보의 2번째 글자가 이러면 친족어 → 배제
     names = set()
     for t in norm["text"].astype(str):
-        m = ZI_RE.match(t)
-        if not m:
-            continue
-        nm = m.group(1)
-        if len(nm) >= 3 and nm[:2] in sur2:
-            names.add(nm[:3])
-        elif nm[0] in sur1 and len(nm) <= 3:
-            if len(nm) == 3 and nm[1] in bad2:
-                continue
-            names.add(nm)
+        for m in ZI_RE.finditer(t):
+            nm = m.group(1)
+            if len(nm) >= 3 and nm[:2] in sur2:
+                names.add(nm[:3])
+            elif nm[0] in sur1 and len(nm) <= 3:
+                if len(nm) == 3 and nm[1] in bad2:
+                    continue
+                names.add(nm)
     log.info("코퍼스 '字' 도입부 인명 추출: %d개 (빈출 姓 %d/%d)",
              len(names), len(sur1), len(sur2))
     return [(n, "PER") for n in names]
@@ -224,7 +222,7 @@ def main():
     df["surface"] = df["surface"].map(normalize)
 
     # 유형 우선순위(PER>OFI>LOC)로 중복 제거: 동일 표면형은 한 유형만
-    prio = {"PER": 0, "OFI": 1, "LOC": 2}
+    prio = {"PER": 0, "ERA": 1, "OFI": 2, "LOC": 3}
     df["_p"] = df["type"].map(prio).fillna(9)
     df = df.sort_values("_p").drop_duplicates(subset=["surface"], keep="first")
     df = df.drop(columns="_p")

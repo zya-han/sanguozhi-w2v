@@ -1,0 +1,99 @@
+# ============================================================================
+# 《史記》(正史) 개체 인식 토큰화 + Word2Vec — 코퍼스 설정
+# 실행: CORPUS_CONFIG=config/shiji.yaml python src/01_…  (docs/ADDING_A_CORPUS.md)
+# ============================================================================
+
+seed: 42
+
+paths:
+  vendor:        vendor                   # 클론한 업스트림 소스 (CBDB 등, 공유)
+  raw:           data/shiji/raw           # 원문 + provenance
+  interim:       data/shiji/interim       # segments / normalized
+  gazetteer:     data/shiji/gazetteer     # gazetteer.tsv + 시드
+  tokenized:     data/shiji/tokenized     # corpus.jsonl
+  models:        models/shiji             # w2v 모델 + vocab
+  reports:       reports/shiji            # 검증 리포트
+  web:           web/shiji                # 웹 탐색기 출력(07·08)
+
+# ----------------------------------------------------------------------------
+# Stage 1 — 원문 수집
+# ----------------------------------------------------------------------------
+corpus:
+  # 정본: 中文維基文庫(zh.wikisource) 史記 — 130卷(本紀12·表10·書8·世家30·列傳70).
+  #   三家注 미수록 → 注 없음(본문만). 표점 포함 → 문장 경계 사용.
+  source:          "wikisource"
+  wikisource_api:  "https://zh.wikisource.org/w/api.php"
+  id:              "shj"          # segment_id 접두
+  book_title:      "史記"         # allpages 접두 — `史記/卷…` 실페이지 발견(卷001~卷130)
+  provenance:      "史記 (正史) — 司馬遷 撰 (全 130卷, 三家注 미수록)"
+  shu_map:                        # 卷 번호 구간 → 체재 (segment 메타)
+    - [12, 本紀]
+    - [22, 表]
+    - [30, 書]
+    - [60, 世家]
+    - [130, 列傳]
+  sentence_close: "。！？」』"
+  sentence_open:  "「『"
+  # 史記는 注 미수록이라 무관(peizhu 세그먼트가 생기지 않음).
+  include_peizhu_in_training: true
+
+# ----------------------------------------------------------------------------
+# Stage 2 — 정규화
+# ----------------------------------------------------------------------------
+normalize:
+  # wikisource 본문은 正字 번체 + 簡體 오염 혼재 → 보호 예외부 s2t로 번체 통일(고전한문 공통).
+  corpus_opencc:   "s2t"
+  opencc_protect:  "于云后里征咸并辟游范干余谷系凶沈表面松制致卜丑"
+  # 異體字 정규화(s2t 후 적용): 코퍼스마다 재생성 (JPVariants 역방향 + 빈도 다수형).
+  variant_map:     "data/shiji/gazetteer/variant_map.tsv"
+
+# ----------------------------------------------------------------------------
+# Stage 3 — 가제티어
+# ----------------------------------------------------------------------------
+gazetteer:
+  cbdb_repo:       "https://github.com/cbdb-project/cbdb_sqlite.git"
+  # 史記 서술 범위: 黃帝 ~ 武帝 太初年間. CBDB는 前漢 이전 커버리지가 매우 빈약 →
+  # 字-추출 + 큐레이션 시드가 주력, CBDB는 보조 (docs §3). 출현 필터가 노이즈 스코핑.
+  year_start:      -2100
+  year_end:        -90
+  # 1=漢前, 61=贏秦, 29=西漢, 2=秦漢, 83=漢(generic)
+  dynasty_codes:   [1, 61, 29, 2, 83]
+  min_surface_len: 2
+  extract_names_from_zi: true
+  surname_min_persons: 20
+  require_corpus_occurrence: true
+  stoplist:        "data/shiji/gazetteer/stoplist.txt"
+  seed_supplement: "data/shiji/gazetteer/seed_supplement.tsv"
+  user_dict:       "data/shiji/gazetteer/user_dict.tsv"
+  opencc_config:   null
+
+# ----------------------------------------------------------------------------
+# Stage 4 — 토큰화
+# ----------------------------------------------------------------------------
+tokenize:
+  punctuation_as_token: true
+
+# ----------------------------------------------------------------------------
+# Stage 6 — 검증 센티넬 (docs §7: 項羽·劉邦·黃帝. 단, '劉邦'은 避諱로 본문에
+# 표기되지 않아(高祖·沛公·漢王로 지칭) 高祖로 대체. 코퍼스 실측 후 조정.)
+# ----------------------------------------------------------------------------
+validate:
+  must_single: [項羽, 高祖, 黃帝, 韓信, 蕭何, 張良, 孔子, 丞相, 太守, 關中]
+  must_char:   [信, 良, 何, 斯]          # 단자 名(韓信·張良·蕭何·李斯) — 병합 금지 확인
+  alias_pair:  [孔子, 仲尼]              # 호칭·字 독립 공존
+  title_probe: "《春秋》"                # 《書名》 단일 토큰 확인
+  sim_probes:  [項羽, 高祖, 黃帝, 孔子, 丞相, 太守, 關中, 匈奴]
+
+# ----------------------------------------------------------------------------
+# Stage 5 — Word2Vec (三國志와 동일 규모대 코퍼스 → 동일 하이퍼파라미터)
+# ----------------------------------------------------------------------------
+word2vec:
+  sg:              1        # skip-gram
+  vector_size:     100
+  window:          5
+  min_count:       3
+  negative:        10
+  epochs:          15
+  workers:         1        # 재현성
+  seed:            42
+  model_name:      "w2v_shiji.model"

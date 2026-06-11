@@ -38,3 +38,6 @@ docs/ADDING_A_CORPUS.md
 
 # 개인 튜토리얼 노트북 (배포 제외)
 tutorial.ipynb
+
+# 토큰화 감사 산출물 (scripts/audit_tokens.py로 재생성)
+reports/*/audit_*.tsv

@@ -3,22 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>정사 《삼국지》 단어 탐색</title>
-<meta name="description" content="진수 《삼국지》(배송지 주 포함)로 학습한 Word2Vec 임베딩 탐색기 — 한자 단어의 쓰임을 코사인 유사도로 비교하고, 비슷한 단어·스파이를 찾아보세요.">
+<title>《삼국지》 단어 탐색기</title>
+<meta name="description" content="정사 《삼국지》(배송지 주 포함)에서 학습한 Word2Vec 임베딩 탐색기 — 한자 단어의 쓰임을 코사인 유사도로 비교하고, 비슷한 단어·스파이를 찾아보세요.">
 <!-- Open Graph / SNS 공유 카드 -->
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="정사 《삼국지》 단어 탐색">
-<meta property="og:title" content="정사 《삼국지》 단어 탐색">
-<meta property="og:description" content="진수 《삼국지》(배송지 주 포함)로 학습한 Word2Vec 임베딩 탐색기 — 한자 단어의 쓰임을 코사인 유사도로 비교하고, 비슷한 단어·스파이를 찾아보세요.">
-<meta property="og:url" content="https://zyahan.blog/sanguozhi-word-explorer/">
+<meta property="og:site_name" content="《삼국지》 단어 탐색기">
+<meta property="og:title" content="《삼국지》 단어 탐색기">
+<meta property="og:description" content="정사 《삼국지》(배송지 주 포함)에서 학습한 Word2Vec 임베딩 탐색기 — 한자 단어의 쓰임을 코사인 유사도로 비교하고, 비슷한 단어·스파이를 찾아보세요.">
+<meta property="og:url" content="https://zyahan.blog/sanguozhi-word-explorer">
 <meta property="og:image" content="https://zyahan.blog/assets/images/sanguozhi-explorer-og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="정사 《삼국지》 단어 탐색 — Word2Vec 임베딩 탐색기">
+<meta property="og:image:alt" content="《삼국지》 단어 탐색기 — Word2Vec 임베딩 탐색기">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="정사 《삼국지》 단어 탐색">
-<meta name="twitter:description" content="진수 《삼국지》 Word2Vec 임베딩 탐색기 — 한자 단어의 쓰임을 코사인 유사도로 비교하고, 비슷한 단어·스파이를 찾아보세요.">
+<meta name="twitter:title" content="《삼국지》 단어 탐색기">
+<meta name="twitter:description" content="정사 《삼국지》(배송지 주 포함)에서 학습한 Word2Vec 임베딩 탐색기 — 한자 단어의 쓰임을 코사인 유사도로 비교하고, 비슷한 단어·스파이를 찾아보세요.">
 <meta name="twitter:image" content="https://zyahan.blog/assets/images/sanguozhi-explorer-og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,10 +28,10 @@
 <body>
 <header class="site-head">
   <a class="blog-link" href="https://zyahan.blog" rel="noopener">미남과 오컬트와 자살</a>
-  <h1>정사 《삼국지》 단어 탐색</h1>
-  <p class="subtitle">진수의 《삼국지》 원문(배송지 주 포함)으로 학습한 Word2Vec 모델로 한자 단어의 쓰임을 비교합니다.
+  <h1>《삼국지》 단어 탐색기</h1>
+  <p class="subtitle">진수의 《삼국지》 원문과 배송지의 주석 텍스트에서 학습한 Word2Vec 모델로 한문 단어의 쓰임을 비교합니다. 
   <strong>한글 독음으로도 검색</strong>할 수 있어요.</p>
-  <p class="meta">vector_size=100 · skip-gram · 어휘 <span id="vocabCount">…</span>개 · 전부 브라우저에서 계산(서버 없음)</p>
+  <p class="meta">vector_size=100 · skip-gram · 어휘 <span id="vocabCount">…</span>개</p>
 </header>
 
 <nav class="tabs" id="tabs">

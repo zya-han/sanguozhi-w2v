@@ -226,6 +226,12 @@ def clean_wiki(text: str) -> str:
     text = re.sub(r"^(?:\{\||\|\}|\|-).*$", "", text, flags=re.M)
     text = text.replace("||", "\n").replace("!!", "\n")
     text = re.sub(r"^[|!]", "", text, flags=re.M)
+    # 판본 표기 행(편집 메타, 原文 아님) 드롭: 〔漢〕司馬遷撰〔宋〕裴駰集解〔唐〕司馬貞索隱 …
+    text = re.sub(r"^[^\n]*〔[^〕\n]{1,8}〕[^\n]*(?:撰|集解|索隱|正義|箋|疏)[^\n]*$",
+                  "", text, flags=re.M)
+    # 잔여 인쇄 가능 ASCII 일괄 제거 — 표 셀 속성(colspan="2")·<p> 등 마크업 잔재가
+    # 글자 토큰(c·o·l·s…)으로 새는 것을 차단. 고전한문 본문에 ASCII는 정당한 용처가 없다.
+    text = re.sub(r"[!-~]+", "", text)
     text = text.replace("　", "").replace("​", "")
     return text
 

@@ -59,6 +59,12 @@ def main():
     ok_title = tok_freq.get(title_probe, 0) > 0 and n_titles > 0
     checks.append(("《書名》 괄호포함 단일 토큰", ok_title,
                    f"{title_probe} {tok_freq.get(title_probe,0)}, 표제 토큰 {n_titles}종"))
+    # 마크업 누출 가드: ASCII 영숫자 토큰 0 (colspan·<p>·Category 등 잔재 검출)
+    import re as _re
+    ascii_toks = sorted((t for t in tok_freq if _re.search(r"[A-Za-z0-9]", t)),
+                        key=lambda t: -tok_freq[t])
+    checks.append(("마크업 누출 없음(ASCII 토큰 0종)", not ascii_toks,
+                   f"발견 {len(ascii_toks)}종" + (f": {' '.join(ascii_toks[:10])}" if ascii_toks else "")))
     all_pass = all(c[1] for c in checks)
 
     # ── 2. 커버리지 ──

@@ -1,15 +1,17 @@
-# 정사 《삼국지》 Word2Vec · 단어 탐색기
+# 정사(正史) Word2Vec · 단어 탐색기
 
-陳壽의 정사 **《三國志》**(裴松之 注 포함, 전체 65卷)로 학습한 **Word2Vec 단어 임베딩**과,
-이를 브라우저에서 바로 탐험하는 **웹 탐색기**입니다. 인물·관직·지명을 하나의 토큰으로 인식하도록
-한자 텍스트를 다듬어 학습했기 때문에, `荀彧`과 가까운 단어로 `程昱`·`荀攸` 같은 인물이 떠오르고
-`丞相`의 이웃으로 그 속관(屬官)들이 나옵니다.
+陳壽의 정사 **《三國志》**(裴松之 注 포함, 전체 65卷)와 司馬遷의 **《史記》**(전체 130卷)로 각각 학습한
+**Word2Vec 단어 임베딩**과, 이를 브라우저에서 바로 탐험하는 **웹 탐색기**입니다. 인물·관직·지명을
+하나의 토큰으로 인식하도록 한자 텍스트를 다듬어 학습했기 때문에, `荀彧`과 가까운 단어로 `程昱`·`荀攸`
+같은 인물이 떠오르고, `匈奴`의 이웃으로 `單于`·`月氏`가, `丞相`의 이웃으로 그 속관(屬官)들이 나옵니다.
 
-> **라이브 데모** — [zyahan.blog/sanguozhi-word-explorer](https://zyahan.blog/sanguozhi-word-explorer) 에서 탐색기를 직접 사용해 볼 수 있습니다.
+> **라이브 데모**
+> - 《삼국지》 단어 탐색기 — [zyahan.blog/sanguozhi-word-explorer](https://zyahan.blog/sanguozhi-word-explorer)
+> - 《사기》 단어 탐색기 — [zyahan.blog/shiji-word-explorer](https://zyahan.blog/shiji-word-explorer)
 
 ## 웹 탐색기
 
-서버 없이 **브라우저 안에서만** 동작합니다. 학습된 벡터(L2 정규화, 약 2.2MB)를 통째로 내려받아
+서버 없이 **브라우저 안에서만** 동작합니다. 학습된 벡터(L2 정규화, 코퍼스당 약 2MB)를 통째로 내려받아
 코사인 유사도를 자바스크립트로 계산하므로, 정적 호스팅이면 어디서나 돌아갑니다.
 
 - **두 단어 비교** — 두 단어의 코사인 유사도와, 각 단어의 이웃 단어를 순위와 함께 나란히 비교합니다.
@@ -19,28 +21,31 @@
 
 한자(`荀彧`)와 한글 독음(`순욱`) 양쪽으로 검색할 수 있고, 입력창은 빈도순 자동완성을 제공합니다.
 결과에는 각 단어의 **코퍼스 출현 횟수**가 함께 표시되며, 처음 쓰는 분을 위한 **해석 방법·한계 안내**도 들어 있습니다.
-독음은 한국 한자음 규칙(두음법칙, 僕射→복야·祭酒→좨주 같은 관직 특수음, 조사 받침 처리)을 반영합니다.
+독음은 한국 한자음 규칙(두음법칙, 僕射→복야·單于→선우·酈食其→역이기 같은 특수음, 조사 받침 처리)을 반영합니다.
 
 검색 결과는 **URL로 공유**할 수 있습니다(딥링크 예: `?task=compare&cmpA=荀彧&cmpB=郭嘉`). 검색할 때마다 주소가
 갱신되고, **결과 내보내기** 버튼으로 현재 링크를 클립보드에 복사합니다. SNS 공유 시 Open Graph 카드가 표시됩니다.
 
 ## 모델 개요
 
-| 항목 | 값 |
-|---|---|
-| 코퍼스 | 三國志 전체 65卷 (魏書30·蜀書15·吳書20), 本文 + 裴松之 注 |
-| 어휘 | 5,708개 (그중 다자 고유명사 약 1,900) |
-| 차원 / 구조 | 100차원 · skip-gram |
-| 학습 | gensim Word2Vec (window 5, min_count 3, negative 10, epochs 15, 고정 시드) |
+| 항목 | 三國志 | 史記 |
+|---|---|---|
+| 코퍼스 | 전체 65卷 (魏書30·蜀書15·吳書20), 本文 + 裴松之 注 | 전체 130卷 (本紀12·表10·書8·世家30·列傳70), 三家注 미수록 |
+| 코퍼스 토큰 | 741,910 | 686,764 |
+| 어휘 | 5,708개 (그중 다자 고유명사 약 1,900) | 4,660개 (그중 다자 고유명사 약 1,200) |
+
+두 모델 모두 **100차원 skip-gram**, gensim Word2Vec(window 5, min_count 3, negative 10, epochs 15,
+고정 시드)로 동일하게 학습했습니다.
 
 특징:
 
 - **글자 단위 토큰화**가 기본이라 허사(虛詞)의 분포가 보존됩니다. 통계적 분절·subword를 쓰지 않습니다.
 - **고유명사만 병합** — 인명·관직·지명 가제티어로 결정론적 최장일치 병합(학습형 NER 없음).
-  CBDB가 누락한 三國 인물(周瑜·呂蒙·荀彧 등)은 코퍼스 전기 도입부의 `{姓名}字{字}` 패턴에서 보충합니다.
-- **인용 史書는 통째로 한 토큰** — 《魏略》·《江表傳》 등 괄호 포함 단일 토큰.
-- **별명을 합치지 않음** — 諸葛亮(名)·孔明(字)·武侯(諡)는 각각 독립 토큰.
-- **本文/裴注·문장 경계 보존** — 학습 윈도가 文/注나 문장 경계를 넘지 않습니다.
+  CBDB가 누락한 인물(三國의 周瑜·呂蒙·荀彧, 그리고 CBDB 커버리지가 빈약한 前漢 이전 인물 다수)은
+  코퍼스 전기 도입부의 `{姓名}字{字}` 패턴과 큐레이션 시드로 보충합니다.
+- **인용 史書는 통째로 한 토큰** — 《魏略》·《江表傳》·《春秋》 등 괄호 포함 단일 토큰.
+- **별명을 합치지 않음** — 諸葛亮(名)·孔明(字)·武侯(諡), 孔子(호칭)·仲尼(字)는 각각 독립 토큰.
+- **本文/注·문장 경계 보존** — 학습 윈도가 文/注나 문장 경계를 넘지 않습니다.
 - **자형 통일** — 원문의 간·번체 혼용을 번체로 정리하되, 고전 의미가 갈리는 글자(于≠於·云≠雲 등)는 보호하고
   일본 신자체 같은 변이형(呉→吳 등)만 통합합니다.
 
@@ -48,11 +53,15 @@
 
 ```python
 from gensim.models import Word2Vec
-m = Word2Vec.load("models/sanguozhi/w2v_sanguozhi.model")
 
+m = Word2Vec.load("models/sanguozhi/w2v_sanguozhi.model")
 m.wv.most_similar("丞相")   # → 倉曹·掾·令史 … (丞相府 속관)
 m.wv.most_similar("劉備")   # → 關羽 …
 m.wv.doesnt_match(["周瑜", "魯肅", "呂蒙", "諸葛亮"])   # → 諸葛亮
+
+m = Word2Vec.load("models/shiji/w2v_shiji.model")
+m.wv.most_similar("項羽")   # → 龍且·項王·沛公·章邯 …
+m.wv.most_similar("匈奴")   # → 單于·胡·月氏 …
 ```
 
 ## 직접 빌드하기
@@ -63,22 +72,24 @@ conda activate ./.conda
 pip install -r requirements.txt
 ```
 
-파이프라인은 순서대로 실행합니다. 모든 설정은 [`config/sanguozhi.yaml`](config/sanguozhi.yaml) 한 곳에서 조정합니다.
+파이프라인은 순서대로 실행합니다. 코퍼스별 설정은 `config/<id>.yaml` 한 곳에서 조정하며,
+기본값은 [`config/sanguozhi.yaml`](config/sanguozhi.yaml)입니다.
 
 ```bash
-python src/01_fetch_corpus.py     # zh.wikisource 三國志 65卷 수집 → 本文/裴注 분리·문장분할
+python src/01_fetch_corpus.py     # zh.wikisource 正史 원문 수집(卷 단위) → 本文/注 분리·문장분할
 python src/02_normalize.py        # 번체 통일(보호 s2t) + 異體字 정규화
 python src/03_build_gazetteer.py  # CBDB+CHGIS+코퍼스 字추출 → 가제티어
 python src/04_tokenize.py         # 결정론적 최장일치 토큰화
-python src/05_train_w2v.py        # Word2Vec 학습 → models/sanguozhi/w2v_sanguozhi.model
-python src/06_validate.py         # 정합성·커버리지 검증 → reports/sanguozhi/validation.md
-python src/07_export_web.py       # 모델 → 웹 탐색기용 데이터(web/sanguozhi/data/)
-python src/08_bundle_html.py      # 단일 HTML 한 장으로 묶기(web/sanguozhi/sanguozhi_explorer.html)
+python src/05_train_w2v.py        # Word2Vec 학습 → models/<id>/w2v_<id>.model
+python src/06_validate.py         # 정합성·커버리지 검증 → reports/<id>/validation.md
+python src/07_export_web.py       # 모델 → 웹 탐색기용 데이터(web/<id>/data/)
+python src/08_bundle_html.py      # 단일 HTML 한 장으로 묶기(web/<id>/<id>_explorer.html)
 ```
 
-> **다른 사서에도 적용** — 같은 코드로 《史記》《漢書》《後漢書》 등 다른 正史 코퍼스를 만들 수 있습니다.
-> 코퍼스는 `config/<id>.yaml` + 환경변수로 전환하며(`CORPUS_CONFIG=config/houhanshu.yaml python src/01_…`),
-> 데이터·모델은 `data/<id>/`·`models/<id>/`로 분리됩니다.
+> **코퍼스 전환** — 환경변수 `CORPUS_CONFIG`로 고릅니다. 《史記》는
+> `CORPUS_CONFIG=config/shiji.yaml python src/01_…`처럼 전 단계를 같은 코드로 빌드하며,
+> 데이터·모델·리포트·웹이 `data/<id>/`·`models/<id>/`·`reports/<id>/`·`web/<id>/`로 분리됩니다.
+> 《漢書》《後漢書》 등 다른 正史도 `config/<id>.yaml` 하나만 새로 쓰면 같은 방식으로 추가할 수 있습니다.
 
 > **CBDB 준비 (Stage 3 전제)** — `src/03`은 `vendor/cbdb_sqlite/*.sqlite3`를 자동 탐색합니다. 없으면
 > [`cbdb-project/cbdb_sqlite`](https://github.com/cbdb-project/cbdb_sqlite)를 클론해 최신 SQLite를 받아 두세요.
@@ -86,8 +97,8 @@ python src/08_bundle_html.py      # 단일 HTML 한 장으로 묶기(web/sanguoz
 ### 웹 탐색기 빌드
 
 ```bash
-python src/07_export_web.py        # 벡터·어휘·독음 추출 → web/sanguozhi/data/ (먼저 1회)
-cd web && python -m http.server    # http://localhost:8000/sanguozhi/ 에서 미리보기
+python src/07_export_web.py        # 벡터·어휘·독음 추출 → web/<id>/data/ (먼저 1회)
+cd web && python -m http.server    # http://localhost:8000/sanguozhi/ · /shiji/ 에서 미리보기
 ```
 
 - 레이아웃: **공통**(`web/app.js`·`web/style.css`)은 코퍼스 무관, **사서별**(`web/<id>/index.html`·
@@ -103,6 +114,7 @@ cd web && python -m http.server    # http://localhost:8000/sanguozhi/ 에서 미
 | 데이터 | 출처 | 라이선스 |
 |---|---|---|
 | 원문 三國志 (전체 65卷) | 中文維基文庫 zh.wikisource `三國志/卷01–卷65` | CC BY-SA 4.0 |
+| 원문 史記 (전체 130卷) | 中文維基文庫 zh.wikisource `史記/卷001–卷130` | CC BY-SA 4.0 |
 | 인명·관직 | CBDB [`cbdb-project/cbdb_sqlite`](https://github.com/cbdb-project/cbdb_sqlite) | CC BY-NC-SA 4.0 |
 | 지명 | CBDB ADDR_CODES (CHGIS 연계) / TGAZ | CHGIS (Harvard & Fudan) |
 

@@ -19,6 +19,7 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+import regex as re
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import ensure_dir, get_logger, load_config, resolve  # noqa: E402
@@ -26,14 +27,25 @@ from common import ensure_dir, get_logger, load_config, resolve  # noqa: E402
 log = get_logger("04_tokenize")
 
 
-class MaxMatcher:
-    """전방 최장일치 병합기. 가제티어 표면형 집합 + 최대 길이로 동작."""
+HAN = re.compile(r"\p{Han}")
 
-    def __init__(self, surfaces: set[str]):
+
+def _is_han(ch: str) -> bool:
+    return bool(HAN.match(ch))
+
+
+class MaxMatcher:
+    """전방 최장일치 병합기. 가제티어 표면형 집합 + 최대 길이로 동작.
+
+    문장부호 등 비(非)한자는 **병합 경계**다: 최장일치는 한자 연속 구간(run) 안에서만
+    이뤄지므로 "相，國"의 相·國이 相國으로 병합되지 않는다.
+    punctuation_as_token=True면 부호를 독립 토큰으로 방출, False면 드롭.
+    """
+
+    def __init__(self, surfaces: set[str], punctuation_as_token: bool = True):
         self.vocab = surfaces
         self.maxlen = max((len(s) for s in surfaces), default=1)
-        # 가지치기용 prefix 집합(선택): 길이별 존재 여부로 조기 종료 가능하나
-        # maxlen이 작아(≤6) 단순 길이 역순 탐색으로 충분.
+        self.punct_token = punctuation_as_token
 
     def tokenize(self, text: str) -> list[str]:
         out = []
@@ -44,21 +56,25 @@ class MaxMatcher:
             if ch == "《":
                 j = text.find("》", i + 1)
                 if j != -1:
-                    out.append(text[i:j + 1])  # 《…》 brackets 포함
+                    out.append(text[i:j + 1])
                     i = j + 1
                     continue
-                i += 1  # 닫는 》 없는 고립 《 는 버림
+                i += 1  # 닫는 》 없는 고립 《
                 continue
-            if ch == "》":
-                i += 1  # 고립 》 버림
+            if not _is_han(ch):
+                # 부호 등 비한자 = 병합 경계. 토큰 포함 여부는 옵션.
+                if self.punct_token and ch != "》":
+                    out.append(ch)
+                i += 1
                 continue
-            # 전방 최장일치 (단, 《 직전까지만; 토큰 내부에 《 포함 금지)
+            # 한자 연속 구간(run) 안에서만 최장일치 — run 경계(부호)를 넘지 않음
+            run_end = i
+            while run_end < n and _is_han(text[run_end]):
+                run_end += 1
+            hi = min(self.maxlen, run_end - i)
             matched = None
-            hi = min(self.maxlen, n - i)
             for L in range(hi, 1, -1):
                 cand = text[i:i + L]
-                if "《" in cand or "》" in cand:
-                    continue
                 if cand in self.vocab:
                     matched = cand
                     break
@@ -76,8 +92,10 @@ def main():
 
     gaz = pd.read_csv(resolve(cfg, "gazetteer") / "gazetteer.tsv", sep="\t")
     surfaces = set(gaz["surface"].astype(str))
-    matcher = MaxMatcher(surfaces)
-    log.info("가제티어 %d 표면형 로드 (최대길이 %d)", len(surfaces), matcher.maxlen)
+    punct_token = cfg.get("tokenize", {}).get("punctuation_as_token", True)
+    matcher = MaxMatcher(surfaces, punctuation_as_token=punct_token)
+    log.info("가제티어 %d 표면형 로드 (최대길이 %d, 부호토큰=%s)",
+             len(surfaces), matcher.maxlen, punct_token)
 
     norm = pd.read_parquet(resolve(cfg, "interim") / "normalized.parquet")
     # 학습 대상 = 三國志 본체(main + peizhu). 편집 텍스트(kaozheng/frontmatter) 제외.

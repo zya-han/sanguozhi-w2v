@@ -113,14 +113,40 @@ def clean_wiki(text: str) -> str:
     return text
 
 
-def to_sentences(cleaned: str, delims: str) -> list[str]:
-    """(이미 clean_wiki된) 텍스트를 표점으로 문장 분할. 한자 + 《》만 보존. 빈 문장 제외."""
-    pattern = "[" + re.escape(delims) + "]"
+def to_sentences(cleaned: str, openers: set, closers: set) -> list[str]:
+    """(이미 clean_wiki된) 텍스트를 문장 경계 표점으로 분할.
+
+    - 닫는 부호(。！？」』): 그 '뒤'에서 분리 — 직전 세그먼트의 끝 토큰으로 붙는다.
+      연속 닫는 부호(。」)는 함께 붙는다.
+    - 여는 부호(「『): 그 '앞'에서 분리 — 다음(인용) 세그먼트의 첫 토큰으로 붙는다.
+    - 문장 내 부호(，、；：)는 경계가 아니라 세그먼트에 남아 토큰 겸 병합 barrier가 된다.
+    공백만 제거. 한자가 없는 세그먼트는 제외.
+    """
     sents = []
-    for chunk in re.split(pattern, cleaned):
-        kept = "".join(KEEP.findall(chunk))
+    cur: list[str] = []
+
+    def flush():
+        kept = "".join("".join(cur).split())
         if HAN_ANY.search(kept):
             sents.append(kept)
+        cur.clear()
+
+    i, n = 0, len(cleaned)
+    while i < n:
+        ch = cleaned[i]
+        if ch in openers:                 # 여는 부호 앞에서 분리
+            flush()
+            cur.append(ch)
+            i += 1
+        elif ch in closers:               # 연속 닫는 부호 뒤에서 분리
+            while i < n and cleaned[i] in closers:
+                cur.append(cleaned[i])
+                i += 1
+            flush()
+        else:
+            cur.append(ch)
+            i += 1
+    flush()
     return sents
 
 
@@ -129,7 +155,8 @@ def shu_of(juan: int) -> str:
 
 
 def build_segments(cfg: dict) -> pd.DataFrame:
-    delims = cfg["corpus"]["sentence_delims"]
+    openers = set(cfg["corpus"]["sentence_open"])
+    closers = set(cfg["corpus"]["sentence_close"])
     n_juan = int(cfg["corpus"]["juan_count"])
     rows = []
     for juan in range(1, n_juan + 1):
@@ -143,13 +170,13 @@ def build_segments(cfg: dict) -> pd.DataFrame:
 
         jid = f"卷{juan:02d}"
         shu = shu_of(juan)
-        for si, sent in enumerate(to_sentences(main_clean, delims)):
+        for si, sent in enumerate(to_sentences(main_clean, openers, closers)):
             rows.append(dict(segment_id=f"sgz_{jid}_m{si:04d}", text=sent,
                              source="zh.wikisource:三國志", juan=jid, shu=shu,
                              kind="main", is_peizhu=False))
         ni = 0
         for nc in note_cleans:
-            for sent in to_sentences(nc, delims):
+            for sent in to_sentences(nc, openers, closers):
                 rows.append(dict(segment_id=f"sgz_{jid}_n{ni:05d}", text=sent,
                                  source="zh.wikisource:三國志", juan=jid, shu=shu,
                                  kind="peizhu", is_peizhu=True))

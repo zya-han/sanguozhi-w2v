@@ -20,7 +20,7 @@
 from __future__ import annotations
 
 import json
-import re
+import regex as re
 import sqlite3
 import subprocess
 import sys
@@ -90,7 +90,8 @@ def extract_per(con: sqlite3.Connection, dy_codes: list[int],
     return out
 
 
-ZI_RE = re.compile(r"^(.{2,4}?)字[一-鿿]")
+# 문장 시작 인명: 한자만(부호 불포함) 2~4자 + 字 + 한자
+ZI_RE = re.compile(r"^(\p{Han}{2,4}?)字\p{Han}")
 
 
 def common_surnames(con: sqlite3.Connection, threshold: int) -> tuple[set[str], set[str]]:

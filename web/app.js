@@ -190,8 +190,11 @@ function runCmp() {
   const head = (tok) => `<span class="han">${esc(tok)}</span>${rdSpan(tok)}${josa(tok, '과', '와')} 가장 비슷한 단어 상위 ${N}개`;
   box.innerHTML = `${exportBtn()}
     <div class="bigscore">
-      <div class="cap"><span class="han">${esc(ta)}</span>${rdSpan(ta)}${fqSpan(ta)} ↔
-        <span class="han">${esc(tb)}</span>${rdSpan(tb)}${fqSpan(tb)}</div>
+      <div class="cap">
+        <span class="cmp-word"><span class="han">${esc(ta)}</span><span class="cmp-sub">${esc(tokenToReading.get(ta) || '')} ${freqOf(ta).toLocaleString()}회</span></span>
+        <span class="cmp-arrow">↔</span>
+        <span class="cmp-word"><span class="han">${esc(tb)}</span><span class="cmp-sub">${esc(tokenToReading.get(tb) || '')} ${freqOf(tb).toLocaleString()}회</span></span>
+      </div>
       <div class="simlabel">코사인 유사도</div>
       <div class="num">${sim.toFixed(3)}</div></div>
     <p class="common-note">양쪽 목록에 모두 나오는 단어는 같은 색으로 표시됩니다.</p>

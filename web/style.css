@@ -139,8 +139,11 @@ button.ghost:hover { background: #e9d4cd; }
 .export-btn:hover { background: #c9e7df; }
 .export-btn.copied { background: var(--accent); color: #fff; }
 .bigscore { text-align: center; margin: 12px 0 2px; }
-.bigscore .cap { color: var(--muted); font-size: .95rem; }
-.bigscore .cap .rd { font-size: .82em; color: var(--meta); }
+.bigscore .cap { display: flex; align-items: center; justify-content: center; gap: 20px; }
+.cmp-word { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; }
+.cmp-word .han { font-size: 2.3rem; font-weight: 700; color: var(--ink); line-height: 1.1; }
+.cmp-sub { font-size: .9rem; color: var(--meta); white-space: nowrap; }
+.cmp-arrow { font-size: 1.5rem; color: var(--muted); }
 .bigscore .simlabel { color: var(--muted); font-size: .9rem; margin-top: 4px; }
 .bigscore .num { font-size: 3rem; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; line-height: 1.15; margin-top: 2px; }
 .fq { font-size: .82em; color: var(--meta); font-family: system-ui, sans-serif; font-variant-numeric: tabular-nums; }

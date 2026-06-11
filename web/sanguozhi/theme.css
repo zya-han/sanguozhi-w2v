@@ -1,0 +1,44 @@
+/* 《三國志》 테마 — 빨강·노랑 계열(붉은 깃발·불꽃).
+   사서별 색은 이 파일에서만 정의한다. 공통 구조/레이아웃은 ../style.css (var()만 사용). */
+:root {
+  /* 기본 */
+  --bg: #faf2e2;              /* 따뜻한 미색 */
+  --card: #fffdf8;
+  --ink: #3a2016;            /* 짙은 적갈 */
+  --ink-soft: #574338;        /* 안내문 본문 */
+  --muted: #957c64;
+  --meta: #b5852f;           /* 빈도수·금색 계열 */
+  --line: #ecdcc2;
+  --link: #b5602a;           /* 예시 링크(번트 오렌지) */
+  /* 강조 */
+  --accent: #b02a1e;         /* 주 강조: 짙은 빨강 */
+  --accent-dk: #8c2016;
+  --accent-soft: #f6e0d8;
+  --accent-soft-dk: #efccbe;  /* ghost·내보내기 버튼 hover */
+  --pill: #fffdf8;           /* 탭 알약 배경 */
+  --chip-border: #ecd0c2;     /* 스파이 칩 테두리 */
+  --row-hover: #f8efe0;       /* 막대 행 hover */
+  /* 유사도 막대(노랑→빨강) */
+  --bar-a: #e0a82e;          /* 막대 시작(금색 노랑) */
+  --bar-b: #b3271b;          /* 막대 끝(빨강) */
+  --track: #efe4d0;
+  --common: #fbe6c0;          /* 양쪽 공통 강조 배경(옅은 노랑) */
+  /* 스파이 박스 */
+  --spybg: #3a1f18;          /* 짙은 적갈-마룬 */
+  --spy-text: #f3e8df;
+  --spy-quote: #c7a99a;
+  --spy-scores: #b39a8c;
+  --gold: #e8b73e;           /* 스파이 이름(밝은 금색·노랑) */
+  --gold-soft: #f0d68f;       /* 스파이 이름 독음 */
+  /* 양쪽 공통 단어 색(따뜻한 계열, 서로 구분) — bg(연한 배경)·bar(좌측 색띠) */
+  --cm1-bg: #f4d8d2;  --cm1-bar: #b3271b;   /* 빨강 */
+  --cm2-bg: #f8e0c8;  --cm2-bar: #c2611c;   /* 번트 오렌지 */
+  --cm3-bg: #f4e7c9;  --cm3-bar: #ad8a1f;   /* 금색 */
+  --cm4-bg: #e8e6c6;  --cm4-bar: #7d7a2c;   /* 올리브 */
+  --cm5-bg: #eaded0;  --cm5-bar: #7a5638;   /* 갈색 */
+  --cm6-bg: #efd5d2;  --cm6-bar: #8c2a2a;   /* 마룬 */
+  --cm7-bg: #f1dccf;  --cm7-bar: #a8542f;   /* 테라코타 */
+  --cm8-bg: #f3d6da;  --cm8-bar: #a8324a;   /* 로즈 */
+  --cm9-bg: #efd6cb;  --cm9-bar: #9c4326;   /* 러스트 */
+  --cm10-bg: #e6e1cd; --cm10-bar: #6f6a3a;  /* 카키 */
+}

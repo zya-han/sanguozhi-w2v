@@ -21,12 +21,14 @@ log = get_logger("08_bundle_html")
 
 def main():
     cfg = load_config()
-    web = resolve(cfg, "web")
+    web = resolve(cfg, "web")        # web/<id> (사서별 index.html·theme.css·data)
+    shared = web.parent              # web (공통 app.js·style.css)
     data = web / "data"
 
     html = (web / "index.html").read_text(encoding="utf-8")
-    css = (web / "style.css").read_text(encoding="utf-8")
-    js = (web / "app.js").read_text(encoding="utf-8")
+    theme = (web / "theme.css").read_text(encoding="utf-8")     # 사서별 테마색
+    css = (shared / "style.css").read_text(encoding="utf-8")    # 공통 구조
+    js = (shared / "app.js").read_text(encoding="utf-8")
 
     vocab = (data / "vocab.json").read_text(encoding="utf-8")
     readings = (data / "readings.json").read_text(encoding="utf-8")
@@ -37,9 +39,12 @@ def main():
     def safe(s: str) -> str:
         return s.replace("</", "<\\/")
 
-    # <link rel="stylesheet" ...> → 인라인 <style>
+    # 사서별 theme.css + 공통 style.css 두 <link> → 인라인 <style> (순서 유지)
     html = html.replace(
-        '<link rel="stylesheet" href="style.css">',
+        '<link rel="stylesheet" href="theme.css">',
+        f"<style>\n{theme}\n</style>",
+    ).replace(
+        '<link rel="stylesheet" href="../style.css">',
         f"<style>\n{css}\n</style>",
     )
 
@@ -54,9 +59,10 @@ def main():
         "</script>\n"
         f"<script>\n{safe(js)}\n</script>"
     )
-    html = html.replace('<script src="app.js"></script>', embed)
+    html = html.replace('<script src="../app.js"></script>', embed)
 
-    out = web / "sanguozhi_explorer.html"
+    cid = Path(cfg["word2vec"]["model_name"]).stem.replace("w2v_", "")  # w2v_shiji.model → shiji
+    out = web / f"{cid}_explorer.html"
     out.write_text(html, encoding="utf-8")
     mb = out.stat().st_size / 1e6
     log.info("단일 HTML 생성: %s (%.2f MB)", out, mb)

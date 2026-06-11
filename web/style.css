@@ -1,21 +1,4 @@
-:root {
-  --bg: #e9f1f0;
-  --card: #fbfdfc;
-  --ink: #143038;
-  --muted: #5f8488;
-  --meta: #4f94a6;
-  --line: #d2e3e1;
-  --accent: #0f7d6b;        /* 주 강조: 짙은 청록(초록) */
-  --accent-dk: #0a5e50;
-  --accent-soft: #d5ece6;
-  --bar-a: #2c72b4;         /* 막대 시작(파랑) */
-  --bar-b: #14a07d;         /* 막대 끝(초록·청록) */
-  --track: #dbe8e6;
-  --common: #d8e8f6;        /* 양쪽 공통 강조: 옅은 파랑 */
-  --pill: #fbfdfc;
-  --spybg: #133038;         /* 스파이 박스: 짙은 청록-남색 */
-  --gold: #56d2bb;          /* 스파이 강조: 밝은 청록(아쿠아) */
-}
+/* 공통 구조·레이아웃 — 색은 사서별 theme.css(:root)에서만 정의. 여기선 var()만 쓴다. */
 * { box-sizing: border-box; }
 /* 전체 고딕체(Noto Sans KR), 한자(CJK)만 명조체(Noto Serif KR) — 둘 다 웹폰트로 임베드(<head>).
    본문 속 래핑 없는 한자는 unicode-range 가상 폰트(HanSerif)로 로컬 명조 폴백,
@@ -72,11 +55,11 @@ main { max-width: 880px; margin: 0 auto; padding: 0 18px; }
 .guide[open] > summary { border-bottom: 1px solid var(--line); }
 .guide-body { padding: 6px 24px 22px; }
 .guide-body h4 { margin: 18px 0 5px; font-size: 1rem; color: var(--ink); }
-.guide-body p { margin: 4px 0; font-size: .93rem; line-height: 1.75; color: #45524f; }
+.guide-body p { margin: 4px 0; font-size: .93rem; line-height: 1.75; color: var(--ink-soft); }
 .guide-body strong { color: var(--accent-dk); }
 .sub { font-size: .72rem; color: var(--muted); font-weight: 400; }
 .hint { color: var(--muted); font-size: .92rem; margin: 0 0 1.1em; }
-.ex { color: #3a6ea5; cursor: pointer; white-space: nowrap; font-weight: 600; text-decoration: none; }
+.ex { color: var(--link); cursor: pointer; white-space: nowrap; font-weight: 600; text-decoration: none; }
 .ex:hover { text-decoration: underline; }
 
 /* 입력 */
@@ -102,7 +85,7 @@ button.ghost {
   padding: 12px 20px; font-size: 1rem; cursor: pointer;
   background: var(--accent-soft); color: var(--accent); border: none; border-radius: 11px;
 }
-button.ghost:hover { background: #e9d4cd; }
+button.ghost:hover { background: var(--accent-soft-dk); }
 .btn-row { display: flex; gap: 10px; align-items: center; }
 
 /* 자동완성 */
@@ -122,7 +105,7 @@ button.ghost:hover { background: #e9d4cd; }
 .chips-row { display: flex; flex-wrap: wrap; gap: 9px; margin: 4px 0 16px; min-height: 4px; }
 .chip {
   display: inline-flex; align-items: baseline; gap: 7px;
-  background: var(--accent-soft); border: 1px solid #e6cfc8; border-radius: 999px;
+  background: var(--accent-soft); border: 1px solid var(--chip-border); border-radius: 999px;
   padding: 7px 9px 7px 15px; font-size: 1.08rem; color: var(--ink);
 }
 .chip .rd { font-size: .68em; color: var(--muted); font-family: system-ui, sans-serif; }
@@ -136,7 +119,7 @@ button.ghost:hover { background: #e9d4cd; }
 .export-row { display: flex; justify-content: flex-end; margin-bottom: 6px; }
 .export-btn { background: var(--accent-soft); color: var(--accent); border: none; border-radius: 8px;
   padding: 6px 13px; font-size: .82rem; cursor: pointer; font-family: inherit; transition: .15s; }
-.export-btn:hover { background: #c9e7df; }
+.export-btn:hover { background: var(--accent-soft-dk); }
 .export-btn.copied { background: var(--accent); color: #fff; }
 .bigscore { text-align: center; margin: 12px 0 2px; }
 .bigscore .cap { display: flex; align-items: center; justify-content: center; gap: 20px; }
@@ -164,7 +147,7 @@ button.ghost:hover { background: #e9d4cd; }
   display: grid; grid-template-columns: minmax(86px, auto) 1fr auto auto; align-items: center;
   gap: 10px; padding: 7px 8px 7px 13px; border-radius: 8px; cursor: pointer;  /* 좌측 패딩 고정 → 공통/비공통 정렬 일치 */
 }
-.bar-row:hover { background: #f0f6f4; }
+.bar-row:hover { background: var(--row-hover); }
 .bar-row.has-rank { grid-template-columns: auto minmax(80px, auto) 1fr auto auto; }
 .bar-rank { font-size: .82rem; color: var(--muted); min-width: 30px; text-align: right;
   font-variant-numeric: tabular-nums; font-family: system-ui, sans-serif; }
@@ -182,13 +165,13 @@ button.ghost:hover { background: #e9d4cd; }
 
 /* 스파이 결과 박스 */
 .spybox {
-  background: var(--spybg); color: #e9f3f1; border-radius: 16px;
+  background: var(--spybg); color: var(--spy-text); border-radius: 16px;
   padding: 28px 22px; text-align: center; margin-top: 8px;
 }
-.spybox .quote { color: #a4c3c1; font-size: 1rem; margin-bottom: 14px; }
+.spybox .quote { color: var(--spy-quote); font-size: 1rem; margin-bottom: 14px; }
 .spybox .who { font-size: 3rem; font-weight: 700; color: var(--gold); line-height: 1.1; }
-.spybox .who .rd { display: block; font-size: .3em; color: #9ee6d7; margin-top: 6px; font-family: system-ui, sans-serif; }
-.spybox .scores { color: #92b1ad; font-size: .86rem; margin-top: 16px; }
+.spybox .who .rd { display: block; font-size: .3em; color: var(--gold-soft); margin-top: 6px; font-family: system-ui, sans-serif; }
+.spybox .scores { color: var(--spy-scores); font-size: .86rem; margin-top: 16px; }
 .spybox .scores .lo { color: var(--gold); font-weight: 600; }
 
 .qword { font-size: 1.1rem; margin: .2em 0 .6em; }

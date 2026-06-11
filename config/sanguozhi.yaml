@@ -15,7 +15,7 @@ paths:
   tokenized:     data/sanguozhi/tokenized     # corpus.jsonl
   models:        models/sanguozhi             # w2v 모델 + vocab
   reports:       reports/sanguozhi            # 검증 리포트
-  web:           web                          # 웹 탐색기 출력(07·08). 코퍼스별이면 web/<id>
+  web:           web/sanguozhi                # 웹 탐색기 출력(07·08). 공통 app.js·style.css 는 web/ 공유
 
 # ----------------------------------------------------------------------------
 # Stage 1 — 원문 수집

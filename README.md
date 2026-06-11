@@ -72,8 +72,8 @@ python src/03_build_gazetteer.py  # CBDB+CHGIS+코퍼스 字추출 → 가제티
 python src/04_tokenize.py         # 결정론적 최장일치 토큰화
 python src/05_train_w2v.py        # Word2Vec 학습 → models/sanguozhi/w2v_sanguozhi.model
 python src/06_validate.py         # 정합성·커버리지 검증 → reports/sanguozhi/validation.md
-python src/07_export_web.py       # 모델 → 웹 탐색기용 데이터(web/data/)
-python src/08_bundle_html.py      # 단일 HTML 한 장으로 묶기(web/sanguozhi_explorer.html)
+python src/07_export_web.py       # 모델 → 웹 탐색기용 데이터(web/sanguozhi/data/)
+python src/08_bundle_html.py      # 단일 HTML 한 장으로 묶기(web/sanguozhi/sanguozhi_explorer.html)
 ```
 
 > **다른 사서에도 적용** — 같은 코드로 《史記》《漢書》《後漢書》 등 다른 正史 코퍼스를 만들 수 있습니다.
@@ -86,15 +86,17 @@ python src/08_bundle_html.py      # 단일 HTML 한 장으로 묶기(web/sanguoz
 ### 웹 탐색기 빌드
 
 ```bash
-python src/07_export_web.py        # 벡터·어휘·독음 추출 (먼저 1회)
-cd web && python -m http.server    # http://localhost:8000 에서 미리보기
+python src/07_export_web.py        # 벡터·어휘·독음 추출 → web/sanguozhi/data/ (먼저 1회)
+cd web && python -m http.server    # http://localhost:8000/sanguozhi/ 에서 미리보기
 ```
 
-- 프런트엔드 소스(`web/index.html`·`style.css`·`app.js`)만 저장소에 포함됩니다.
-  추출 데이터(`web/data/`)와 단일 HTML 번들은 모델 산출물이라 위 스크립트로 재생성합니다.
-- **배포**: `web/` 폴더를 정적 호스팅에 올리면 됩니다(상대경로라 어느 하위 경로에서도 동작).
-- **단일 파일 배포**: `src/08_bundle_html.py`가 CSS·JS·벡터(base64)를 한 파일에 담아
-  `web/sanguozhi_explorer.html`로 묶습니다. 더블클릭(`file://`)만으로 서버 없이 열립니다.
+- 레이아웃: **공통**(`web/app.js`·`web/style.css`)은 코퍼스 무관, **사서별**(`web/<id>/index.html`·
+  `theme.css`·`og-image.png`)은 코퍼스마다. `theme.css`의 `:root`가 사서별 테마색을 정의하고
+  공통 `style.css`는 `var()`만 쓴다. 추출 데이터(`web/<id>/data/`)·단일 HTML 번들은 미추적(재생성).
+- **배포**: `web/` 트리를 정적 호스팅에 올리면 됩니다(사서별 `index.html`이 `../app.js`·`../style.css` 참조).
+- **단일 파일 배포**: `src/08_bundle_html.py`가 theme+공통 CSS·JS·벡터(base64)를 한 파일에 담아
+  `web/<id>/<id>_explorer.html`(예 `web/sanguozhi/sanguozhi_explorer.html`)로 묶습니다.
+  더블클릭(`file://`)만으로 서버 없이 열립니다.
 
 ## 데이터 출처 · 라이선스
 

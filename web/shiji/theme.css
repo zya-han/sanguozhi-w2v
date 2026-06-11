@@ -1,0 +1,44 @@
+/* 《史記》 테마 — 청록·파랑 계열.
+   사서별 색은 이 파일에서만 정의한다. 공통 구조/레이아웃은 ../style.css (var()만 사용). */
+:root {
+  /* 기본 */
+  --bg: #e9f1f0;
+  --card: #fbfdfc;
+  --ink: #143038;
+  --ink-soft: #45524f;        /* 안내문 본문 */
+  --muted: #5f8488;
+  --meta: #4f94a6;
+  --line: #d2e3e1;
+  --link: #3a6ea5;            /* 예시 링크 */
+  /* 강조 */
+  --accent: #0f7d6b;          /* 주 강조: 짙은 청록 */
+  --accent-dk: #0a5e50;
+  --accent-soft: #d5ece6;
+  --accent-soft-dk: #c9e7df;  /* ghost·내보내기 버튼 hover */
+  --pill: #fbfdfc;            /* 탭 알약 배경 */
+  --chip-border: #cde6df;     /* 스파이 칩 테두리 */
+  --row-hover: #f0f6f4;       /* 막대 행 hover */
+  /* 유사도 막대(파랑→초록) */
+  --bar-a: #2c72b4;
+  --bar-b: #14a07d;
+  --track: #dbe8e6;
+  --common: #d8e8f6;          /* 양쪽 공통 강조 배경(옅은 파랑) */
+  /* 스파이 박스 */
+  --spybg: #133038;           /* 짙은 청록-남색 */
+  --spy-text: #e9f3f1;
+  --spy-quote: #a4c3c1;
+  --spy-scores: #92b1ad;
+  --gold: #56d2bb;            /* 스파이 이름(밝은 아쿠아) */
+  --gold-soft: #9ee6d7;       /* 스파이 이름 독음 */
+  /* 양쪽 공통 단어 색(시원한 계열, 서로 구분) — bg(연한 배경)·bar(좌측 색띠) */
+  --cm1-bg: #d3ede7;  --cm1-bar: #1f8f74;   /* 청록 */
+  --cm2-bg: #d8e6f6;  --cm2-bar: #2f6fb0;   /* 파랑 */
+  --cm3-bg: #e3def3;  --cm3-bar: #5b51b0;   /* 인디고 */
+  --cm4-bg: #dceccf;  --cm4-bar: #5b9a3b;   /* 초록 */
+  --cm5-bg: #d0ecef;  --cm5-bar: #1f8a93;   /* 시안 */
+  --cm6-bg: #e6d8ee;  --cm6-bar: #7b3fa0;   /* 보라 */
+  --cm7-bg: #dde3ee;  --cm7-bar: #4a5e8a;   /* 슬레이트블루 */
+  --cm8-bg: #d6e8da;  --cm8-bar: #2e7d4f;   /* 포레스트 */
+  --cm9-bg: #d6e9ef;  --cm9-bar: #3a85a8;   /* 스틸블루 */
+  --cm10-bg: #f0dcee; --cm10-bar: #9a3b8f;  /* 마젠타 */
+}

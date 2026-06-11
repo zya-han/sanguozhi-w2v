@@ -96,16 +96,10 @@ function rdSpan(tok) { const r = tokenToReading.get(tok); return r ? ` <span cla
 function freqOf(tok) { return FREQ[tokenToIndex.get(tok)] || 0; }                       // 코퍼스 출현 횟수
 function fqSpan(tok) { return ` <span class="fq">${freqOf(tok).toLocaleString()}회</span>`; }
 // 양쪽 공통 단어에 부여할 색 팔레트(쿨톤 위주, 서로 구분). 항목이 많으면 순환.
-const COMMON_PALETTE = [
-  { bg: '#d3ede7', bar: '#1f8f74' }, { bg: '#d8e6f6', bar: '#2f6fb0' },
-  { bg: '#e3def3', bar: '#5b51b0' }, { bg: '#dceccf', bar: '#5b9a3b' },
-  { bg: '#d0ecef', bar: '#1f8a93' }, { bg: '#f0dcee', bar: '#9a3b8f' },
-  { bg: '#efe6cf', bar: '#94782b' }, { bg: '#dde3ee', bar: '#4a5e8a' },
-  { bg: '#f3dde0', bar: '#a8455a' }, { bg: '#d6e8da', bar: '#2e7d4f' },
-  { bg: '#eddcd0', bar: '#a3623a' }, { bg: '#e6d8ee', bar: '#7b3fa0' },
-  { bg: '#d6e9ef', bar: '#3a85a8' }, { bg: '#e4eccb', bar: '#7d9a2e' },
-  { bg: '#f1d8da', bar: '#b03a46' }, { bg: '#dfe6d6', bar: '#5e7a4a' },
-];
+// 색은 사서별 theme.css 의 --cm1…cm10 (테마 톤에 맞춤). 항목이 많으면 순환.
+const COMMON_PALETTE = Array.from({ length: 10 }, (_, i) => ({
+  bg: `var(--cm${i + 1}-bg)`, bar: `var(--cm${i + 1}-bar)`,
+}));
 
 // 한글 조사: 앞말의 받침 유무로 선택. 한자가 아니라 화면에 보이는 독음의 끝 음절로 판정.
 function hasBatchim(text) {

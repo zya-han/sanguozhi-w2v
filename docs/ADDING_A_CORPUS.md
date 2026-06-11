@@ -60,7 +60,13 @@
 
 ## 4. 코드 변경 (공유 `src/`, 1회만)
 
-### A. CORPUS_CONFIG 디스패치 — `src/common.py`
+> **현재 상태**: 아래 **A·B 및 디렉터리 재편은 三國志 기준으로 이미 적용됨**.
+> `config/sanguozhi.yaml`(기본), `data/sanguozhi/…`·`models/sanguozhi/`·`reports/sanguozhi/`,
+> `paths.web: web`. 새 코퍼스는 **C(Stage 1 allpages)** 적용 + config 생성 + 큐레이션만 하면 됨.
+> (三國志 config는 아직 `page_prefix/juan_count`로 동작 — C 적용 시 `book_title`로 전환.)
+
+### A. CORPUS_CONFIG 디스패치 — `src/common.py` ✅적용됨
+기본값은 `config/sanguozhi.yaml`. `CORPUS_CONFIG` 환경변수로 코퍼스 전환.
 `load_config`가 환경변수를 읽게 한다(미설정 시 루트 `config.yaml` = 三國志 폴백, 하위호환):
 ```python
 def load_config(path=None):
@@ -80,10 +86,9 @@ shift; for s in "$@"; do python "src/${s}"*.py; done
 # 예: ./run.sh houhanshu 01_ 02_ 03_ 04_ 05_ 06_
 ```
 
-### B. 모델 파일명 파라미터화 — `config` + `src/05·06·07·08`
-현재 `models/w2v_sanguozhi.model` 하드코딩. config `word2vec.model_name` 추가 후 네 곳에서
-`resolve(cfg,"models")/cfg["word2vec"].get("model_name","w2v_sanguozhi.model")` 사용.
-(paths.models가 코퍼스별이라 파일명 동일해도 무방하나 명시 권장: `w2v_<id>.model`.)
+### B. 모델 파일명·웹 경로 파라미터화 — `config` + `src/05·06·07·08` ✅적용됨
+`word2vec.model_name`(05 저장·06·07 로드)과 `paths.web`(07·08 출력 = `web/data`) config화 완료.
+새 코퍼스는 config에 `model_name: w2v_<id>.model`, `paths.web: web/<id>`만 지정.
 
 ### C. Stage 1 페이지 발견 일반화 — `src/01_fetch_corpus.py`
 `range(1, juan_count+1)` + zero-pad 구성을 **allpages 발견**으로 교체:

@@ -15,7 +15,14 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def load_config(path: str | os.PathLike | None = None) -> dict:
-    cfg_path = Path(path) if path else REPO_ROOT / "config.yaml"
+    """코퍼스 설정 로드. 우선순위: 인자 > $CORPUS_CONFIG > config/sanguozhi.yaml.
+
+    다중 코퍼스: `CORPUS_CONFIG=config/houhanshu.yaml python src/01_…`.
+    """
+    chosen = path or os.environ.get("CORPUS_CONFIG")
+    cfg_path = Path(chosen) if chosen else REPO_ROOT / "config" / "sanguozhi.yaml"
+    if not cfg_path.is_absolute():
+        cfg_path = REPO_ROOT / cfg_path
     with open(cfg_path, encoding="utf-8") as f:
         return yaml.safe_load(f)
 

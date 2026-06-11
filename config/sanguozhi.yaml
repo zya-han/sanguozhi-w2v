@@ -1,18 +1,21 @@
 # ============================================================================
-# 《三國志》(正史) 개체 인식 토큰화 + Word2Vec — 단일 설정 파일
-# 모든 단계가 이 파일을 읽는다. 명세서 §2 확정 설계 결정은 변경 금지.
+# 《三國志》(正史) 개체 인식 토큰화 + Word2Vec — 코퍼스 설정
+# 다중 코퍼스: 다른 사서는 config/<id>.yaml 로 복사 후 paths·corpus·gazetteer 수정.
+# 실행: (기본) python src/01_…  또는  CORPUS_CONFIG=config/houhanshu.yaml python src/01_…
+# 새 코퍼스 추가는 docs/ADDING_A_CORPUS.md 참조.
 # ============================================================================
 
 seed: 42
 
 paths:
-  vendor:        vendor                       # 클론한 업스트림 소스
-  raw:           data/raw
-  interim:       data/interim
-  gazetteer:     data/gazetteer
-  tokenized:     data/tokenized
-  models:        models
-  reports:       reports
+  vendor:        vendor                       # 클론한 업스트림 소스 (CBDB 등, 공유)
+  raw:           data/sanguozhi/raw           # 원문 + provenance
+  interim:       data/sanguozhi/interim       # segments / normalized
+  gazetteer:     data/sanguozhi/gazetteer     # gazetteer.tsv + 시드
+  tokenized:     data/sanguozhi/tokenized     # corpus.jsonl
+  models:        models/sanguozhi             # w2v 모델 + vocab
+  reports:       reports/sanguozhi            # 검증 리포트
+  web:           web                          # 웹 탐색기 출력(07·08). 코퍼스별이면 web/<id>
 
 # ----------------------------------------------------------------------------
 # Stage 1 — 원문 수집
@@ -20,16 +23,15 @@ paths:
 corpus:
   # 정본: 中文維基文庫(zh.wikisource) 三國志 — 전체 65卷(魏30·蜀15·吳20), 正字 번체.
   #   裴松之 注 = {{*|...}} 템플릿으로 명시 구분. 표점(標點) 포함 → 문장 경계 사용.
-  #   (당초 Kanripo KR2a0012는 魏志 30卷만 담겨 蜀/吳書 누락 → wikisource로 교체.)
   source:          "wikisource"
   wikisource_api:  "https://zh.wikisource.org/w/api.php"
   page_prefix:     "三國志/卷"
   juan_count:      65            # 卷01~卷65 (魏1-30, 蜀31-45, 吳46-65)
   juan_zero_pad:   2
+  book_title:      "三國志"      # (Stage 1 일반화 시 allpages 접두로 사용; docs 참조)
   # 문장 경계 표점(명세 §2.6). 모두 경계 겸 토큰으로 보존.
   #   close(닫는 부호): 그 '뒤'에서 분리, 직전 세그먼트의 끝 토큰. 문장끝 。！？ + 인용 닫기 」』
   #   open(여는 부호): 그 '앞'에서 분리, 다음 세그먼트의 첫 토큰. 인용 열기 「『
-  # 인용문은 「…。」처럼 독립 세그먼트가 된다. 문장내 부호(，、；：)는 경계 아님(토큰+barrier).
   sentence_close: "。！？」』"
   sentence_open:  "「『"
   # 裴松之 注 학습 포함 여부 (항상 is_peizhu 플래그로 구분 보존; False면 학습에서 제외)
@@ -48,8 +50,7 @@ normalize:
   corpus_opencc:   "s2t"
   opencc_protect:  "于云后里征咸并辟游范干余谷系凶沈表面松制致卜丑"
   # 異體字 정규화(s2t 후 적용): 일본 신자체 등 변이형을 코퍼스 다수형으로 통합.
-  # 呉→吳·靣→面·為→爲 등. 의미상이(才≠纔·御≠禦)는 제외. 코퍼스·가제티어 동일 적용.
-  variant_map:     "data/gazetteer/variant_map.tsv"
+  variant_map:     "data/sanguozhi/gazetteer/variant_map.tsv"
 
 # ----------------------------------------------------------------------------
 # Stage 3 — 가제티어
@@ -57,51 +58,37 @@ normalize:
 gazetteer:
   cbdb_repo:       "https://github.com/cbdb-project/cbdb_sqlite.git"
   # 클론 후 vendor/cbdb_sqlite/*.sqlite3 자동 탐색 (HuggingFace latest.zip에서 받음)
-  # 시대 필터 경계 (CE). 後漢~三國. (BIOG_MAIN 연도 중첩 판정에 사용)
   year_start:      25
   year_end:        280
   # 後漢~三國 왕조 코드 (DYNASTIES 실측): 25=東漢,3=三國,26=魏,53=蜀,42=吳,83=漢(generic)
   dynasty_codes:   [25, 3, 26, 53, 42, 83]
-  min_surface_len: 2                       # 2자 미만 제거 (단자 名 병합 금지)
-  # CBDB는 三國 인물 커버리지가 빈약(周瑜·呂蒙·荀彧 부재) → 코퍼스 자체의 전기 도입부
-  # "{姓名}字{字}"를 CBDB 빈출 姓 앵커로 결정론적 추출(학습형 NER 아님). 문장 시작 앵커.
+  min_surface_len: 2
   extract_names_from_zi: true
-  surname_min_persons: 20                  # 이 인원수 이상 보유한 姓만 앵커로 사용(노이즈 제거)
-  # LOC: CBDB ADDR_CODES(=CHGIS 연계)에서 지명 추출. CHGIS 연도는 후대 행정인스턴스라
-  # 신뢰 불가 → 코퍼스 출현 필터로 三國 스코핑. (TGAZ API는 보조 교차검증용, 선택)
-  require_corpus_occurrence: true          # 코퍼스에 실제 등장하는 표면형만 유지(三國 스코핑)
-  stoplist: "data/gazetteer/stoplist.txt"  # §3.4 sanity 필터: CBDB 유입 비개체어 제외
-  # CBDB가 누락한 canonical 三國 字·號·諡 등 보충 시드(검증 §6 충족). 출처 표기.
-  seed_supplement: "data/gazetteer/seed_supplement.tsv"
-  # 사용자가 직접 큐레이션한 병합 대상(敬稱·別稱 등). git 추적, stoplist 면제.
-  user_dict: "data/gazetteer/user_dict.tsv"
-  # CBDB는 正體(번체) 보관 → 코퍼스와 동일 자형. 변환 불필요(null). 충돌 위험 회피.
+  surname_min_persons: 20
+  require_corpus_occurrence: true
+  stoplist:        "data/sanguozhi/gazetteer/stoplist.txt"
+  seed_supplement: "data/sanguozhi/gazetteer/seed_supplement.tsv"
+  user_dict:       "data/sanguozhi/gazetteer/user_dict.tsv"
   opencc_config:   null
-  # 보조 교차검증용 TGAZ (사용 안해도 무방)
   tgaz_base:       "https://chgis.hudci.org/tgaz"
 
 # ----------------------------------------------------------------------------
 # Stage 4 — 토큰화
 # ----------------------------------------------------------------------------
 tokenize:
-  # 문장 내 부호(，、；：「」 등)를 토큰으로 포함할지. 어느 쪽이든 부호는 최장일치
-  # 병합 경계라 "相，國"이 相國으로 병합되지 않는다. (sentence-final 。！？는 Stage1
-  # 에서 문장/윈도 경계로 이미 분리됨.)
-  #   true  → 부호가 각각 독립 토큰 (부호가 자연스러운 경계, 분포에 부호 맥락 보존)
-  #   false → 부호 제거(드롭), 한자 토큰만
+  # 부호도 토큰으로 포함(최장일치 병합 경계라 "相，國"이 相國으로 병합되지 않음).
   punctuation_as_token: true
 
 # ----------------------------------------------------------------------------
-# Stage 5 — Word2Vec (권장 기본값)
+# Stage 5 — Word2Vec
 # ----------------------------------------------------------------------------
 word2vec:
   sg:              1        # skip-gram
-  # 386k 토큰·4.6k vocab 소규모 코퍼스 → 50~100 권장(200은 과파라미터화).
-  # 50차원이 가장 선명하나, 구조 표현력 위해 100차원 채택.
-  vector_size:     100
+  vector_size:     100     # 386k 토큰 소규모 → 50~100 권장(200은 과파라미터화)
   window:          5
   min_count:       3
   negative:        10
   epochs:          15
-  workers:         1        # 재현성 (변경 금지 권장)
+  workers:         1        # 재현성
   seed:            42
+  model_name:      "w2v_sanguozhi.model"

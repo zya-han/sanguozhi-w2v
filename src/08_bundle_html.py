@@ -21,7 +21,7 @@ log = get_logger("08_bundle_html")
 
 def main():
     cfg = load_config()
-    web = resolve(cfg, "models").parent / "web"
+    web = resolve(cfg, "web")
     data = web / "data"
 
     html = (web / "index.html").read_text(encoding="utf-8")

@@ -48,7 +48,7 @@
 
 ```python
 from gensim.models import Word2Vec
-m = Word2Vec.load("models/w2v_sanguozhi.model")
+m = Word2Vec.load("models/sanguozhi/w2v_sanguozhi.model")
 
 m.wv.most_similar("丞相")   # → 倉曹·掾·令史 … (丞相府 속관)
 m.wv.most_similar("劉備")   # → 關羽 …
@@ -63,18 +63,22 @@ conda activate ./.conda
 pip install -r requirements.txt
 ```
 
-파이프라인은 순서대로 실행합니다. 모든 설정은 [`config.yaml`](config.yaml) 한 곳에서 조정합니다.
+파이프라인은 순서대로 실행합니다. 모든 설정은 [`config/sanguozhi.yaml`](config/sanguozhi.yaml) 한 곳에서 조정합니다.
 
 ```bash
 python src/01_fetch_corpus.py     # zh.wikisource 三國志 65卷 수집 → 本文/裴注 분리·문장분할
 python src/02_normalize.py        # 번체 통일(보호 s2t) + 異體字 정규화
 python src/03_build_gazetteer.py  # CBDB+CHGIS+코퍼스 字추출 → 가제티어
 python src/04_tokenize.py         # 결정론적 최장일치 토큰화
-python src/05_train_w2v.py        # Word2Vec 학습 → models/w2v_sanguozhi.model
-python src/06_validate.py         # 정합성·커버리지 검증 → reports/validation.md
+python src/05_train_w2v.py        # Word2Vec 학습 → models/sanguozhi/w2v_sanguozhi.model
+python src/06_validate.py         # 정합성·커버리지 검증 → reports/sanguozhi/validation.md
 python src/07_export_web.py       # 모델 → 웹 탐색기용 데이터(web/data/)
 python src/08_bundle_html.py      # 단일 HTML 한 장으로 묶기(web/sanguozhi_explorer.html)
 ```
+
+> **다른 사서에도 적용** — 같은 코드로 《史記》《漢書》《後漢書》 등 다른 正史 코퍼스를 만들 수 있습니다.
+> 코퍼스는 `config/<id>.yaml` + 환경변수로 전환하며(`CORPUS_CONFIG=config/houhanshu.yaml python src/01_…`),
+> 데이터·모델은 `data/<id>/`·`models/<id>/`로 분리됩니다. 절차는 [`docs/ADDING_A_CORPUS.md`](docs/ADDING_A_CORPUS.md) 참조.
 
 > **CBDB 준비 (Stage 3 전제)** — `src/03`은 `vendor/cbdb_sqlite/*.sqlite3`를 자동 탐색합니다. 없으면
 > [`cbdb-project/cbdb_sqlite`](https://github.com/cbdb-project/cbdb_sqlite)를 클론해 최신 SQLite를 받아 두세요.

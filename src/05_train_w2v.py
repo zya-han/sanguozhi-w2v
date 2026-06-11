@@ -68,7 +68,7 @@ def main():
     )
 
     models_dir = ensure_dir(resolve(cfg, "models"))
-    model_path = models_dir / "w2v_sanguozhi.model"
+    model_path = models_dir / w.get("model_name", "w2v_sanguozhi.model")
     model.save(str(model_path))
 
     # vocab.tsv (token, freq, is_entity)

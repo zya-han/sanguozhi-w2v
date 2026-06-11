@@ -29,7 +29,8 @@ def main():
     recs = [json.loads(l) for l in open(resolve(cfg, "tokenized") / "corpus.jsonl", encoding="utf-8")]
     all_tokens = [t for r in recs for t in r["tokens"]]
     tok_freq = Counter(all_tokens)
-    model = Word2Vec.load(str(resolve(cfg, "models") / "w2v_sanguozhi.model"))
+    model = Word2Vec.load(str(resolve(cfg, "models")
+                              / cfg["word2vec"].get("model_name", "w2v_sanguozhi.model")))
 
     # ── 1. 토큰화 정합성 검사 ──
     must_single = ["諸葛亮", "孔明", "曹操", "劉備", "孫權", "周瑜", "呂蒙",

@@ -97,7 +97,8 @@ def main():
     from gensim.models import Word2Vec
     import hanja
 
-    model_path = resolve(cfg, "models") / "w2v_sanguozhi.model"
+    model_name = cfg["word2vec"].get("model_name", "w2v_sanguozhi.model")
+    model_path = resolve(cfg, "models") / model_name
     model = Word2Vec.load(str(model_path))
     wv = model.wv
     dim = wv.vector_size
@@ -111,7 +112,7 @@ def main():
     norms[norms == 0] = 1.0
     mat = (mat / norms).astype(np.float32)
 
-    out_dir = ensure_dir(resolve(cfg, "models").parent / "web" / "data")
+    out_dir = ensure_dir(resolve(cfg, "web") / "data")
 
     (out_dir / "vectors.bin").write_bytes(mat.tobytes(order="C"))
     log.info("vectors.bin: %.2f MB", (out_dir / "vectors.bin").stat().st_size / 1e6)

@@ -3,25 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>《삼국지》 단어 탐색기</title>
-<meta name="description" content="정사 《삼국지》(배송지 주 포함)에서 학습한 Word2Vec 임베딩 탐색기 — 한자 단어의 쓰임을 코사인 유사도로 비교하고, 비슷한 단어·스파이를 찾아보세요.">
+<title>《후한서》 단어 탐색기</title>
+<meta name="description" content="범엽의 《후한서》 본문에서 학습한 Word2Vec 임베딩 탐색기 — 한자 단어의 쓰임을 코사인 유사도로 비교하고, 비슷한 단어·스파이를 찾아보세요.">
 <!-- Open Graph / SNS 공유 카드 -->
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="《삼국지》 단어 탐색기">
-<meta property="og:title" content="《삼국지》 단어 탐색기">
-<meta property="og:description" content="정사 《삼국지》(배송지 주 포함)에서 학습한 Word2Vec 임베딩 탐색기 — 한자 단어의 쓰임을 코사인 유사도로 비교하고, 비슷한 단어·스파이를 찾아보세요.">
-<meta property="og:url" content="https://zyahan.blog/sanguozhi-word-explorer">
-<meta property="og:image" content="https://zyahan.blog/assets/images/sanguozhi-explorer-og-image.png">
+<meta property="og:site_name" content="《후한서》 단어 탐색기">
+<meta property="og:title" content="《후한서》 단어 탐색기">
+<meta property="og:description" content="범엽의 《후한서》 본문에서 학습한 Word2Vec 임베딩 탐색기 — 한자 단어의 쓰임을 코사인 유사도로 비교하고, 비슷한 단어·스파이를 찾아보세요.">
+<meta property="og:url" content="https://zyahan.blog/houhanshu-word-explorer">
+<meta property="og:image" content="https://zyahan.blog/assets/images/houhanshu-explorer-og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="《삼국지》 단어 탐색기 — Word2Vec 임베딩 탐색기">
+<meta property="og:image:alt" content="《후한서》 단어 탐색기 — Word2Vec 임베딩 탐색기">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="《삼국지》 단어 탐색기">
-<meta name="twitter:description" content="정사 《삼국지》(배송지 주 포함)에서 학습한 Word2Vec 임베딩 탐색기 — 한자 단어의 쓰임을 코사인 유사도로 비교하고, 비슷한 단어·스파이를 찾아보세요.">
-<meta name="twitter:image" content="https://zyahan.blog/assets/images/sanguozhi-explorer-og-image.png">
+<meta name="twitter:title" content="《후한서》 단어 탐색기">
+<meta name="twitter:description" content="범엽의 《후한서》 본문에서 학습한 Word2Vec 임베딩 탐색기 — 한자 단어의 쓰임을 코사인 유사도로 비교하고, 비슷한 단어·스파이를 찾아보세요.">
+<meta name="twitter:image" content="https://zyahan.blog/assets/images/houhanshu-explorer-og-image.png">
 <!-- Canonical -->
-<link rel="canonical" href="https://zyahan.blog/sanguozhi-word-explorer">
+<link rel="canonical" href="https://zyahan.blog/houhanshu-word-explorer">
 <!-- Favicon -->
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -47,9 +47,9 @@
 <body>
 <header class="site-head">
   <a class="blog-link" href="https://zyahan.blog" rel="noopener">미남과 오컬트와 자살</a>
-  <nav class="series-nav"><span class="han">前四史</span> 단어 탐색기 · <a href="../shiji/index.html">《사기》</a> · <a href="../hanshu/index.html">《한서》</a> · <a href="../houhanshu/index.html">《후한서》</a> · <strong class="current">《삼국지》</strong></nav>
-  <h1>《삼국지》 단어 탐색기</h1>
-  <p class="subtitle">진수의 《삼국지》 원문과 배송지의 주석 텍스트에서 학습한 Word2Vec 모델로 한문 단어의 쓰임을 비교합니다.
+  <nav class="series-nav"><span class="han">前四史</span> 단어 탐색기 · <a href="../shiji/index.html">《사기》</a> · <a href="../hanshu/index.html">《한서》</a> · <strong class="current">《후한서》</strong> · <a href="../sanguozhi/index.html">《삼국지》</a></nav>
+  <h1>《후한서》 단어 탐색기</h1>
+  <p class="subtitle">범엽의 《후한서》 本文에서 학습한 Word2Vec 모델로 한문 단어의 쓰임을 비교합니다.
   <strong>한글 독음으로도 검색</strong>할 수 있어요.</p>
   <p class="meta">vector_size=100 · skip-gram · 어휘 <span id="vocabCount">…</span>개</p>
 </header>
@@ -67,10 +67,10 @@
     <summary>📖 처음이신가요? — 결과 읽는 법과 한계 (코사인 유사도란?)</summary>
     <div class="guide-body">
       <h4>이 도구는 무엇을 보여주나요?</h4>
-      <p>《삼국지》 본문에서 각 단어가 <strong>어떤 말들과 함께 등장하는지</strong>(문맥)를 컴퓨터가 학습한 것입니다.
+      <p>《후한서》 본문에서 각 단어가 <strong>어떤 말들과 함께 등장하는지</strong>(문맥)를 컴퓨터가 학습한 것입니다.
       낱말의 ‘뜻’을 아는 게 아니라, <strong>쓰임새가 닮은 단어</strong>를 찾아 줍니다. 그래서
-      <span class="han">荀彧</span>(순욱)의 이웃으로 <span class="han">程昱</span>(정욱)·<span class="han">荀攸</span>(순유) 같은
-      조조 진영 문관들이 떠오르고, ‘승상’ 옆에는 그 속관 벼슬들이 모입니다.</p>
+      <span class="han">匈奴</span>(흉노)의 이웃으로 <span class="han">南單于</span>(남선우)·<span class="han">鮮卑</span>(선비)·<span class="han">車師</span>(거사) 같은
+      북방 민족 관련 단어들이 떠오르고, ‘태수’ 옆에는 다른 벼슬 이름들이 모입니다.</p>
 
       <h4>코사인 유사도란?</h4>
       <p>두 단어가 <strong>얼마나 비슷한 문맥</strong>에서 쓰였는지를 0~1 사이 숫자로 나타낸 값입니다.
@@ -82,15 +82,16 @@
       의미라, 라이벌이나 적장도 비슷한 전투·기록 맥락에 나오면 가깝게 묶일 수 있습니다.</p>
 
       <h4>⚠️ 적게 나온 단어는 조심하세요</h4>
-      <p>단어 옆 ‘<strong>N회</strong>’는 《삼국지》에 그 단어가 등장한 횟수입니다. 몇 번밖에 안 나온 단어는
+      <p>단어 옆 ‘<strong>N회</strong>’는 《후한서》에 그 단어가 등장한 횟수입니다. 몇 번밖에 안 나온 단어는
       컴퓨터가 <strong>충분히 보지 못해</strong> 결과가 불안정합니다 — 유사어가 우연일 수 있어요.
       <strong>수십~수백 회 이상</strong> 등장한 단어일수록 결과를 믿을 만합니다.</p>
 
       <h4>그 밖에 알아둘 점</h4>
-      <p>· 이 모델은 오직 <strong>진수 《삼국지》(배송지 주 포함)</strong> 원문만 압니다. 《삼국지연의》(소설)나
-      다른 사서, 역사적 사실 전체를 반영하지 않으며, 원문의 서술 습관·치우침이 그대로 담깁니다.<br>
-      · 한 글자 이름(<span class="han">亮</span>·<span class="han">操</span> 등)은 다른 뜻과 겹쳐 흐려질 수 있어 따로 묶지 않고,
-      <span class="han">諸葛亮</span>처럼 두 글자 이상 고유명사만 한 단어로 인식합니다.<br>
+      <p>· 이 모델은 오직 <strong>범엽 《후한서》 本文</strong>만 압니다(李賢注·劉昭注 등 후대 주석은 학습에서 제외). 다른 사서나
+      역사적 사실 전체를 반영하지 않으며, 원문의 서술 습관·치우침이 그대로 담깁니다.<br>
+      · 創業주 光武帝는 諱(<span class="han">秀</span>)를 피해 본문에 廟號 <span class="han">世祖</span>로 주로 나오고, 都城은 後漢의 정자 <span class="han">雒陽</span>과 <span class="han">洛陽</span>이 함께 쓰입니다.<br>
+      · 한 글자 이름(<span class="han">援</span>·<span class="han">禹</span> 등)은 다른 뜻과 겹쳐 흐려질 수 있어 따로 묶지 않고,
+      <span class="han">鄧禹</span>처럼 두 글자 이상 고유명사만 한 단어로 인식합니다.<br>
       · ‘스파이 찾기’는 무리의 평균과 가장 덜 닮은 단어를 고르는 <strong>놀이</strong>입니다. 정답이 아니라 재미로 즐겨 주세요.</p>
     </div>
   </details>
@@ -98,12 +99,12 @@
   <!-- 두 단어 비교 -->
   <section class="card panel" data-panel="compare">
     <h2>두 단어 비교</h2>
-    <p class="hint">두 단어가 《삼국지》에서 얼마나 비슷한 맥락에 쓰였는지 보기 위해, 각 단어와 비슷한 환경에서 출현한 단어들의 목록을 나란히 놓고 비교합니다.
-      <a class="ex" data-ex="compare" data-a="劉備" data-b="先主">예시: <span class="han">劉備</span> vs <span class="han">先主</span></a></p>
+    <p class="hint">두 단어가 《후한서》에서 얼마나 비슷한 맥락에 쓰였는지 보기 위해, 각 단어와 비슷한 환경에서 출현한 단어들의 목록을 나란히 놓고 비교합니다.
+      <a class="ex" data-ex="compare" data-a="世祖" data-b="光武帝">예시: <span class="han">世祖</span> vs <span class="han">光武帝</span></a></p>
     <div class="grid2">
-      <div class="field"><label>단어 1</label><input type="text" id="cmpA" placeholder="예: 劉備" autocomplete="off">
+      <div class="field"><label>단어 1</label><input type="text" id="cmpA" placeholder="예: 世祖" autocomplete="off">
         <div class="suggest" id="cmpASuggest" hidden></div></div>
-      <div class="field"><label>단어 2</label><input type="text" id="cmpB" placeholder="예: 先主" autocomplete="off">
+      <div class="field"><label>단어 2</label><input type="text" id="cmpB" placeholder="예: 光武帝" autocomplete="off">
         <div class="suggest" id="cmpBSuggest" hidden></div></div>
     </div>
     <button class="primary" id="cmpBtn">비교하기</button>
@@ -114,7 +115,7 @@
   <section class="card panel" data-panel="spy" hidden>
     <h2>🕵️ 스파이 찾기 <span class="sub">(어몽어스)</span></h2>
     <p class="hint">단어 3개 이상을 모으면, 무리에서 가장 이질적인 단어 — 스파이 — 를 찾아냅니다.
-      <a class="ex" data-ex="spy" data-list="周瑜·魯肅·呂蒙·陸遜·諸葛亮">예시: <span class="han">周瑜·魯肅·呂蒙·陸遜·諸葛亮</span></a></p>
+      <a class="ex" data-ex="spy" data-list="鄧禹·吳漢·馮異·岑彭·班固">예시: <span class="han">鄧禹·吳漢·馮異·岑彭·班固</span></a></p>
     <div class="field"><label>단어 추가</label>
       <input type="text" id="spyInput" placeholder="한자/한글 입력 후 선택" autocomplete="off">
       <div class="suggest" id="spyInputSuggest" hidden></div></div>
@@ -130,9 +131,9 @@
   <section class="card panel" data-panel="similar" hidden>
     <h2>비슷한 단어 찾기</h2>
     <p class="hint">한 단어와 가장 비슷한 맥락에 쓰인 단어들을 유사도 순으로 봅니다.
-      <a class="ex" data-ex="similar" data-a="曹公">예시: <span class="han">曹公</span></a></p>
+      <a class="ex" data-ex="similar" data-a="班超">예시: <span class="han">班超</span></a></p>
     <div class="field"><label>단어</label>
-      <input type="text" id="simInput" placeholder="예: 曹公 또는 조공" autocomplete="off">
+      <input type="text" id="simInput" placeholder="예: 班超 또는 반초" autocomplete="off">
       <div class="suggest" id="simInputSuggest" hidden></div></div>
     <label class="slider">개수 <span id="simTopnVal">20</span>
       <input type="range" id="simTopn" min="5" max="50" value="20" step="1"></label>
@@ -146,13 +147,13 @@
 
 <footer class="site-foot">
   <p><strong>데이터 출처</strong> ·
-  원문 <span class="han">三國志</span> 65<span class="han">卷</span>: <a href="https://zh.wikisource.org/wiki/三國志" rel="noopener"><span class="han">中文維基文庫</span></a> (CC BY-SA 4.0) ·
+  원문 <span class="han">後漢書</span> 120<span class="han">卷</span>(本文 학습, <span class="han">李賢注</span>·<span class="han">劉昭注</span> 제외): <a href="https://zh.wikisource.org/wiki/後漢書" rel="noopener"><span class="han">中文維基文庫</span></a> (CC BY-SA 4.0) ·
   인명·관직: <a href="https://github.com/cbdb-project" rel="noopener">CBDB</a> (CC BY-NC-SA 4.0) ·
   지명: CHGIS (Harvard &amp; Fudan).</p>
   <p>CBDB 기반 파생물이므로 <strong>비상업·출처표기·동일조건(CC BY-NC-SA 4.0)</strong> 하에 이용하세요.</p>
   <p class="credits">제작 <a href="https://zyahan.blog" rel="noopener">주아</a> &amp; Claude Code ·
   모델 저장소 <a href="https://github.com/zya-han/sishi-w2v" rel="noopener">github.com/zya-han/sishi-w2v</a> ·
-  <span class="ver">v1.6.0</span> · 최종 수정 2026-06-11</p>
+  <span class="ver">v1.0.0</span> · 최종 수정 2026-06-12</p>
 </footer>
 
 <script src="../app.js"></script>

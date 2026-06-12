@@ -1,0 +1,105 @@
+# ============================================================================
+# 《後漢書》(正史) 개체 인식 토큰화 + Word2Vec — 코퍼스 설정
+# 실행: CORPUS_CONFIG=config/houhanshu.yaml python src/01_…  (docs/ADDING_A_CORPUS.md)
+# ============================================================================
+
+seed: 42
+
+paths:
+  vendor:        vendor                      # 클론한 업스트림 소스 (CBDB 등, 공유)
+  raw:           data/houhanshu/raw          # 원문 + provenance
+  interim:       data/houhanshu/interim      # segments / normalized
+  gazetteer:     data/houhanshu/gazetteer    # gazetteer.tsv + 시드
+  tokenized:     data/houhanshu/tokenized    # corpus.jsonl
+  models:        models/houhanshu            # w2v 모델 + vocab
+  reports:       reports/houhanshu           # 검증 리포트
+  web:           web/houhanshu               # 웹 탐색기 출력(07·08)
+
+# ----------------------------------------------------------------------------
+# Stage 1 — 원문 수집
+# ----------------------------------------------------------------------------
+corpus:
+  # 정본: 中文維基文庫(zh.wikisource) 後漢書 — 范曄 撰(紀10·傳80) + 司馬彪《續漢書》八志30
+  #   (총 120卷, 卷 네이밍 zero-pad 없음 卷1~卷120). 李賢注(紀傳)·劉昭注(志)가 {{*|}}로 혼재
+  #   (卷마다 분량 편차 큼: 卷1=266注, 卷66=0). 표점 포함 → 문장 경계 사용.
+  source:          "wikisource"
+  wikisource_api:  "https://zh.wikisource.org/w/api.php"
+  id:              "hhs"          # segment_id 접두
+  book_title:      "後漢書"       # allpages 접두 — `後漢書/卷…` 실페이지 발견(卷1~卷120)
+  provenance:      "後漢書 (正史) — 范曄 撰, 李賢 注 (紀傳 90卷) + 司馬彪 續漢書 志 30卷 (劉昭 注)"
+  shu_map:                        # 卷 번호 구간 → 체재 (segment 메타; Stage 1 후 실측 정렬)
+    - [10, 紀]
+    - [90, 傳]
+    - [120, 志]
+  sentence_close: "。！？」』"
+  sentence_open:  "「『"
+  # wikisource 後漢書에는 李賢注(唐)·劉昭注가 {{*|}}로 광범위 수록. 漢書(顏注 제외)와 동일하게
+  # 後漢 本文 모델 의도에 맞춰 唐注/六朝注는 학습 제외 — peizhu 세그먼트는 data엔 보존되나
+  # Stage 5가 필터(가제티어·audit는 注 텍스트도 참조). 注釋家 register/이름 오염 회피.
+  include_peizhu_in_training: false
+
+# ----------------------------------------------------------------------------
+# Stage 2 — 정규화
+# ----------------------------------------------------------------------------
+normalize:
+  # wikisource 본문은 正字 번체 + 簡體 오염 혼재 → 보호 예외부 s2t로 번체 통일(고전한문 공통).
+  corpus_opencc:   "s2t"
+  opencc_protect:  "于云后里征咸并辟游范干余谷系凶沈表面松制致卜丑"
+  # 異體字 정규화(s2t 후 적용): 코퍼스마다 재생성 (scripts/gen_variant_map.py).
+  variant_map:     "data/houhanshu/gazetteer/variant_map.tsv"
+
+# ----------------------------------------------------------------------------
+# Stage 3 — 가제티어
+# ----------------------------------------------------------------------------
+gazetteer:
+  cbdb_repo:       "https://github.com/cbdb-project/cbdb_sqlite.git"
+  # 後漢書 서술 범위: 光武 建武(25) ~ 獻帝 末(220). CBDB 東漢 커버리지는 三國志 작업에서
+  # 확인했듯 빈약 → 字-추출 + 큐레이션 시드가 주력, CBDB는 보조 (docs §3).
+  year_start:      25
+  year_end:        220
+  # 25=東漢, 83=漢(generic). 三國 사망자 일부 포함 가능하나 출현 필터가 스코핑.
+  dynasty_codes:   [25, 83]
+  min_surface_len: 2
+  extract_names_from_zi: true
+  surname_min_persons: 20
+  require_corpus_occurrence: true
+  # 가제티어 재설계(漢書에서 검증) — CBDB 노이즈 차단 + 코퍼스 고유 개체 회복:
+  cbdb_addr:     false      # ADDR(全왕조 지명) 통째 신뢰 안 함 → 시드 後漢 郡國 + corpus_extract
+  cbdb_altname:  zi_only    # CBDB 字/號은 코퍼스가 '字X·號曰X'로 도입한 것만 (길상 字 FP 차단)
+  corpus_extract: true      # 봉호·君長號(單于)·別名 코퍼스 패턴 추출 (CBDB 미수록분)
+  stoplist:        "data/houhanshu/gazetteer/stoplist.txt"
+  seed_supplement: "data/houhanshu/gazetteer/seed_supplement.tsv"
+  user_dict:       "data/houhanshu/gazetteer/user_dict.tsv"
+  opencc_config:   null
+
+# ----------------------------------------------------------------------------
+# Stage 4 — 토큰화
+# ----------------------------------------------------------------------------
+tokenize:
+  punctuation_as_token: true
+
+# ----------------------------------------------------------------------------
+# Stage 6 — 검증 센티넬 (docs §7: 後漢書 = 光武帝·班超·馬援. Stage 4 실측 후 조정.)
+# ----------------------------------------------------------------------------
+validate:
+  # 光武帝는 본문 빈도 8(廟號 世祖 165·帝 지칭 지배적) → 강한 앵커 世祖 사용. 創業 名秀는
+  # 避諱로 본문 희소(史記 劉邦과 동형). 都城은 後漢 정자 雒陽·통용 洛陽 둘 다 존재.
+  must_single: [世祖, 班超, 馬援, 鄧禹, 竇憲, 梁冀, 太守, 刺史, 洛陽, 匈奴]
+  must_char:   [援, 禹, 超, 固]            # 단자 名(馬援·鄧禹·班超·班固) — 병합 금지 확인
+  alias_pair:  [孔子, 仲尼]                # 名·字 독립 공존 (前四史 공통 견고 센티넬)
+  title_probe: "《春秋》"                  # 《書名》 단일 토큰 확인
+  sim_probes:  [世祖, 班超, 馬援, 竇憲, 太守, 刺史, 洛陽, 匈奴]
+
+# ----------------------------------------------------------------------------
+# Stage 5 — Word2Vec (史記·漢書·三國志와 동일 규모대 코퍼스 → 동일 하이퍼파라미터)
+# ----------------------------------------------------------------------------
+word2vec:
+  sg:              1        # skip-gram
+  vector_size:     100
+  window:          5
+  min_count:       3
+  negative:        10
+  epochs:          15
+  workers:         1        # 재현성
+  seed:            42
+  model_name:      "w2v_houhanshu.model"

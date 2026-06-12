@@ -121,6 +121,10 @@ def fetch_juan_wikitext(cfg: dict, title: str) -> str:
 
 REF_RE = re.compile(r"<ref[^>/]*>.*?</ref>|<ref[^>]*/>", re.S)
 LANGCONV_RE = re.compile(r"-\{(.*?)\}-", re.S)
+# 末尾 校勘記 섹션(==校勘記==·==【校勘記】== 等) → EOF 통째 드롭. 後人 교감 apparatus
+# (「X頁Y行…按：殿本考證…據汲本」)라 原文이 아니며, 板本名·編者名으로 vocab을 오염시킨다.
+# 後漢書 953세그먼트 출처. 史記·漢書 raw에도 존재(재실행 시 혜택). 末尾 섹션 전제(실측).
+KANKAN_RE = re.compile(r"\n=+[ 　]*【?[ 　]*校勘記[ 　]*】?[ 　]*=+.*\Z", re.S)
 # 본문 내용을 감싸기만 하는 템플릿(專名號·표시·색상·인용 등) — 내용을 살린다.
 TMPL_INNER_RE = re.compile(r"\{\{([^{}|]*)((?:\|[^{}]*)?)\}\}")
 UNWRAP_NAMES = {"propernoun", "專", "標", "deeppink", "green", "yl", "quote"}
@@ -166,7 +170,13 @@ def unwrap_wrappers(text: str, names: set) -> str:
                     j += 1
             inner = text[i + 2:j - 2]
             name, _, rest = inner.partition("|")
-            if name.strip().lower() in names:
+            nl = name.strip().lower()
+            if nl == "color":
+                # {{color|<색상명>|本文}} (後漢書 論曰·贊曰·校勘 강조 등 3-인자 래퍼):
+                # 색상명 인자만 버리고 本文은 살린다(2-인자 {{blue|本文}}와 형태가 다름).
+                _, _, rest = rest.partition("|")
+                out.append(unwrap_wrappers(rest, names))
+            elif nl in names:
                 out.append(unwrap_wrappers(rest, names))   # 本文만(중첩 래퍼도 재귀)
             else:
                 out.append(text[i:j])                       # {{*|}}·헤더 등은 그대로
@@ -189,6 +199,7 @@ def preprocess_wikitext(wikitext: str) -> str:
        {{WavyBookMark|X}} → 《X》, {{!|X|IDS}}·{{另|X|주}}·{{參|X|주}} → X.
        그 외 템플릿은 보존 → split_main_note({{*|}}·{{註|}}·{{annotate|}})와 드롭이 처리.
     """
+    wikitext = KANKAN_RE.sub("\n", wikitext)   # 末尾 ==校勘記== 섹션(後人 교감) 통째 드롭
     wikitext = REF_RE.sub("", wikitext)
     wikitext = LANGCONV_RE.sub(pick_langconv, wikitext)
     wikitext = unwrap_wrappers(wikitext, WRAPPER_NAMES)
@@ -276,6 +287,15 @@ def clean_wiki(text: str) -> str:
     # 잔여 인쇄 가능 ASCII 일괄 제거 — 표 셀 속성(colspan="2")·<p> 등 마크업 잔재가
     # 글자 토큰(c·o·l·s…)으로 새는 것을 차단. 고전한문 본문에 ASCII는 정당한 용처가 없다.
     text = re.sub(r"[!-~]+", "", text)
+    # 위키소스 편집 부호 정규화(後漢書 志·傳 실측; 다른 사서엔 거의 없어 무해):
+    text = text.translate(str.maketrans({
+        "“": "「", "”": "」", "‘": "『", "’": "』",  # 곡선 인용부 → 파이프라인 인용부
+        "﹑": "、",                                   # 작은 모점(열거 구분) → 、
+        "〖": "", "〗": "",                          # 郡國志 縣名 묶음표 → 벗김(내용 보존)
+        "◎": "", "○": "",                           # 郡國志 항목 圈點 → 제거
+    }))
+    text = re.sub(r"[０-９Ａ-Ｚａ-ｚ]+", "", text)   # 全角 영숫자(편집 잔재; 全角 ！？。는 보존)
+    text = re.sub(r"[�-]", "", text)  # 대체문자·PUA 제거(缺字 □는 보존)
     text = text.replace("　", "").replace("​", "")
     return text
 

@@ -62,6 +62,11 @@ gazetteer:
   extract_names_from_zi: true
   surname_min_persons: 20
   require_corpus_occurrence: true
+  # CBDB 노이즈 게이팅 (docs/GAZETTEER_REFINEMENT.md §3). CBDB는 前漢 이전이 극빈약 →
+  # ADDR/ALT 위양성 차단 + 코퍼스 패턴으로 FN 회복, 나머지는 LLM 전수 분류가 정제.
+  cbdb_addr:     false      # ADDR(全왕조 지명) 통째 신뢰 안 함 → 시드 + corpus_extract
+  cbdb_altname:  zi_only    # CBDB 字/號은 코퍼스가 '字X·號曰X'로 도입한 것만 (길상 字 FP 차단)
+  corpus_extract: true      # 봉호 X王/X侯/X君·君長號 單于·別名 코퍼스 패턴 (CBDB 미수록 회복)
   stoplist:        "data/shiji/gazetteer/stoplist.txt"
   seed_supplement: "data/shiji/gazetteer/seed_supplement.tsv"
   user_dict:       "data/shiji/gazetteer/user_dict.tsv"

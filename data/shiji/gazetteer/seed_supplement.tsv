@@ -1,0 +1,693 @@
+# 보충 시드 — 《史記》 (docs/ADDING_A_CORPUS.md §6).
+# CBDB는 前漢 이전 커버리지가 매우 빈약 → 큐레이션 시드 + 字-추출이 주력, CBDB는 보조.
+# require_corpus_occurrence 필터를 거치므로 코퍼스에 실제 등장하는 것만 최종 채택된다.
+# 컬럼: surface<TAB>type<TAB>refers_to(메모, 가제티어에는 surface,type만 반영)
+#
+# ── PER: 五帝·三代 ──
+黃帝	PER	五帝
+顓頊	PER	五帝
+帝嚳	PER	五帝
+帝堯	PER	五帝
+帝舜	PER	五帝
+唐堯	PER	堯 별칭
+虞舜	PER	舜 별칭
+炎帝	PER	신화 제왕
+神農	PER	신화 제왕
+蚩尤	PER	신화 인물
+后稷	PER	周 시조
+皋陶	PER	舜 신하
+成湯	PER	殷 시조(湯)
+伊尹	PER	殷 재상
+傅說	PER	殷 재상
+比干	PER	殷 충신
+箕子	PER	殷 현인
+微子	PER	殷 현인
+妲己	PER	紂 비
+褒姒	PER	幽王 비
+西伯	PER	文王 칭호
+文王	PER	周文王
+武王	PER	周武王
+周公	PER	周公旦
+召公	PER	召公奭
+太公望	PER	呂尚 호
+呂尚	PER	太公望 본명
+伯夷	PER	孤竹君 子
+叔齊	PER	孤竹君 子
+# ── PER: 春秋 ──
+孔子	PER	孔丘
+仲尼	PER	孔子 字
+老子	PER	老聃
+老聃	PER	老子
+顏淵	PER	顏回 字
+顏回	PER	공자 제자
+子路	PER	공자 제자(仲由)
+子貢	PER	공자 제자(端木賜)
+子夏	PER	공자 제자(卜商)
+曾參	PER	공자 제자
+管仲	PER	齊 재상
+晏嬰	PER	齊 재상
+鮑叔	PER	鮑叔牙
+鮑叔牙	PER	管仲 知己
+齊桓公	PER	春秋五霸
+晉文公	PER	春秋五霸
+秦穆公	PER	春秋五霸
+楚莊王	PER	春秋五霸
+闔廬	PER	吳王
+夫差	PER	吳王
+句踐	PER	越王
+范蠡	PER	越 모신
+伍子胥	PER	吳 모신
+孫武	PER	병가
+孫臏	PER	병가
+穰苴	PER	司馬穰苴
+扁鵲	PER	명의
+子產	PER	鄭 재상
+季札	PER	吳 공자
+# ── PER: 戰國 ──
+吳起	PER	병가
+商鞅	PER	秦 변법
+衛鞅	PER	商鞅 별칭
+公孫鞅	PER	商鞅 별칭
+龐涓	PER	魏 장수
+樂毅	PER	燕 장수
+田單	PER	齊 장수
+廉頗	PER	趙 장수
+藺相如	PER	趙 명신
+趙奢	PER	趙 장수
+趙括	PER	趙 장수
+白起	PER	秦 장수
+王翦	PER	秦 장수
+李牧	PER	趙 장수
+蒙恬	PER	秦 장수
+蒙毅	PER	秦 신하
+蘇秦	PER	종횡가
+張儀	PER	종횡가
+范雎	PER	秦 재상
+蔡澤	PER	秦 재상
+呂不韋	PER	秦 상국
+韓非	PER	법가
+李斯	PER	秦 승상
+荀卿	PER	荀子
+孟子	PER	孟軻
+孟軻	PER	孟子
+莊周	PER	莊子
+鄒衍	PER	음양가
+申不害	PER	법가
+信陵君	PER	魏 공자(魏無忌)
+平原君	PER	趙 공자(趙勝)
+孟嘗君	PER	齊 공자(田文)
+春申君	PER	楚 재상(黃歇)
+屈原	PER	楚 대부
+毛遂	PER	평원군 식객
+虞卿	PER	趙 모신
+魯仲連	PER	齊 변사
+專諸	PER	자객
+豫讓	PER	자객
+聶政	PER	자객
+荊軻	PER	자객
+高漸離	PER	荊軻 벗
+# ── PER: 秦 ──
+秦始皇	PER	嬴政
+始皇	PER	秦始皇 약칭
+始皇帝	PER	秦始皇 칭호
+二世	PER	胡亥
+胡亥	PER	秦二世
+扶蘇	PER	始皇 장자
+趙高	PER	秦 환관
+章邯	PER	秦 장수
+王離	PER	秦 장수
+# ── PER: 秦末·楚漢 ──
+陳勝	PER	陳涉
+吳廣	PER	기의 지도자
+陳涉	PER	陳勝 字
+項梁	PER	項羽 숙부
+項燕	PER	楚 장수
+項伯	PER	項羽 숙부
+項莊	PER	項氏 일족
+項籍	PER	項羽 본명
+項羽	PER	項籍 字
+范增	PER	項羽 모신
+劉邦	PER	漢高祖(避諱로 본문 미표기 예상 — 출현 필터 위임)
+呂后	PER	高祖 황후
+呂太后	PER	呂后 칭호
+蕭何	PER	漢 상국
+曹參	PER	漢 상국
+張良	PER	漢 모신
+韓信	PER	漢 대장(淮陰侯)
+陳平	PER	漢 모신
+周勃	PER	漢 태위
+樊噲	PER	漢 장수
+灌嬰	PER	漢 장수
+夏侯嬰	PER	漢 장수
+酈食其	PER	漢 변사
+陸賈	PER	漢 변사
+叔孫通	PER	漢 의례
+婁敬	PER	漢 모신(劉敬)
+蒯通	PER	변사
+田橫	PER	齊 왕족
+彭越	PER	漢 장수
+黥布	PER	英布 별칭
+英布	PER	漢 장수
+盧綰	PER	燕王
+陳豨	PER	반장
+張耳	PER	趙王
+陳餘	PER	趙 모신
+田榮	PER	齊 왕족
+龍且	PER	楚 장수
+季布	PER	楚→漢 장수
+欒布	PER	漢 신하
+王陵	PER	漢 승상
+周昌	PER	漢 어사대부
+紀信	PER	漢 장수
+韓王信	PER	韓王 信(淮陰侯와 구분)
+淮陰侯	PER	韓信 봉호
+留侯	PER	張良 봉호
+# ── PER: 漢 ──
+孝惠	PER	惠帝
+孝文	PER	文帝
+孝景	PER	景帝
+文帝	PER	漢文帝
+景帝	PER	漢景帝
+武帝	PER	漢武帝(褚補 등)
+竇太后	PER	文帝 황후
+賈誼	PER	漢 문신
+賈生	PER	賈誼 호칭
+鼂錯	PER	漢 어사대부
+晁錯	PER	鼂錯 이표기
+周亞夫	PER	漢 태위
+竇嬰	PER	漢 승상
+田蚡	PER	漢 승상
+灌夫	PER	漢 장수
+衛青	PER	漢 대장군
+霍去病	PER	漢 표기장군
+李廣	PER	漢 장수
+李陵	PER	李廣 손자
+張騫	PER	서역 개척
+公孫弘	PER	漢 승상
+主父偃	PER	漢 신하
+董仲舒	PER	유학자
+汲黯	PER	漢 직신
+鄭當時	PER	漢 신하
+張湯	PER	혹리
+趙禹	PER	혹리
+郅都	PER	혹리
+寧成	PER	혹리
+義縱	PER	혹리
+王溫舒	PER	혹리
+杜周	PER	혹리
+司馬相如	PER	문인
+東方朔	PER	문인
+司馬遷	PER	저자
+司馬談	PER	저자 부친
+桑弘羊	PER	재정
+卜式	PER	재정
+#
+# ── ERA: 年號 (武帝 이후만 — docs §6; 출현 필터가 스코핑) ──
+建元	ERA	武帝
+元光	ERA	武帝
+元朔	ERA	武帝
+元狩	ERA	武帝
+元鼎	ERA	武帝
+元封	ERA	武帝
+太初	ERA	武帝
+天漢	ERA	武帝(褚補 등 가능)
+太始	ERA	武帝(褚補 등 가능)
+征和	ERA	武帝(褚補 등 가능)
+後元	ERA	武帝(褚補 등 가능)
+#
+# ── OFI: 史記 추가 (先秦·秦漢 관제; 漢代 공통 베이스는 아래 복사분) ──
+令尹	OFI	楚 재상
+上卿	OFI	卿 위계
+客卿	OFI	타국 출신 卿
+上將軍	OFI	무직
+國尉	OFI	秦 무직
+郎中令	OFI	九卿(秦漢)
+奉常	OFI	九卿(秦)
+典客	OFI	九卿(秦)
+治粟內史	OFI	九卿(秦)
+內史	OFI	경기 장관
+中尉	OFI	경위
+郡守	OFI	郡 장관(秦~漢初)
+太史令	OFI	사관
+太史	OFI	사관
+太宰	OFI	殷周 관
+單于	OFI	匈奴 군주號
+閼氏	OFI	單于 비號
+大行	OFI	九卿(漢)
+大農令	OFI	九卿(漢)
+樓船將軍	OFI	漢武 將軍號
+伏波將軍	OFI	漢武 將軍號
+貳師將軍	OFI	漢武 將軍號
+列侯	OFI	작위
+關內侯	OFI	작위
+五大夫	OFI	작위(秦漢)
+中大夫	OFI	大夫
+上大夫	OFI	大夫
+#
+# ── LOC: 史記 추가 (戰國 都城·秦郡·楚漢 전장·西域; 베이스는 아래 복사분) ──
+咸陽	LOC	秦 도성
+櫟陽	LOC	秦 옛 도성
+邯鄲	LOC	趙 도성
+臨淄	LOC	齊 도성
+大梁	LOC	魏 도성
+滎陽	LOC	楚漢 요지
+成皋	LOC	楚漢 요지
+廣武	LOC	楚漢 대치처
+垓下	LOC	전장
+鴻門	LOC	회견지
+霸上	LOC	요지
+長平	LOC	전장
+馬陵	LOC	전장
+桂陵	LOC	전장
+澠池	LOC	회견지
+井陘	LOC	전장(韓信)
+函谷關	LOC	관문
+武關	LOC	관문
+關中	LOC	지역
+關東	LOC	지역
+山東	LOC	지역(함곡관 동쪽)
+江東	LOC	지역
+巴蜀	LOC	지역
+黔中	LOC	秦郡
+三川	LOC	秦郡
+泗水	LOC	秦郡/水
+九原	LOC	秦郡
+右北平	LOC	郡(李廣)
+朔方	LOC	漢武 郡
+五原	LOC	郡
+定襄	LOC	郡
+南海	LOC	秦郡
+桂林	LOC	秦郡
+象郡	LOC	秦郡
+南越	LOC	國
+東越	LOC	國
+閩越	LOC	國
+朝鮮	LOC	國
+匈奴	LOC	族·國
+大宛	LOC	西域國
+月氏	LOC	西域國
+大月氏	LOC	西域國
+烏孫	LOC	西域國
+康居	LOC	西域國
+大夏	LOC	西域國
+安息	LOC	西域國
+條支	LOC	西域國
+身毒	LOC	西域國
+樓蘭	LOC	西域國
+夜郎	LOC	西南夷國
+西域	LOC	지역
+甘泉	LOC	궁·산(雲陽)
+#
+# ── OFI: 漢代 공통 베이스 (三國志 시드 복사 — docs §6; 출현 필터가 스코핑) ──
+太尉	OFI	三公
+司徒	OFI	三公
+司空	OFI	三公
+丞相	OFI	재상
+相國	OFI	재상
+大司馬	OFI	武職 최고
+太傅	OFI	上公
+太師	OFI	上公
+太保	OFI	上公
+太常	OFI	九卿
+光祿勳	OFI	九卿
+衛尉	OFI	九卿
+太僕	OFI	九卿
+廷尉	OFI	九卿
+大鴻臚	OFI	九卿
+宗正	OFI	九卿
+大司農	OFI	九卿
+少府	OFI	九卿
+執金吾	OFI	경위
+大將軍	OFI	武職
+驃騎將軍	OFI	將軍號
+車騎將軍	OFI	將軍號
+衛將軍	OFI	將軍號
+前將軍	OFI	將軍號
+後將軍	OFI	將軍號
+左將軍	OFI	將軍號
+右將軍	OFI	將軍號
+征東將軍	OFI	四征
+征西將軍	OFI	四征
+征南將軍	OFI	四征
+征北將軍	OFI	四征
+鎮東將軍	OFI	四鎮
+鎮西將軍	OFI	四鎮
+鎮南將軍	OFI	四鎮
+鎮北將軍	OFI	四鎮
+安東將軍	OFI	將軍號
+安南將軍	OFI	將軍號
+平南將軍	OFI	將軍號
+偏將軍	OFI	將軍號
+裨將軍	OFI	將軍號
+蕩寇將軍	OFI	將軍號
+討逆將軍	OFI	將軍號
+破虜將軍	OFI	將軍號
+奮武將軍	OFI	將軍號
+建威將軍	OFI	將軍號
+軍師將軍	OFI	將軍號
+中護軍	OFI	禁軍
+中領軍	OFI	禁軍
+護軍	OFI	무관
+領軍	OFI	무관
+議郎	OFI	郎官
+中郎	OFI	郎官
+侍郎	OFI	郎官
+郎中	OFI	郎官
+中郎將	OFI	郎官
+五官中郎將	OFI	郎官
+左中郎將	OFI	郎官
+右中郎將	OFI	郎官
+虎賁中郎將	OFI	郎官
+羽林中郎將	OFI	郎官
+尚書令	OFI	尚書
+尚書僕射	OFI	尚書
+左僕射	OFI	尚書
+右僕射	OFI	尚書
+尚書	OFI	尚書
+侍中	OFI	加官
+黃門侍郎	OFI	궁중
+散騎常侍	OFI	加官
+給事中	OFI	加官
+中書令	OFI	中書
+中書監	OFI	中書
+秘書監	OFI	秘書
+御史大夫	OFI	감찰
+御史中丞	OFI	감찰
+司隸校尉	OFI	감찰
+刺史	OFI	地방
+州牧	OFI	地방
+治中	OFI	州속관
+別駕	OFI	州속관
+主簿	OFI	속관
+功曹	OFI	속관
+從事	OFI	州속관
+督郵	OFI	郡속관
+太守	OFI	郡守
+都尉	OFI	무관
+縣令	OFI	縣
+縣長	OFI	縣
+郡丞	OFI	郡속관
+縣丞	OFI	縣속관
+亭長	OFI	亭
+大長秋	OFI	궁중
+中常侍	OFI	환관
+小黃門	OFI	환관
+中黃門	OFI	환관
+常侍	OFI	근시
+謁者	OFI	근시
+太子太傅	OFI	太子官
+太子少傅	OFI	太子官
+太子舍人	OFI	太子官
+洗馬	OFI	太子官
+都督	OFI	군사
+監軍	OFI	군사
+長史	OFI	속관
+司馬	OFI	무관
+參軍	OFI	속관
+祭酒	OFI	學官
+博士	OFI	學官
+太中大夫	OFI	大夫
+光祿大夫	OFI	大夫
+諫議大夫	OFI	大夫
+中散大夫	OFI	大夫
+奉車都尉	OFI	都尉
+駙馬都尉	OFI	都尉
+騎都尉	OFI	都尉
+校尉	OFI	무관
+典農中郎將	OFI	屯田
+典農校尉	OFI	屯田
+#
+# ── LOC: 州郡 베이스 (三國志 시드 복사 — 부분만 유효; 출현 필터가 스코핑) ──
+司隸	LOC	州
+豫州	LOC	州
+兗州	LOC	州
+徐州	LOC	州
+青州	LOC	州
+荊州	LOC	州
+揚州	LOC	州
+益州	LOC	州
+涼州	LOC	州
+并州	LOC	州
+冀州	LOC	州
+幽州	LOC	州
+交州	LOC	州
+雍州	LOC	州
+河南	LOC	郡
+河內	LOC	郡
+河東	LOC	郡
+弘農	LOC	郡
+京兆	LOC	郡
+馮翊	LOC	郡
+扶風	LOC	郡
+太原	LOC	郡
+上黨	LOC	郡
+西河	LOC	郡
+雁門	LOC	郡
+上谷	LOC	郡
+漁陽	LOC	郡
+遼東	LOC	郡
+遼西	LOC	郡
+玄菟	LOC	郡
+樂浪	LOC	郡
+鉅鹿	LOC	郡
+常山	LOC	郡
+中山	LOC	郡
+安平	LOC	郡
+河間	LOC	郡
+清河	LOC	郡
+魏郡	LOC	郡
+陳留	LOC	郡
+東郡	LOC	郡
+東平	LOC	郡
+任城	LOC	郡
+泰山	LOC	郡
+濟北	LOC	郡
+山陽	LOC	郡
+濟陰	LOC	郡
+沛國	LOC	郡
+梁國	LOC	郡
+汝南	LOC	郡
+潁川	LOC	郡
+南陽	LOC	郡
+南郡	LOC	郡
+江夏	LOC	郡
+廬江	LOC	郡
+九江	LOC	郡
+丹陽	LOC	郡
+會稽	LOC	郡
+吳郡	LOC	郡
+豫章	LOC	郡
+廬陵	LOC	郡
+武陵	LOC	郡
+長沙	LOC	郡
+桂陽	LOC	郡
+零陵	LOC	郡
+蜀郡	LOC	郡
+廣漢	LOC	郡
+犍為	LOC	郡
+巴郡	LOC	郡
+漢中	LOC	郡
+武都	LOC	郡
+隴西	LOC	郡
+天水	LOC	郡
+南安	LOC	郡
+安定	LOC	郡
+北地	LOC	郡
+武威	LOC	郡
+張掖	LOC	郡
+酒泉	LOC	郡
+敦煌	LOC	郡
+金城	LOC	郡
+北海	LOC	郡
+東萊	LOC	郡
+琅邪	LOC	郡
+東海	LOC	郡
+下邳	LOC	郡
+彭城	LOC	郡
+廣陵	LOC	郡
+洛陽	LOC	도성
+長安	LOC	도성
+許昌	LOC	도성
+成都	LOC	도성
+建業	LOC	도성
+壽春	LOC	요지
+官渡	LOC	전장
+赤壁	LOC	전장
+合肥	LOC	요지
+濡須	LOC	요지
+街亭	LOC	전장
+陳倉	LOC	요지
+江陵	LOC	요지
+襄陽	LOC	요지
+樊城	LOC	요지
+鄴	LOC	도성
+#
+# ── PER: 전수 감사 추가 (2026-06-12) — 上古·五帝 인물 ──
+少典	PER	黃帝 부계
+軒轅	PER	黃帝 名
+神農氏	PER	炎帝 씨족
+軒轅氏	PER	黃帝 씨족
+玄囂	PER	黃帝 子
+昌意	PER	黃帝 子
+蟜極	PER	帝嚳 父
+嫘祖	PER	黃帝 妃
+放勳	PER	堯 名
+重華	PER	舜 名
+瞽叟	PER	舜 父
+丹朱	PER	堯 子
+商均	PER	舜 子
+驩兜	PER	四凶
+共工	PER	四凶
+三苗	PER	四凶(족)
+祝融	PER	火正
+# ── PER: 商 왕 계보 (殷本紀) ──
+太丁	PER	商王
+外丙	PER	商王
+中壬	PER	商王
+太甲	PER	商王
+沃丁	PER	商王
+太庚	PER	商王
+小甲	PER	商王
+雍己	PER	商王
+太戊	PER	商王
+中丁	PER	商王
+外壬	PER	商王
+河亶甲	PER	商王
+祖乙	PER	商王
+祖辛	PER	商王
+沃甲	PER	商王
+祖丁	PER	商王
+南庚	PER	商王
+陽甲	PER	商王
+盤庚	PER	商王
+小辛	PER	商王
+小乙	PER	商王
+武丁	PER	商王
+祖庚	PER	商王
+廩辛	PER	商王
+庚丁	PER	商王
+武乙	PER	商王
+武庚	PER	紂 子
+# ── PER: 夏 왕 ──
+太康	PER	夏王
+中康	PER	夏王
+少康	PER	夏王
+孔甲	PER	夏王
+履癸	PER	桀 名
+# ── PER: 周 ──
+古公	PER	古公亶父 약칭
+古公亶父	PER	周 태왕
+季歷	PER	王季
+王季	PER	季歷 칭호
+伯邑考	PER	文王 장자
+散宜生	PER	周 신하
+閎夭	PER	周 신하
+# ── PER: 춘추전국·진한 보충 ──
+公孫	PER	姓(黃帝 姓公孫)
+甘茂	PER	秦 좌승상
+甘羅	PER	甘茂 손자
+摢裏疾	PER	樗里疾(코퍼스 표기)
+摢裏子	PER	樗里子(코퍼스 표기)
+范睢	PER	范雎(코퍼스 표기)
+須賈	PER	魏 중대부
+鄭安平	PER	秦 장수
+白圭	PER	화식가
+猗頓	PER	화식가
+計然	PER	范蠡 師
+鄒陽	PER	문인
+曹沫	PER	자객(노)
+田儋	PER	齊 왕족
+田市	PER	齊王
+田都	PER	齊王
+田安	PER	濟北王
+田廣	PER	齊王
+田成子	PER	田常
+劉敬	PER	婁敬 사성
+申公	PER	노 유학자
+楊僕	PER	樓船將軍
+減宣	PER	혹리
+司馬季主	PER	복자
+莊子	PER	莊周
+中行說	PER	匈奴 책사(환관)
+韓安國	PER	漢 어사대부
+太子丹	PER	燕 태자
+鐘離眛	PER	楚 장수
+李少君	PER	방사
+安期生	PER	방사 전설
+司馬穰苴	PER	穰苴 전칭
+神君	PER	무속 신격(封禪書)
+# ── PER: 봉호·君侯 칭호 ──
+商君	PER	商鞅 봉호
+武安君	PER	白起·李牧·蘇秦 봉호
+武信君	PER	項梁 호
+成安君	PER	陳餘 봉호
+廣武君	PER	李左車 봉호
+長安君	PER	成蟜 봉호
+涇陽君	PER	秦 공자
+安國君	PER	孝文王 태자호
+文信侯	PER	呂不韋 봉호
+辟陽侯	PER	審食其 봉호
+朱虛侯	PER	劉章 봉호
+魏其侯	PER	竇嬰 봉호
+魏文侯	PER	魏 군주
+平陽侯	PER	曹參家 봉호
+博望侯	PER	張騫 봉호
+東牟侯	PER	劉興居 봉호
+建成侯	PER	봉호
+潁陰侯	PER	灌嬰 봉호
+浞野侯	PER	趙破奴 봉호
+合騎侯	PER	公孫敖 봉호
+冠軍侯	PER	霍去病 봉호
+樂成侯	PER	봉호
+長平侯	PER	衛青 봉호
+條侯	PER	周亞夫 봉호
+絳侯	PER	周勃 봉호
+萬石君	PER	石奮 호
+滕公	PER	夏侯嬰 호칭
+# ── PER: 氏族 (六卿·三桓 등) ──
+中行氏	PER	晉 六卿
+中行	PER	晉 中行氏 약칭
+趙氏	PER	씨족
+呂氏	PER	씨족(諸呂)
+項氏	PER	씨족
+季氏	PER	魯 三桓
+叔孫氏	PER	魯 三桓
+韓氏	PER	晉 六卿
+魏氏	PER	晉 六卿
+羊舌氏	PER	晉 공족
+夏后氏	PER	夏 왕족
+有扈氏	PER	夏 제후
+孔氏	PER	씨족
+司馬氏	PER	씨족
+姬氏	PER	周 성
+石氏	PER	씨족
+小月氏	PER	西域(월지 잔부)
+#
+# ── LOC: 전수 감사 추가 ──
+西南夷	LOC	족·지역
+阪泉	LOC	전장(黃帝)
+牧野	LOC	전장(武王)
+羑里	LOC	文王 구금지
+烏江	LOC	項羽 최후지
+鹿臺	LOC	紂 재처
+阿房	LOC	아방궁
+酈山	LOC	여산(코퍼스 표기)
+驪山	LOC	여산
+沙丘	LOC	평대(始皇 붕어지)
+鴻溝	LOC	초한 경계
+# ── PER: 꼬리 감사 추가 ──
+淳于越	PER	秦 박사
+淳于髡	PER	齊 변사
+淳于意	PER	倉公
+子糾	PER	公子糾(齊)
+安平君	PER	田單 봉호
+金安上	PER	漢 신하
+芮良夫	PER	周 대부
+#
+# ── 위음성 보강 (2026-06-12) — 토큰화 누락 개체 ──
+驍騎將軍	OFI	漢武 將軍號(霍去病 拜)
+衛子夫	PER	武帝 衛皇后(衛青 姊)
+去病	PER	霍去病 단독지칭(驃騎將軍去病)
+冒頓	PER	匈奴 單于(독음 묵돌)
+公孫衍	PER	戰國 縱橫家(犀首, 魏)
+張釋之	PER	漢 廷尉(法平)

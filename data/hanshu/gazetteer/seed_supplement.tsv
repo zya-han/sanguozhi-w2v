@@ -1,0 +1,1312 @@
+# 보충 시드 — 《漢書》 (docs/ADDING_A_CORPUS.md §6).
+# CBDB는 前漢 커버리지가 빈약 → 큐레이션 시드 + 字-추출이 주력, CBDB는 보조.
+# require_corpus_occurrence 필터를 거치므로 코퍼스에 실제 등장하는 것만 최종 채택된다.
+# 컬럼: surface<TAB>type<TAB>refers_to(메모, 가제티어에는 surface,type만 반영)
+#
+# ── ERA: 年號 (西漢 + 新 — docs §6; 출현 필터가 스코핑) ──
+建元	ERA	武帝
+元光	ERA	武帝
+元朔	ERA	武帝
+元狩	ERA	武帝
+元鼎	ERA	武帝
+元封	ERA	武帝
+太初	ERA	武帝
+天漢	ERA	武帝
+太始	ERA	武帝
+征和	ERA	武帝
+後元	ERA	武帝(文帝·景帝·昭帝도 後元)
+始元	ERA	昭帝
+元鳳	ERA	昭帝
+元平	ERA	昭帝
+本始	ERA	宣帝
+地節	ERA	宣帝
+元康	ERA	宣帝
+神爵	ERA	宣帝
+五鳳	ERA	宣帝
+甘露	ERA	宣帝
+黃龍	ERA	宣帝
+初元	ERA	元帝
+永光	ERA	元帝
+建昭	ERA	元帝
+竟寧	ERA	元帝
+建始	ERA	成帝
+河平	ERA	成帝
+陽朔	ERA	成帝
+鴻嘉	ERA	成帝
+永始	ERA	成帝
+元延	ERA	成帝
+綏和	ERA	成帝
+建平	ERA	哀帝
+元壽	ERA	哀帝
+元始	ERA	平帝
+居攝	ERA	孺子嬰(王莽 攝政)
+初始	ERA	孺子嬰
+始建國	ERA	王莽 新
+天鳳	ERA	王莽 新
+地皇	ERA	王莽 新
+中元	ERA	景帝(中元年)
+#
+# ── PER: 楚漢·漢初 (高祖 功臣) ──
+劉邦	PER	漢高祖(避諱 — 高祖/上/沛公/漢王 지칭 다수)
+項羽	PER	項籍 字
+項籍	PER	項羽 본명
+項梁	PER	項羽 숙부
+項伯	PER	項羽 숙부
+范增	PER	項羽 모신
+呂后	PER	高祖 황후
+呂太后	PER	呂后 칭호
+蕭何	PER	漢 상국
+曹參	PER	漢 상국
+張良	PER	漢 모신(留侯)
+韓信	PER	漢 대장(淮陰侯)
+陳平	PER	漢 모신
+周勃	PER	漢 태위
+樊噲	PER	漢 장수
+灌嬰	PER	漢 장수
+夏侯嬰	PER	漢 장수(滕公)
+酈食其	PER	漢 변사
+酈商	PER	漢 장수
+陸賈	PER	漢 변사
+叔孫通	PER	漢 의례
+婁敬	PER	漢 모신
+劉敬	PER	婁敬 사성
+彭越	PER	漢 장수(梁王)
+英布	PER	漢 장수(淮南王)
+黥布	PER	英布 별칭
+盧綰	PER	燕王
+張耳	PER	趙王
+陳餘	PER	趙 모신
+田橫	PER	齊 왕족
+季布	PER	楚→漢 장수
+欒布	PER	漢 신하
+周昌	PER	漢 어사대부
+王陵	PER	漢 승상
+審食其	PER	辟陽侯
+紀信	PER	漢 장수
+韓王信	PER	韓王 信
+傅寬	PER	漢 공신
+靳歙	PER	漢 공신
+召平	PER	東陵侯
+雍齒	PER	什邡侯
+任敖	PER	御史大夫
+周苛	PER	御史大夫
+蒯通	PER	변사
+酈生	PER	酈食其 호칭
+#
+# ── PER: 文景 ──
+孝惠	PER	惠帝
+惠帝	PER	漢惠帝
+孝文	PER	文帝
+文帝	PER	漢文帝
+孝景	PER	景帝
+景帝	PER	漢景帝
+竇太后	PER	文帝 황후
+賈誼	PER	漢 문신
+賈生	PER	賈誼 호칭
+鼂錯	PER	漢 어사대부
+晁錯	PER	鼂錯 이표기
+袁盎	PER	漢 신하
+爰盎	PER	袁盎 이표기
+周亞夫	PER	漢 태위
+竇嬰	PER	魏其侯
+田蚡	PER	武安侯
+灌夫	PER	漢 장수
+張釋之	PER	廷尉
+馮唐	PER	漢 신하
+申屠嘉	PER	丞相
+鄧通	PER	文帝 寵臣
+張蒼	PER	丞相
+周仁	PER	漢 신하
+直不疑	PER	漢 신하
+衛綰	PER	丞相
+石奮	PER	萬石君
+劉濞	PER	吳王(七國之亂)
+#
+# ── PER: 武帝期 ──
+武帝	PER	漢武帝
+衛青	PER	大將軍(長平侯)
+霍去病	PER	票騎將軍(冠軍侯)
+李廣	PER	漢 장수
+李陵	PER	李廣 손자
+李廣利	PER	貳師將軍
+公孫弘	PER	丞相
+公孫賀	PER	丞相
+公孫敖	PER	將軍
+趙破奴	PER	浞野侯
+路博德	PER	伏波將軍
+韓安國	PER	御史大夫
+主父偃	PER	漢 신하
+董仲舒	PER	유학자
+汲黯	PER	漢 직신
+鄭當時	PER	漢 신하
+張湯	PER	혹리
+趙禹	PER	혹리
+杜周	PER	혹리
+義縱	PER	혹리
+王溫舒	PER	혹리
+寧成	PER	혹리
+郅都	PER	혹리
+減宣	PER	혹리
+司馬相如	PER	문인
+東方朔	PER	문인
+枚乘	PER	문인
+枚皋	PER	문인
+鄒陽	PER	문인
+嚴助	PER	漢 신하
+莊助	PER	嚴助 본표기
+朱買臣	PER	會稽太守
+吾丘壽王	PER	漢 신하
+終軍	PER	漢 사신
+嚴安	PER	상서자
+徐樂	PER	상서자
+司馬遷	PER	太史令(史記 저자)
+司馬談	PER	太史令(父)
+桑弘羊	PER	재정
+卜式	PER	재정
+兒寬	PER	御史大夫
+倪寬	PER	兒寬 이표기
+張騫	PER	서역 개척(博望侯)
+蘇武	PER	漢 사신(典屬國)
+蘇建	PER	蘇武 父
+李延年	PER	協律
+金日磾	PER	車騎將軍(秺侯)
+田仁	PER	漢 신하
+任安	PER	漢 신하(報任安書)
+劉安	PER	淮南王(淮南子)
+劉長	PER	淮南厲王
+#
+# ── PER: 昭宣 ──
+霍光	PER	大將軍(博陸侯)
+霍禹	PER	霍光 子
+霍山	PER	霍氏
+霍雲	PER	霍氏
+上官桀	PER	左將軍
+上官安	PER	上官桀 子
+田千秋	PER	丞相
+車千秋	PER	田千秋 이표기
+田延年	PER	大司農
+杜延年	PER	御史大夫
+丙吉	PER	丞相(博陽侯)
+邴吉	PER	丙吉 이표기
+魏相	PER	丞相(高平侯)
+韓增	PER	大司馬
+趙充國	PER	後將軍(營平侯)
+辛武賢	PER	破羌將軍
+蕭望之	PER	御史大夫
+周堪	PER	光祿勳
+劉向	PER	光祿大夫(別錄)
+劉更生	PER	劉向 본명
+京房	PER	易학자
+翼奉	PER	漢 신하
+李尋	PER	漢 신하
+王吉	PER	諫大夫
+貢禹	PER	御史大夫
+龔遂	PER	渤海太守
+黃霸	PER	丞相(循吏)
+于定國	PER	丞相(廷尉)
+張敞	PER	京兆尹
+趙廣漢	PER	京兆尹
+韓延壽	PER	馮翊太守
+尹翁歸	PER	右扶風
+嚴延年	PER	河南太守
+蓋寬饒	PER	司隸校尉
+諸葛豐	PER	司隸校尉
+鄭吉	PER	西域都護
+馮奉世	PER	將軍
+甘延壽	PER	破匈奴
+陳湯	PER	西域副校尉
+朱邑	PER	大司農
+召信臣	PER	南陽太守
+龔勝	PER	漢 신하
+龔舍	PER	漢 신하
+夏侯勝	PER	경학자
+夏侯建	PER	경학자
+眭弘	PER	경학자
+蓋寬	PER	蓋寬饒 약칭
+#
+# ── PER: 元成哀平·外戚 ──
+匡衡	PER	丞相
+張禹	PER	丞相(안창후)
+翟方進	PER	丞相
+孔光	PER	丞相
+何武	PER	大司空
+師丹	PER	大司空
+王嘉	PER	丞相
+平當	PER	丞상
+彭宣	PER	大司空
+薛宣	PER	丞相
+朱博	PER	丞相
+王商	PER	丞相(外戚)
+史丹	PER	外戚
+傅喜	PER	大司馬
+丁明	PER	大司馬
+董賢	PER	大司馬(哀帝 寵)
+淳于長	PER	外戚
+息夫躬	PER	漢 신하
+孫寶	PER	漢 신하
+鄭崇	PER	漢 신하
+毋將隆	PER	漢 신하
+鮑宣	PER	司隸校尉
+谷永	PER	漢 신하
+杜鄴	PER	漢 신하
+揚雄	PER	문인(法言·太玄)
+劉歆	PER	古文학(七略)
+班伯	PER	班氏
+班斿	PER	班氏
+班況	PER	班固 증조
+#
+# ── PER: 新莽 ──
+王莽	PER	新 황제
+王鳳	PER	大司馬(外戚)
+王音	PER	大司馬
+王商	PER	成都侯
+王根	PER	大司馬
+王舜	PER	新 太師
+甄豐	PER	新 重臣
+甄邯	PER	新 重臣
+平晏	PER	新 大司徒
+王邑	PER	新 大司空(昆陽)
+王尋	PER	新 大司徒
+嚴尤	PER	新 장수
+陳茂	PER	新 장수
+隗囂	PER	群雄
+公孫述	PER	群雄(蜀)
+劉縯	PER	更始 형(劉伯升)
+劉玄	PER	更始帝
+翟義	PER	반王莽
+#
+# ── PER: 諸侯王·宗室·太子 ──
+劉據	PER	戾太子(巫蠱)
+衛太子	PER	劉據 칭호
+史皇孫	PER	宣帝 父
+劉賀	PER	昌邑王(廢帝)
+劉胥	PER	廣陵王
+劉旦	PER	燕王
+#
+# ── PER: 儒林·古인 (인용 다수) ──
+孔子	PER	孔丘
+仲尼	PER	孔子 字
+顏淵	PER	顏回 字
+顏回	PER	공자 제자
+子貢	PER	공자 제자
+子路	PER	공자 제자
+曾子	PER	曾參
+曾參	PER	공자 제자
+子夏	PER	공자 제자
+老子	PER	老聃
+孟子	PER	孟軻
+荀卿	PER	荀子
+屈原	PER	楚 대부
+伏生	PER	尚書 전수
+申公	PER	魯詩
+轅固	PER	齊詩
+韓嬰	PER	韓詩
+董生	PER	董仲舒 호칭
+#
+# ── PER: 匈奴 單于·西域 (匈奴傳·西域傳) ──
+冒頓	PER	匈奴 單于
+老上	PER	匈奴 單于
+軍臣	PER	匈奴 單于
+伊稚斜	PER	匈奴 單于
+呼韓邪	PER	匈奴 單于
+郅支	PER	匈奴 單于
+烏維	PER	匈奴 單于
+中行說	PER	匈奴 책사(환관)
+#
+# ── OFI: 漢代 관제 (西漢 三公九卿·將軍·西域官; 출현 필터가 스코핑) ──
+丞相	OFI	재상
+相國	OFI	재상
+太尉	OFI	三公(武)
+御史大夫	OFI	三公(부재상)
+大司馬	OFI	武職 최고
+大司徒	OFI	新·後漢 三公
+大司空	OFI	新·後漢 三公
+太傅	OFI	上公
+太師	OFI	上公
+太保	OFI	上公
+太常	OFI	九卿(奉常)
+奉常	OFI	九卿(秦~漢초)
+光祿勳	OFI	九卿(郎中令)
+郎中令	OFI	九卿(漢초)
+衛尉	OFI	九卿
+太僕	OFI	九卿
+廷尉	OFI	九卿
+大鴻臚	OFI	九卿(典客)
+典客	OFI	九卿(漢초)
+大行令	OFI	典客 개칭
+宗正	OFI	九卿
+大司農	OFI	九卿(치속내사)
+治粟內史	OFI	大司農 전신
+少府	OFI	九卿
+執金吾	OFI	경위(中尉)
+中尉	OFI	경위(漢초)
+詹事	OFI	太子家令 통할
+將作大匠	OFI	토목
+水衡都尉	OFI	上林·재정
+典屬國	OFI	屬國 관할
+大長秋	OFI	황후궁
+內史	OFI	경기 장관
+京兆尹	OFI	三輔
+左馮翊	OFI	三輔
+右扶風	OFI	三輔
+司隸校尉	OFI	감찰
+城門校尉	OFI	八校
+中壘校尉	OFI	八校
+屯騎校尉	OFI	八校
+步兵校尉	OFI	八校
+越騎校尉	OFI	八校
+長水校尉	OFI	八校
+胡騎校尉	OFI	八校
+射聲校尉	OFI	八校
+虎賁校尉	OFI	八校
+護軍都尉	OFI	군사
+西域都護	OFI	西域
+都護	OFI	西域
+戊己校尉	OFI	西域 둔전
+大將軍	OFI	武職 최고
+驃騎將軍	OFI	將軍號
+票騎將軍	OFI	驃騎(漢書 표기)
+車騎將軍	OFI	將軍號
+衛將軍	OFI	將軍號
+前將軍	OFI	將軍號
+後將軍	OFI	將軍號
+左將軍	OFI	將軍號
+右將軍	OFI	將軍號
+貳師將軍	OFI	武帝 將軍號
+樓船將軍	OFI	將軍號
+伏波將軍	OFI	將軍號
+彊弩將軍	OFI	將軍號
+度遼將軍	OFI	將軍號
+破羌將軍	OFI	將軍號
+中郎將	OFI	郎官
+郎中	OFI	郎官
+中郎	OFI	郎官
+侍郎	OFI	郎官
+議郎	OFI	郎官
+諫大夫	OFI	諫議
+諫議大夫	OFI	諫議
+太中大夫	OFI	大夫
+中大夫	OFI	大夫
+光祿大夫	OFI	大夫
+給事中	OFI	加官
+侍中	OFI	加官
+常侍	OFI	근시
+中常侍	OFI	근시
+散騎	OFI	加官
+尚書	OFI	尙書
+尚書令	OFI	尙書
+僕射	OFI	尙書
+御史中丞	OFI	감찰
+司直	OFI	丞相司直
+刺史	OFI	地방감찰
+州牧	OFI	地방
+太守	OFI	郡守
+郡守	OFI	郡 장관(漢초)
+都尉	OFI	郡尉
+縣令	OFI	縣
+縣長	OFI	縣
+丞	OFI	보좌관(縣丞 등)
+三老	OFI	향관
+嗇夫	OFI	향관
+游徼	OFI	향관
+亭長	OFI	亭
+博士	OFI	學官
+祭酒	OFI	學官
+謁者	OFI	근시
+中書	OFI	中書謁者(환관)
+中書令	OFI	中書
+列侯	OFI	작위
+徹侯	OFI	列侯(武帝 避諱전)
+關內侯	OFI	작위
+單于	OFI	匈奴 군주號
+閼氏	OFI	單于 비號
+昆邪	OFI	匈奴 王號(昆邪王)
+#
+# ── LOC: 西漢 郡國·三輔·都城 ──
+長安	LOC	도성
+未央	LOC	未央宮
+建章	LOC	建章宮
+長樂	LOC	長樂宮
+甘泉	LOC	궁(雲陽)
+雲陽	LOC	縣(甘泉)
+櫟陽	LOC	縣
+霸上	LOC	요지
+鴻門	LOC	회견지
+滎陽	LOC	요지
+成皋	LOC	요지
+敖倉	LOC	창고
+昆陽	LOC	전장(新)
+京兆	LOC	三輔
+馮翊	LOC	三輔
+扶風	LOC	三輔
+弘農	LOC	郡
+河南	LOC	郡
+河東	LOC	郡
+河內	LOC	郡
+太原	LOC	郡
+上黨	LOC	郡
+雲中	LOC	郡
+定襄	LOC	郡
+雁門	LOC	郡
+代郡	LOC	郡
+上谷	LOC	郡
+漁陽	LOC	郡
+右北平	LOC	郡
+遼西	LOC	郡
+遼東	LOC	郡
+玄菟	LOC	郡
+樂浪	LOC	郡
+涿郡	LOC	郡
+渤海	LOC	郡
+鉅鹿	LOC	郡
+常山	LOC	郡
+清河	LOC	郡
+信都	LOC	國
+河間	LOC	國
+廣平	LOC	國
+真定	LOC	國
+中山	LOC	國
+趙國	LOC	國
+魏郡	LOC	郡
+東郡	LOC	郡
+陳留	LOC	郡
+潁川	LOC	郡
+汝南	LOC	郡
+南陽	LOC	郡
+沛郡	LOC	郡
+梁國	LOC	國
+魯國	LOC	國
+楚國	LOC	國
+泗水	LOC	國
+廣陵	LOC	國
+臨淮	LOC	郡
+會稽	LOC	郡
+丹陽	LOC	郡
+豫章	LOC	郡
+廬江	LOC	郡
+九江	LOC	郡
+六安	LOC	國
+江都	LOC	國
+城陽	LOC	國
+琅邪	LOC	郡
+東萊	LOC	郡
+北海	LOC	郡
+千乘	LOC	郡
+齊郡	LOC	郡
+濟南	LOC	郡
+平原	LOC	郡
+泰山	LOC	郡
+濟陰	LOC	郡
+山陽	LOC	郡
+東平	LOC	國
+東海	LOC	郡
+南郡	LOC	郡
+江夏	LOC	郡
+長沙	LOC	國
+桂陽	LOC	郡
+武陵	LOC	郡
+零陵	LOC	郡
+蒼梧	LOC	郡
+鬱林	LOC	郡
+合浦	LOC	郡
+交趾	LOC	郡
+九真	LOC	郡
+日南	LOC	郡
+南海	LOC	郡
+漢中	LOC	郡
+廣漢	LOC	郡
+蜀郡	LOC	郡
+犍為	LOC	郡
+牂柯	LOC	郡
+越巂	LOC	郡
+巴郡	LOC	郡
+武都	LOC	郡
+隴西	LOC	郡
+天水	LOC	郡
+安定	LOC	郡
+北地	LOC	郡
+上郡	LOC	郡
+西河	LOC	郡
+朔方	LOC	郡
+五原	LOC	郡
+金城	LOC	郡
+武威	LOC	郡
+張掖	LOC	郡
+酒泉	LOC	郡
+敦煌	LOC	郡
+#
+# ── LOC: 西域·四夷·邊外 ──
+匈奴	LOC	族·國
+西域	LOC	지역
+烏孫	LOC	西域國
+大宛	LOC	西域國
+月氏	LOC	西域國
+大月氏	LOC	西域國
+康居	LOC	西域國
+大夏	LOC	西域國
+安息	LOC	西域國
+罽賓	LOC	西域國
+龜茲	LOC	西域國
+樓蘭	LOC	西域國
+鄯善	LOC	西域國
+車師	LOC	西域國
+莎車	LOC	西域國
+疏勒	LOC	西域國
+于闐	LOC	西域國
+焉耆	LOC	西域國
+南越	LOC	國
+東越	LOC	國
+閩越	LOC	國
+朝鮮	LOC	國
+西南夷	LOC	족·지역
+夜郎	LOC	西南夷國
+滇	LOC	西南夷國
+#
+# ── LOC: 지역·관문 ──
+關中	LOC	지역
+關東	LOC	지역
+山東	LOC	지역
+河西	LOC	지역
+江東	LOC	지역
+巴蜀	LOC	지역
+函谷關	LOC	관문
+武關	LOC	관문
+蕭關	LOC	관문
+玉門關	LOC	관문
+陽關	LOC	관문
+洛陽	LOC	도성
+#
+# ── 위음성 보강 (2026-06-12) — 가제티어 누락 개체 ──
+# OFI: 將軍·校尉 칭호 (武帝~新莽; 본문 출현 확인). 강노장군은 強→彊 정규화로 기존 시드가 잡음.
+驍騎將軍	OFI	武帝 將軍號
+輕車將軍	OFI	將軍號
+虎牙將軍	OFI	將軍號(田順 등)
+因杅將軍	OFI	武帝 將軍號(公孫敖)
+橫海將軍	OFI	武帝 將軍號(韓說)
+蒲類將軍	OFI	昭帝 將軍號
+祁連將軍	OFI	武帝 將軍號(田廣明)
+奮武將軍	OFI	將軍號
+護軍將軍	OFI	將軍號
+材官將軍	OFI	將軍號
+拔胡將軍	OFI	將軍號(郭昌)
+浚稽將軍	OFI	武帝 將軍號(趙破奴)
+立國將軍	OFI	新莽 將軍號
+寧始將軍	OFI	新莽 將軍號
+厭難將軍	OFI	新莽 將軍號
+更始將軍	OFI	新莽 將軍號
+副校尉	OFI	西域·匈奴 副校尉
+# PER: 后妃·宗室女 (衞→衛 정규화 후 衛-형이 衞-형도 포섭)
+衛子夫	PER	武帝 衛皇后
+衛皇后	PER	武帝后(衛子夫)
+衛思后	PER	衛子夫 諡
+陳皇后	PER	武帝 폐후(陳阿嬌)
+李夫人	PER	武帝 寵妃
+趙婕妤	PER	昭帝母(鉤弋夫人)
+鉤弋	PER	鉤弋夫人(趙婕妤)
+班婕妤	PER	成帝 妃·文인
+馮昭儀	PER	元帝 妃(馮媛)
+傅昭儀	PER	元帝 妃(傅太后)
+丁姬	PER	哀帝母
+史良娣	PER	戾太子 妃(宣帝 조모)
+戾后	PER	史良娣 諡
+邛成	PER	宣帝 王皇后(邛成太后)
+王皇后	PER	황후(王政君 등)
+許皇后	PER	宣帝 許皇后 등
+王夫人	PER	武帝 王夫人 등
+# PER: 名 단독 지칭 (전체이름은 더 긴 매칭이 우선되어 공존)
+去病	PER	霍去病
+廣利	PER	李廣利
+充國	PER	趙充國
+破奴	PER	趙破奴
+弘羊	PER	桑弘羊
+日磾	PER	金日磾
+不疑	PER	雋不疑·直不疑
+
+# ── LLM 전수분류 FN 회복 (2026-06-12) — CBDB 미수록/ADDR게이팅 개체 ──
+昭德	APP	LLM분류
+武德	APP	LLM분류
+三川	LOC	LLM분류
+三江	LOC	LLM분류
+三河	LOC	LLM분류
+三輔	LOC	LLM분류
+上庸	LOC	LLM분류
+上林	LOC	LLM분류
+上蔡	LOC	LLM분류
+上邽	LOC	LLM분류
+上黨郡	LOC	LLM분류
+下密	LOC	LLM분류
+下邑	LOC	LLM분류
+下邳	LOC	LLM분류
+下邽	LOC	LLM분류
+且末	LOC	LLM분류
+中牟	LOC	LLM분류
+中都	LOC	LLM분류
+丹徒	LOC	LLM분류
+丹水	LOC	LLM분류
+乘丘	LOC	LLM분류
+乘氏	LOC	LLM분류
+九原	LOC	LLM분류
+井陘	LOC	LLM분류
+京師	LOC	LLM분류
+信宮	LOC	LLM분류
+修武	LOC	LLM분류
+元城	LOC	LLM분류
+兗州	LOC	LLM분류
+內黃	LOC	LLM분류
+冀州	LOC	LLM분류
+北宮	LOC	LLM분류
+北平	LOC	LLM분류
+南城	LOC	LLM분류
+南安	LOC	LLM분류
+南宮	LOC	LLM분류
+南昌	LOC	LLM분류
+南皮	LOC	LLM분류
+南鄭	LOC	LLM분류
+南陵	LOC	LLM분류
+南陽郡	LOC	LLM분류
+博山	LOC	LLM분류
+博平	LOC	LLM분류
+博望	LOC	LLM분류
+博陽	LOC	LLM분류
+即墨	LOC	LLM분류
+厭次	LOC	LLM분류
+受降城	LOC	LLM분류
+合陽	LOC	LLM분류
+吳楚七國	LOC	LLM분류
+周陽	LOC	LLM분류
+咸陽	LOC	LLM분류
+善無	LOC	LLM분류
+單父	LOC	LLM분류
+嚴鄉	LOC	LLM분류
+城父	LOC	LLM분류
+堂邑	LOC	LLM분류
+壺關	LOC	LLM분류
+壽春	LOC	LLM분류
+壽良	LOC	LLM분류
+夏陽	LOC	LLM분류
+外黃	LOC	LLM분류
+大梁	LOC	LLM분류
+大陸	LOC	LLM분류
+天山	LOC	LLM분류
+太原郡	LOC	LLM분류
+太子宮	LOC	LLM분류
+太行	LOC	LLM분류
+夷道	LOC	LLM분류
+好畤	LOC	LLM분류
+婼羌	LOC	LLM분류
+孔鄉	LOC	LLM분류
+孟津	LOC	LLM분류
+安丘	LOC	LLM분류
+安平	LOC	LLM분류
+安故	LOC	LLM분류
+安昌	LOC	LLM분류
+安樂	LOC	LLM분류
+安遠	LOC	LLM분류
+安邑	LOC	LLM분류
+安鄉	LOC	LLM분류
+安陵	LOC	LLM분류
+安陽	LOC	LLM분류
+定安	LOC	LLM분류
+定陶	LOC	LLM분류
+宜春	LOC	LLM분류
+宜鄉	LOC	LLM분류
+宜陽	LOC	LLM분류
+宣平	LOC	LLM분류
+容城	LOC	LLM분류
+富平	LOC	LLM분류
+富昌	LOC	LLM분류
+封陽	LOC	LLM분류
+將陵	LOC	LLM분류
+尉犁	LOC	LLM분류
+岐山	LOC	LLM분류
+平丘	LOC	LLM분류
+平城	LOC	LLM분류
+平安	LOC	LLM분류
+平州	LOC	LLM분류
+平恩	LOC	LLM분류
+平昌	LOC	LLM분류
+平林	LOC	LLM분류
+平棘	LOC	LLM분류
+平樂	LOC	LLM분류
+平氏	LOC	LLM분류
+平鄉	LOC	LLM분류
+平陰	LOC	LLM분류
+平陵	LOC	LLM분류
+平陸	LOC	LLM분류
+平陽	LOC	LLM분류
+并州	LOC	LLM분류
+幽州	LOC	LLM분류
+幽都	LOC	LLM분류
+廢丘	LOC	LLM분류
+廣宗	LOC	LLM분류
+廣德	LOC	LLM분류
+廣昌	LOC	LLM분류
+廣武	LOC	LLM분류
+廣陽	LOC	LLM분류
+廣饒	LOC	LLM분류
+延陵	LOC	LLM분류
+建章宮	LOC	LLM분류
+建陵	LOC	LLM분류
+弋陽	LOC	LLM분류
+弓高	LOC	LLM분류
+張掖郡	LOC	LLM분류
+彭城	LOC	LLM분류
+徐州	LOC	LLM분류
+恆山	LOC	LLM분류
+成安	LOC	LLM분류
+成武	LOC	LLM분류
+成紀	LOC	LLM분류
+成都	LOC	LLM분류
+成陽	LOC	LLM분류
+房陵	LOC	LLM분류
+扶陽	LOC	LLM분류
+承休	LOC	LLM분류
+揚州	LOC	LLM분류
+揭陽	LOC	LLM분류
+文安	LOC	LLM분류
+文山	LOC	LLM분류
+斥丘	LOC	LLM분류
+新城	LOC	LLM분류
+新安	LOC	LLM분류
+新昌	LOC	LLM분류
+新秦	LOC	LLM분류
+新蔡	LOC	LLM분류
+新豐	LOC	LLM분류
+新都	LOC	LLM분류
+新野	LOC	LLM분류
+新陽	LOC	LLM분류
+方與	LOC	LLM분류
+方陽	LOC	LLM분류
+昆明	LOC	LLM분류
+昌邑	LOC	LLM분류
+昌陵	LOC	LLM분류
+明堂	LOC	LLM분류
+晉國	LOC	LLM분류
+晉陽	LOC	LLM분류
+曲周	LOC	LLM분류
+曲沃	LOC	LLM분류
+曲臺	LOC	LLM분류
+曲陽	LOC	LLM분류
+會稽郡	LOC	LLM분류
+朝陽	LOC	LLM분류
+未央宮	LOC	LLM분류
+東垣	LOC	LLM분류
+東城	LOC	LLM분류
+東安	LOC	LLM분류
+東鄉	LOC	LLM분류
+東阿	LOC	LLM분류
+東陽	LOC	LLM분류
+析木	LOC	LLM분류
+柏人	LOC	LLM분류
+桂林	LOC	LLM분류
+桐柏	LOC	LLM분류
+桐鄉	LOC	LLM분류
+梁山	LOC	LLM분류
+梁父	LOC	LLM분류
+樂安	LOC	LLM분류
+樂平	LOC	LLM분류
+樂成	LOC	LLM분류
+樂昌	LOC	LLM분류
+樂陵	LOC	LLM분류
+樅陽	LOC	LLM분류
+樓煩	LOC	LLM분류
+橫陽	LOC	LLM분류
+武城	LOC	LLM분류
+武安	LOC	LLM분류
+武州	LOC	LLM분류
+武平	LOC	LLM분류
+武彊	LOC	LLM분류
+武成	LOC	LLM분류
+武陽	LOC	LLM분류
+歸德	LOC	LLM분류
+氾鄉	LOC	LLM분류
+汝陰	LOC	LLM분류
+江南	LOC	LLM분류
+江水	LOC	LLM분류
+江淮	LOC	LLM분류
+江陵	LOC	LLM분류
+池陽	LOC	LLM분류
+汾陰	LOC	LLM분류
+沃野	LOC	LLM분류
+河內郡	LOC	LLM분류
+河北	LOC	LLM분류
+河南郡	LOC	LLM분류
+河水	LOC	LLM분류
+河陽	LOC	LLM분류
+海陽	LOC	LLM분류
+浿水	LOC	LLM분류
+涇水	LOC	LLM분류
+涇陽	LOC	LLM분류
+涼州	LOC	LLM분류
+淄川	LOC	LLM분류
+淮北	LOC	LLM분류
+淮南	LOC	LLM분류
+淮陰	LOC	LLM분류
+淮陽	LOC	LLM분류
+深澤	LOC	LLM분류
+清陽	LOC	LLM분류
+渭城	LOC	LLM분류
+渭陵	LOC	LLM분류
+渭陽	LOC	LLM분류
+湟水	LOC	LLM분류
+溫宿	LOC	LLM분류
+滎陽城	LOC	LLM분류
+漸臺	LOC	LLM분류
+潁陰	LOC	LLM분류
+濟北	LOC	LLM분류
+濟陽	LOC	LLM분류
+濮陽	LOC	LLM분류
+烏氏	LOC	LLM분류
+無終	LOC	LLM분류
+燉煌	LOC	LLM분류
+營陵	LOC	LLM분류
+狄道	LOC	LLM분류
+猗氏	LOC	LLM분류
+獲嘉	LOC	LLM분류
+玉門	LOC	LLM분류
+王城	LOC	LLM분류
+珠崖郡	LOC	LLM분류
+琅邪郡	LOC	LLM분류
+瑕丘	LOC	LLM분류
+甘泉宮	LOC	LLM분류
+番禺	LOC	LLM분류
+當塗	LOC	LLM분류
+當陽	LOC	LLM분류
+白石	LOC	LLM분류
+白馬	LOC	LLM분류
+皮山	LOC	LLM분류
+益州	LOC	LLM분류
+盩厔	LOC	LLM분류
+睢陵	LOC	LLM분류
+睢陽	LOC	LLM분류
+石渠	LOC	LLM분류
+碭郡	LOC	LLM분류
+秦國	LOC	LLM분류
+穀城	LOC	LLM분류
+章武	LOC	LLM분류
+符離	LOC	LLM분류
+紅陽	LOC	LLM분류
+紫宮	LOC	LLM분류
+緱氏	LOC	LLM분류
+美陽	LOC	LLM분류
+義渠	LOC	LLM분류
+義陽	LOC	LLM분류
+肅慎	LOC	LLM분류
+肥如	LOC	LLM분류
+胡陵	LOC	LLM분류
+膠東	LOC	LLM분류
+膠西	LOC	LLM분류
+臨晉	LOC	LLM분류
+臨朐	LOC	LLM분류
+臨汝	LOC	LLM분류
+臨江	LOC	LLM분류
+臨河	LOC	LLM분류
+臨洮	LOC	LLM분류
+臨涇	LOC	LLM분류
+臨淄	LOC	LLM분류
+臨濟	LOC	LLM분류
+臨邛	LOC	LLM분류
+舂陵	LOC	LLM분류
+舞陽	LOC	LLM분류
+苦陘	LOC	LLM분류
+茂陵	LOC	LLM분류
+范陽	LOC	LLM분류
+荊州	LOC	LLM분류
+華山	LOC	LLM분류
+華陰	LOC	LLM분류
+華陽	LOC	LLM분류
+萬年	LOC	LLM분류
+蒲犁	LOC	LLM분류
+蒲類	LOC	LLM분류
+蓬萊	LOC	LLM분류
+藍田	LOC	LLM분류
+蘭陵	LOC	LLM분류
+衡山	LOC	LLM분류
+襄國	LOC	LLM분류
+襄城	LOC	LLM분류
+襄平	LOC	LLM분류
+西城	LOC	LLM분류
+西安	LOC	LLM분류
+西宮	LOC	LLM분류
+西州	LOC	LLM분류
+西平	LOC	LLM분류
+西海	LOC	LLM분류
+觀津	LOC	LLM분류
+許田	LOC	LLM분류
+象郡	LOC	LLM분류
+豫州	LOC	LLM분류
+豫章郡	LOC	LLM분류
+越裳	LOC	LLM분류
+趙城	LOC	LLM분류
+身毒國	LOC	LLM분류
+輪臺	LOC	LLM분류
+轘轅	LOC	LLM분류
+辟陽	LOC	LLM분류
+邯鄲	LOC	LLM분류
+鄢陵	LOC	LLM분류
+酒泉郡	LOC	LLM분류
+重泉	LOC	LLM분류
+鉅野	LOC	LLM분류
+銅鞮	LOC	LLM분류
+長信宮	LOC	LLM분류
+長城	LOC	LLM분류
+長安城	LOC	LLM분류
+長平	LOC	LLM분류
+長樂宮	LOC	LLM분류
+長水	LOC	LLM분류
+長社	LOC	LLM분류
+長陵	LOC	LLM분류
+開封	LOC	LLM분류
+陰山	LOC	LLM분류
+陳倉	LOC	LLM분류
+陸渾	LOC	LLM분류
+陽信	LOC	LLM분류
+陽城	LOC	LLM분류
+陽安	LOC	LLM분류
+陽山	LOC	LLM분류
+陽武	LOC	LLM분류
+陽翟	LOC	LLM분류
+陽陵	LOC	LLM분류
+雍丘	LOC	LLM분류
+雍州	LOC	LLM분류
+雒陽	LOC	LLM분류
+雲中郡	LOC	LLM분류
+雲夢	LOC	LLM분류
+雲陵	LOC	LLM분류
+霸陵	LOC	LLM분류
+靈臺	LOC	LLM분류
+青州	LOC	LLM분류
+順陽	LOC	LLM분류
+須昌	LOC	LLM분류
+頻陽	LOC	LLM분류
+飛狐	LOC	LLM분류
+館陶	LOC	LLM분류
+首陽	LOC	LLM분류
+馬邑	LOC	LLM분류
+高城	LOC	LLM분류
+高奴	LOC	LLM분류
+高密	LOC	LLM분류
+高平	LOC	LLM분류
+高昌	LOC	LLM분류
+高陵	LOC	LLM분류
+高陽	LOC	LLM분류
+魯陽	LOC	LLM분류
+鴈門	LOC	LLM분류
+黎陽	LOC	LLM분류
+黑水	LOC	LLM분류
+齊國	LOC	LLM분류
+龍城	LOC	LLM분류
+龍門	LOC	LLM분류
+主爵都尉	OFI	LLM분류
+北地都尉	OFI	LLM분류
+協律都尉	OFI	LLM분류
+博望侯	OFI	LLM분류
+名王	OFI	LLM분류
+周侯	OFI	LLM분류
+國師公	OFI	LLM분류
+奧鞬王	OFI	LLM분류
+孝單于	OFI	LLM분류
+屬國都尉	OFI	LLM분류
+彊弩都尉	OFI	LLM분류
+搜粟都尉	OFI	LLM분류
+日逐王	OFI	LLM분류
+東牟侯	OFI	LLM분류
+渾邪王	OFI	LLM분류
+灌將軍	OFI	LLM분류
+留侯	OFI	LLM분류
+祁連	OFI	LLM분류
+粟都尉	OFI	LLM분류
+胡將軍	OFI	LLM분류
+蒲將軍	OFI	LLM분류
+西于王	OFI	LLM분류
+護羌校尉	OFI	LLM분류
+谷蠡王	OFI	LLM분류
+賢王	OFI	LLM분류
+車師王	OFI	LLM분류
+車騎都尉	OFI	LLM분류
+農都尉	OFI	LLM분류
+通侯	OFI	LLM분류
+郡都尉	OFI	LLM분류
+都水	OFI	LLM분류
+關都尉	OFI	LLM분류
+附城	OFI	LLM분류
+霸王	OFI	LLM분류
+鞮單于	OFI	LLM분류
+騎君	OFI	LLM분류
+骨都侯	OFI	LLM분류
+高昌侯	OFI	LLM분류
+鬱成王	OFI	LLM분류
+龜茲王	OFI	LLM분류
+丁公	PER	LLM분류
+丁將軍	PER	LLM분류
+且鞮侯	PER	LLM분류
+九江王	PER	LLM분류
+代共王	PER	LLM분류
+代孝王	PER	LLM분류
+休侯	PER	LLM분류
+休屠王	PER	LLM분류
+侯公	PER	LLM분류
+信都王	PER	LLM분류
+元王	PER	LLM분류
+共公	PER	LLM분류
+冠軍侯	PER	LLM분류
+冠陽侯	PER	LLM분류
+出公	PER	LLM분류
+剌王	PER	LLM분류
+北平侯	PER	LLM분류
+千秋	PER	LLM분류
+南粵王	PER	LLM분류
+南越王	PER	LLM분류
+博山侯	PER	LLM분류
+博陽侯	PER	LLM분류
+原侯	PER	LLM분류
+厲公	PER	LLM분류
+厲王	PER	LLM분류
+合陽侯	PER	LLM분류
+合騎侯	PER	LLM분류
+吳公	PER	LLM분류
+呂侯	PER	LLM분류
+呂公	PER	LLM분류
+呂王	PER	LLM분류
+周公	PER	LLM분류
+周成王	PER	LLM분류
+周文王	PER	LLM분류
+周景王	PER	LLM분류
+周武王	PER	LLM분류
+周襄王	PER	LLM분류
+哀侯	PER	LLM분류
+商丘	PER	LLM분류
+商君	PER	LLM분류
+嗣君	PER	LLM분류
+嚴王	PER	LLM분류
+嚴鄉侯	PER	LLM분류
+塞王	PER	LLM분류
+壽昌	PER	LLM분류
+夏侯	PER	LLM분류
+太公	PER	LLM분류
+太史公	PER	LLM분류
+夷侯	PER	LLM분류
+如侯	PER	LLM분류
+威公	PER	LLM분류
+威王	PER	LLM분류
+子南君	PER	LLM분류
+孝侯	PER	LLM분류
+孝公	PER	LLM분류
+安昌侯	PER	LLM분류
+宋公	PER	LLM분류
+宋襄公	PER	LLM분류
+宛王	PER	LLM분류
+宜陵侯	PER	LLM분류
+宣成侯	PER	LLM분류
+宣王	PER	LLM분류
+富平侯	PER	LLM분류
+小夏侯	PER	LLM분류
+尹公	PER	LLM분류
+岸頭侯	PER	LLM분류
+川繆王	PER	LLM분류
+師王	PER	LLM분류
+幽王	PER	LLM분류
+康侯	PER	LLM분류
+康公	PER	LLM분류
+康居王	PER	LLM분류
+康王	PER	LLM분류
+廣國	PER	LLM분류
+廣戚侯	PER	LLM분류
+廣武君	PER	LLM분류
+廣陵王	PER	LLM분류
+建平侯	PER	LLM분류
+建德	PER	LLM분류
+式王	PER	LLM분류
+弓高侯	PER	LLM분류
+張次公	PER	LLM분류
+張王	PER	LLM분류
+彭王	PER	LLM분류
+徐公	PER	LLM분류
+思侯	PER	LLM분류
+恆山王	PER	LLM분류
+恭王	PER	LLM분류
+悼公	PER	LLM분류
+悼惠王	PER	LLM분류
+惠公	PER	LLM분류
+愍公	PER	LLM분류
+愍王	PER	LLM분류
+憲王	PER	LLM분류
+懷公	PER	LLM분류
+懿王	PER	LLM분류
+成公	PER	LLM분류
+成安君	PER	LLM분류
+成都侯	PER	LLM분류
+戚侯	PER	LLM분류
+戴侯	PER	LLM분류
+戴王	PER	LLM분류
+扶蘇	PER	LLM분류
+承休侯	PER	LLM분류
+按道侯	PER	LLM분류
+揚子	PER	LLM분류
+政君	PER	LLM분류
+文侯	PER	LLM분류
+文君	PER	LLM분류
+新成侯	PER	LLM분류
+方山	PER	LLM분류
+方陽侯	PER	LLM분류
+昆吾	PER	LLM분류
+昆邪王	PER	LLM분류
+昌邑王	PER	LLM분류
+昏侯	PER	LLM분류
+易王	PER	LLM분류
+昭君	PER	LLM분류
+昭王	PER	LLM분류
+晉侯	PER	LLM분류
+晉文公	PER	LLM분류
+景侯	PER	LLM분류
+景公	PER	LLM분류
+曲周侯	PER	LLM분류
+曲陽侯	PER	LLM분류
+朱虛侯	PER	LLM분류
+李將軍	PER	LLM분류
+杜侯	PER	LLM분류
+東陽侯	PER	LLM분류
+桃侯	PER	LLM분류
+桓侯	PER	LLM분류
+桓公	PER	LLM분류
+梁丘	PER	LLM분류
+梁孝王	PER	LLM분류
+梁敬王	PER	LLM분류
+條侯	PER	LLM분류
+楚元王	PER	LLM분류
+楚孝王	PER	LLM분류
+楚思王	PER	LLM분류
+樂安侯	PER	LLM분류
+樂平侯	PER	LLM분류
+樂成侯	PER	LLM분류
+樂陵侯	PER	LLM분류
+樅公	PER	LLM분류
+樓蘭王	PER	LLM분류
+武信君	PER	LLM분류
+武公	PER	LLM분류
+武君	PER	LLM분류
+殷王	PER	LLM분류
+氾鄉侯	PER	LLM분류
+江公	PER	LLM분류
+江都王	PER	LLM분류
+泄公	PER	LLM분류
+淮陰侯	PER	LLM분류
+清河王	PER	LLM분류
+游公	PER	LLM분류
+滇王	PER	LLM분류
+滕公	PER	LLM분류
+潁陰侯	PER	LLM분류
+烈王	PER	LLM분류
+燕剌王	PER	LLM분류
+營陵侯	PER	LLM분류
+狂王	PER	LLM분류
+獻公	PER	LLM분류
+王昭君	PER	LLM분류
+甫侯	PER	LLM분류
+申侯	PER	LLM분류
+番君	PER	LLM분류
+當陽君	PER	LLM분류
+白公	PER	LLM분류
+白起	PER	LLM분류
+相如	PER	LLM분류
+石君	PER	LLM분류
+祁侯	PER	LLM분류
+神君	PER	LLM분류
+票侯	PER	LLM분류
+秦孝公	PER	LLM분류
+秦穆公	PER	LLM분류
+秺侯	PER	LLM분류
+穆公	PER	LLM분류
+穆王	PER	LLM분류
+穰侯	PER	LLM분류
+粵王	PER	LLM분류
+紅陽侯	PER	LLM분류
+絳侯	PER	LLM분류
+綱王	PER	LLM분류
+繆侯	PER	LLM분류
+繆公	PER	LLM분류
+繆王	PER	LLM분류
+繇王	PER	LLM분류
+義侯	PER	LLM분류
+義陽王	PER	LLM분류
+翕侯	PER	LLM분류
+翟王	PER	LLM분류
+胡公	PER	LLM분류
+臺侯	PER	LLM분류
+舞陽侯	PER	LLM분류
+若王	PER	LLM분류
+茲侯	PER	LLM분류
+荒王	PER	LLM분류
+萬石君	PER	LLM분류
+董君	PER	LLM분류
+蓋侯	PER	LLM분류
+蓋公	PER	LLM분류
+蔡侯	PER	LLM분류
+蕭相國	PER	LLM분류
+薛公	PER	LLM분류
+虢公	PER	LLM분류
+衛侯	PER	LLM분류
+衛公	PER	LLM분류
+衛山	PER	LLM분류
+褒新侯	PER	LLM분류
+襄公	PER	LLM분류
+襄平侯	PER	LLM분류
+許昌	PER	LLM분류
+質侯	PER	LLM분류
+趙共王	PER	LLM분류
+趙幽王	PER	LLM분류
+趙隱王	PER	LLM분류
+趙頃王	PER	LLM분류
+軍趙充國	PER	LLM분류
+軹侯	PER	LLM분류
+轑陽侯	PER	LLM분류
+辟陽侯	PER	LLM분류
+郚鄉侯	PER	LLM분류
+鄧公	PER	LLM분류
+酇侯	PER	LLM분류
+重合侯	PER	LLM분류
+野王	PER	LLM분류
+釐公	PER	LLM분류
+釐王	PER	LLM분류
+金安	PER	LLM분류
+鉤町王	PER	LLM분류
+鍾離	PER	LLM분류
+長君	PER	LLM분류
+長沙王	PER	LLM분류
+長羅侯	PER	LLM분류
+開陵侯	PER	LLM분류
+閔公	PER	LLM분류
+閔王	PER	LLM분류
+閩王	PER	LLM분류
+閩粵王	PER	LLM분류
+阿侯	PER	LLM분류
+陶共王	PER	LLM분류
+陽城侯	PER	LLM분류
+陽安侯	PER	LLM분류
+陽平侯	PER	LLM분류
+隱公	PER	LLM분류
+隱王	PER	LLM분류
+霍將軍	PER	LLM분류
+靈公	PER	LLM분류
+靈王	PER	LLM분류
+鞮侯	PER	LLM분류
+頃公	PER	LLM분류
+項王	PER	LLM분류
+顯君	PER	LLM분류
+馳義侯	PER	LLM분류
+高安侯	PER	LLM분류
+高平侯	PER	LLM분류
+高武侯	PER	LLM분류
+魏公	PER	LLM분류
+魏其侯	PER	LLM분류
+魏文侯	PER	LLM분류
+魯公	PER	LLM분류
+魯共王	PER	LLM분류
+魯哀公	PER	LLM분류
+魯嚴公	PER	LLM분류
+魯孝王	PER	LLM분류
+齊侯	PER	LLM분류
+齊孝王	PER	LLM분류
+齊懷王	PER	LLM분류
+齊桓公	PER	LLM분류
+龍額侯	PER	LLM분류

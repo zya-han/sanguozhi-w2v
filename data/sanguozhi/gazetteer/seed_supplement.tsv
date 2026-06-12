@@ -1,0 +1,449 @@
+# 보충 시드 — CBDB가 누락한 canonical 三國 字(courtesy)·號·諡.
+# 출처: 《三國志》 각 傳 첫머리 "字XX" 표기(正史 기준). 별명 정규화 아님 — 각각 독립 PER 표면형.
+# require_corpus_occurrence 필터를 거치므로 코퍼스에 실제 등장하는 것만 최종 채택된다.
+# 컬럼: surface<TAB>type<TAB>refers_to(메모, 가제티어에는 surface,type만 반영)
+孔明	PER	諸葛亮 字
+臥龍	PER	諸葛亮 號
+武侯	PER	諸葛亮 諡(忠武侯)
+玄德	PER	劉備 字
+雲長	PER	關羽 字
+益德	PER	張飛 字(正史)
+翼德	PER	張飛 字(통행)
+孟德	PER	曹操 字
+仲謀	PER	孫權 字
+公瑾	PER	周瑜 字
+子龍	PER	趙雲 字
+奉先	PER	呂布 字
+仲達	PER	司馬懿 字
+文若	PER	荀彧 字
+公達	PER	荀攸 字
+奉孝	PER	郭嘉 字
+元直	PER	徐庶 字
+士元	PER	龐統 字
+鳳雛	PER	龐統 號
+伯約	PER	姜維 字
+士載	PER	鄧艾 字
+士季	PER	鍾會 字
+伯言	PER	陸遜 字
+子明	PER	呂蒙 字
+興霸	PER	甘寧 字
+子義	PER	太史慈 字
+子瑜	PER	諸葛瑾 字
+孝直	PER	法正 字
+令明	PER	龐德 字
+儁乂	PER	張郃 字
+公明	PER	徐晃 字
+文謙	PER	樂進 字
+文則	PER	于禁 字
+仲康	PER	許褚 字
+元讓	PER	夏侯惇 字
+妙才	PER	夏侯淵 字
+子孝	PER	曹仁 字
+子廉	PER	曹洪 字
+仲德	PER	程昱 字
+文和	PER	賈詡 字
+公台	PER	陳宮 字
+子魚	PER	華歆 字
+景興	PER	王朗 字
+子元	PER	司馬師 字
+子上	PER	司馬昭 字
+伯符	PER	孫策 字
+文台	PER	孫堅 字
+本初	PER	袁紹 字
+公路	PER	袁術 字
+景升	PER	劉表 字
+季玉	PER	劉璋 字
+文遠	PER	張遼 字
+幼常	PER	馬謖 字
+孟起	PER	馬超 字
+漢升	PER	黃忠 字
+子敬	PER	魯肅 字
+德祖	PER	楊脩 字
+仲穎	PER	董卓 字
+# ── 주요 인물 본명(CBDB 누락분 보장; 字 도입부 추출이 놓친 경우 대비) ──
+周瑜	PER	吳 장수
+魯肅	PER	吳 장수
+呂蒙	PER	吳 장수
+陸遜	PER	吳 도독
+太史慈	PER	吳 장수
+甘寧	PER	吳 장수
+黃蓋	PER	吳 장수
+周泰	PER	吳 장수
+凌統	PER	吳 장수
+孫堅	PER	吳 시조
+孫策	PER	吳 시조
+孫權	PER	吳 대제
+張遼	PER	魏 오자양장
+徐晃	PER	魏 오자양장
+張郃	PER	魏 오자양장
+樂進	PER	魏 오자양장
+于禁	PER	魏 오자양장
+許褚	PER	魏 호위
+典韋	PER	魏 호위
+夏侯惇	PER	魏 종실장
+夏侯淵	PER	魏 종실장
+曹仁	PER	魏 종실장
+曹洪	PER	魏 종실장
+荀彧	PER	魏 모사
+荀攸	PER	魏 모사
+郭嘉	PER	魏 모사
+程昱	PER	魏 모사
+賈詡	PER	魏 모사
+陳宮	PER	呂布 모사
+龐統	PER	蜀 군사
+法正	PER	蜀 모사
+馬超	PER	蜀 오호장
+黃忠	PER	蜀 오호장
+趙雲	PER	蜀 오호장
+姜維	PER	蜀 대장군
+龐德	PER	魏 장수
+華佗	PER	명의
+
+# ════════ 年號 (연호) — 後漢·三國·西晉初. CBDB에 年號 카테고리 없어 보강 ════════
+建武	ERA	後漢
+中元	ERA	後漢
+永平	ERA	後漢
+建初	ERA	後漢
+元和	ERA	後漢
+章和	ERA	後漢
+永元	ERA	後漢
+元興	ERA	後漢/吳
+延平	ERA	後漢
+永初	ERA	後漢
+元初	ERA	後漢
+永寧	ERA	後漢/晉
+建光	ERA	後漢
+延光	ERA	後漢
+永建	ERA	後漢
+陽嘉	ERA	後漢
+永和	ERA	後漢
+漢安	ERA	後漢
+建康	ERA	後漢
+永嘉	ERA	後漢
+本初	ERA	後漢
+建和	ERA	後漢
+和平	ERA	後漢
+元嘉	ERA	後漢
+永興	ERA	後漢
+永壽	ERA	後漢
+延熹	ERA	後漢
+永康	ERA	後漢
+建寧	ERA	後漢
+熹平	ERA	後漢
+光和	ERA	後漢
+中平	ERA	後漢
+昭寧	ERA	後漢
+永漢	ERA	後漢
+初平	ERA	後漢
+興平	ERA	後漢
+建安	ERA	後漢
+延康	ERA	後漢/魏
+黃初	ERA	魏
+太和	ERA	魏
+青龍	ERA	魏
+景初	ERA	魏
+正始	ERA	魏
+嘉平	ERA	魏
+正元	ERA	魏
+甘露	ERA	魏/吳
+景元	ERA	魏
+咸熙	ERA	魏
+章武	ERA	蜀
+建興	ERA	蜀/吳
+延熙	ERA	蜀
+景耀	ERA	蜀
+炎興	ERA	蜀
+黃武	ERA	吳
+黃龍	ERA	吳
+嘉禾	ERA	吳
+赤烏	ERA	吳
+太元	ERA	吳
+神鳳	ERA	吳
+五鳳	ERA	吳
+太平	ERA	吳
+永安	ERA	吳
+寶鼎	ERA	吳
+建衡	ERA	吳
+鳳凰	ERA	吳
+天冊	ERA	吳
+天璽	ERA	吳
+天紀	ERA	吳
+泰始	ERA	西晉
+
+# ════════ 官職 (관직) — 後漢三國 常見. CBDB OFFICE_CODES 누락 보강 ════════
+太尉	OFI	三公
+司徒	OFI	三公
+司空	OFI	三公
+丞相	OFI	재상
+相國	OFI	재상
+大司馬	OFI	武職 최고
+太傅	OFI	上公
+太師	OFI	上公
+太保	OFI	上公
+太常	OFI	九卿
+光祿勳	OFI	九卿
+衛尉	OFI	九卿
+太僕	OFI	九卿
+廷尉	OFI	九卿
+大鴻臚	OFI	九卿
+宗正	OFI	九卿
+大司農	OFI	九卿
+少府	OFI	九卿
+執金吾	OFI	경위
+大將軍	OFI	武職
+驃騎將軍	OFI	將軍號
+車騎將軍	OFI	將軍號
+衛將軍	OFI	將軍號
+前將軍	OFI	將軍號
+後將軍	OFI	將軍號
+左將軍	OFI	將軍號
+右將軍	OFI	將軍號
+征東將軍	OFI	四征
+征西將軍	OFI	四征
+征南將軍	OFI	四征
+征北將軍	OFI	四征
+鎮東將軍	OFI	四鎮
+鎮西將軍	OFI	四鎮
+鎮南將軍	OFI	四鎮
+鎮北將軍	OFI	四鎮
+安東將軍	OFI	將軍號
+安南將軍	OFI	將軍號
+平南將軍	OFI	將軍號
+偏將軍	OFI	將軍號
+裨將軍	OFI	將軍號
+蕩寇將軍	OFI	將軍號
+討逆將軍	OFI	將軍號
+破虜將軍	OFI	將軍號
+奮武將軍	OFI	將軍號
+建威將軍	OFI	將軍號
+軍師將軍	OFI	將軍號
+中護軍	OFI	禁軍
+中領軍	OFI	禁軍
+護軍	OFI	무관
+領軍	OFI	무관
+議郎	OFI	郎官
+中郎	OFI	郎官
+侍郎	OFI	郎官
+郎中	OFI	郎官
+中郎將	OFI	郎官
+五官中郎將	OFI	郎官
+左中郎將	OFI	郎官
+右中郎將	OFI	郎官
+虎賁中郎將	OFI	郎官
+羽林中郎將	OFI	郎官
+尚書令	OFI	尚書
+尚書僕射	OFI	尚書
+左僕射	OFI	尚書
+右僕射	OFI	尚書
+尚書	OFI	尚書
+侍中	OFI	加官
+黃門侍郎	OFI	궁중
+散騎常侍	OFI	加官
+給事中	OFI	加官
+中書令	OFI	中書
+中書監	OFI	中書
+秘書監	OFI	秘書
+御史大夫	OFI	감찰
+御史中丞	OFI	감찰
+司隸校尉	OFI	감찰
+刺史	OFI	地방
+州牧	OFI	地방
+治中	OFI	州속관
+別駕	OFI	州속관
+主簿	OFI	속관
+功曹	OFI	속관
+從事	OFI	州속관
+督郵	OFI	郡속관
+太守	OFI	郡守
+都尉	OFI	무관
+縣令	OFI	縣
+縣長	OFI	縣
+郡丞	OFI	郡속관
+縣丞	OFI	縣속관
+亭長	OFI	亭
+大長秋	OFI	궁중
+中常侍	OFI	환관
+小黃門	OFI	환관
+中黃門	OFI	환관
+常侍	OFI	근시
+謁者	OFI	근시
+太子太傅	OFI	太子官
+太子少傅	OFI	太子官
+太子舍人	OFI	太子官
+洗馬	OFI	太子官
+都督	OFI	군사
+監軍	OFI	군사
+長史	OFI	속관
+司馬	OFI	무관
+參軍	OFI	속관
+祭酒	OFI	學官
+博士	OFI	學官
+太中大夫	OFI	大夫
+光祿大夫	OFI	大夫
+諫議大夫	OFI	大夫
+中散大夫	OFI	大夫
+奉車都尉	OFI	都尉
+駙馬都尉	OFI	都尉
+騎都尉	OFI	都尉
+校尉	OFI	무관
+典農中郎將	OFI	屯田
+典農校尉	OFI	屯田
+
+# ════════ 地名 (지명) — 三國 州·郡 中心. CBDB ADDR_CODES 누락 보강 ════════
+司隸	LOC	州
+豫州	LOC	州
+兗州	LOC	州
+徐州	LOC	州
+青州	LOC	州
+荊州	LOC	州
+揚州	LOC	州
+益州	LOC	州
+涼州	LOC	州
+并州	LOC	州
+冀州	LOC	州
+幽州	LOC	州
+交州	LOC	州
+雍州	LOC	州
+河南	LOC	郡
+河內	LOC	郡
+河東	LOC	郡
+弘農	LOC	郡
+京兆	LOC	郡
+馮翊	LOC	郡
+扶風	LOC	郡
+太原	LOC	郡
+上黨	LOC	郡
+西河	LOC	郡
+雁門	LOC	郡
+上谷	LOC	郡
+漁陽	LOC	郡
+遼東	LOC	郡
+遼西	LOC	郡
+玄菟	LOC	郡
+樂浪	LOC	郡
+鉅鹿	LOC	郡
+常山	LOC	郡
+中山	LOC	郡
+安平	LOC	郡
+河間	LOC	郡
+清河	LOC	郡
+魏郡	LOC	郡
+陳留	LOC	郡
+東郡	LOC	郡
+東平	LOC	郡
+任城	LOC	郡
+泰山	LOC	郡
+濟北	LOC	郡
+山陽	LOC	郡
+濟陰	LOC	郡
+沛國	LOC	郡
+梁國	LOC	郡
+汝南	LOC	郡
+潁川	LOC	郡
+南陽	LOC	郡
+南郡	LOC	郡
+江夏	LOC	郡
+廬江	LOC	郡
+九江	LOC	郡
+丹陽	LOC	郡
+會稽	LOC	郡
+吳郡	LOC	郡
+豫章	LOC	郡
+廬陵	LOC	郡
+武陵	LOC	郡
+長沙	LOC	郡
+桂陽	LOC	郡
+零陵	LOC	郡
+蜀郡	LOC	郡
+廣漢	LOC	郡
+犍為	LOC	郡
+巴郡	LOC	郡
+漢中	LOC	郡
+武都	LOC	郡
+隴西	LOC	郡
+天水	LOC	郡
+南安	LOC	郡
+安定	LOC	郡
+北地	LOC	郡
+武威	LOC	郡
+張掖	LOC	郡
+酒泉	LOC	郡
+敦煌	LOC	郡
+金城	LOC	郡
+北海	LOC	郡
+東萊	LOC	郡
+琅邪	LOC	郡
+東海	LOC	郡
+下邳	LOC	郡
+彭城	LOC	郡
+廣陵	LOC	郡
+洛陽	LOC	도성
+長安	LOC	도성
+許昌	LOC	도성
+成都	LOC	도성
+建業	LOC	도성
+壽春	LOC	요지
+官渡	LOC	전장
+赤壁	LOC	전장
+合肥	LOC	요지
+濡須	LOC	요지
+街亭	LOC	전장
+陳倉	LOC	요지
+江陵	LOC	요지
+襄陽	LOC	요지
+樊城	LOC	요지
+鄴	LOC	도성
+
+# ════════ 注 저자 + CBDB 누락 인물 ════════
+裴松之	PER	注 저자
+司馬彪	PER	注(續漢書)
+王沈	PER	注(魏書)
+魚豢	PER	注(魏略)
+韋昭	PER	注(吳書)
+孫盛	PER	注(魏氏春秋 등)
+習鑿齒	PER	注(漢晉春秋)
+張璠	PER	注(漢紀)
+華嶠	PER	注(漢書)
+虞溥	PER	注(江表傳)
+干寶	PER	注(晉紀)
+郭頒	PER	注(世語)
+樂資	PER	注(山陽公載記)
+應劭	PER	注(漢官儀)
+謝承	PER	注(後漢書)
+袁宏	PER	注
+王隱	PER	注
+虞預	PER	注
+趙岐	PER	注
+譙周	PER	蜀 학자
+杜預	PER	晉 장수
+何顒	PER	後漢 명사
+橋玄	PER	後漢 태위
+華佗	PER	명의
+管輅	PER	術士
+禰衡	PER	문인
+左慈	PER	方士
+邊讓	PER	문인
+孔融	PER	건안칠자
+王粲	PER	건안칠자
+蔡邕	PER	학자
+陳琳	PER	건안칠자
+阮瑀	PER	건안칠자
+徐幹	PER	건안칠자
+應瑒	PER	건안칠자
+劉楨	PER	건안칠자
+嵇康	PER	죽림칠현
+阮籍	PER	죽림칠현
+山濤	PER	죽림칠현
+向秀	PER	죽림칠현
+王肅	PER	경학자
+鄭玄	PER	경학자
+盧植	PER	학자
+皇甫嵩	PER	後漢 장수
+朱儁	PER	後漢 장수
+張角	PER	황건
+公孫瓚	PER	군벌
+公孫度	PER	요동
+陶謙	PER	徐州
+孔伷	PER	군벌
+韓馥	PER	군벌
+

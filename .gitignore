@@ -12,12 +12,11 @@ data/*/raw/
 data/*/interim/
 data/*/tokenized/
 models/
-# gazetteer.tsv 는 CC BY-NC-SA CBDB 파생물 → 재배포 금지(제외). seed/user_dict도 미추적.
-# (큐레이션 입력 stoplist.txt·variant_map.tsv 는 추적.)
+# gazetteer.tsv 는 CC BY-NC-SA CBDB 파생물(최종 산출) → 재배포 금지(제외). Stage 3로 재생성.
+# 큐레이션 입력(stoplist·variant_map·seed_supplement·user_dict)은 추적 — 사실 기반 개체 목록이라
+# CBDB 재배포 우려와 무관하고, 모델 재현·LLM 분류 결과 보존을 위해 저장소에 둔다.
 data/*/gazetteer/gazetteer.tsv
 data/*/gazetteer/gazetteer_stats.json
-data/*/gazetteer/seed_supplement.tsv
-data/*/gazetteer/user_dict.tsv
 # 웹 탐색기: 프런트엔드 소스(공통 app.js·style.css, 사서별 index.html·theme.css·og 이미지)는
 # 추적. 추출물(데이터·단일 HTML)은 미추적(src/07·08로 재생성). 구조: web/<id>/{index,theme,data,번들}.
 web/*/data/
@@ -41,3 +40,6 @@ tutorial.ipynb
 
 # 토큰화 감사 산출물 (scripts/audit_tokens.py로 재생성)
 reports/*/audit_*.tsv
+# LLM 전수분류 중간 산출물 (후보 덤프·적용 결과 — stoplist/seed에 이미 반영됨)
+reports/*/llm_*.json
+reports/*/llm_*.jsonl

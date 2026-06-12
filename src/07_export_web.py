@@ -81,7 +81,8 @@ def fix_special_readings(bare: str, reading: str) -> str:
       - 琅邪의 邪는 '사'가 아니라 '야' → 낭야
       - 中行·太行의 行은 '행'이 아니라 '항' → 중항(씨)·태항(산). 大行(대행)은 그대로.
       - 車騎·車府의 車는 '차'가 아니라 '거' → 거기장군·중거부령
-      - 食其(인명)의 食은 '식'이 아니라 '이' → 역이기(酈食其)·심이기(審食其)"""
+      - 食其(인명)의 食은 '식'이 아니라 '이' → 역이기(酈食其)·심이기(審食其)
+      - 單于의 單은 '단'이 아니라 '선' → 선우·질지선우(郅支單于)·흉노선우(匈奴單于)"""
     if len(reading) != len(bare):
         return reading                       # 1:1 매핑이 아니면 손대지 않음
     out = list(reading)
@@ -108,6 +109,8 @@ def fix_special_readings(bare: str, reading: str) -> str:
             out[i] = "거"
         elif ch == "食" and i + 1 < len(bare) and bare[i + 1] == "其":
             out[i] = "이"
+        elif ch == "單" and i + 1 < len(bare) and bare[i + 1] == "于":
+            out[i] = "선"          # 흉노 君長號 單于=선우 → 郅支單于 질지선우·匈奴單于 흉노선우
     return "".join(out)
 
 

@@ -2,8 +2,8 @@
 
 二十四史의 첫 네 정사 **前四史**(《史記》·《漢書》·《後漢書》·《三國志》)를 대상으로, 각 사서를 한자
 텍스트로 다듬어 학습한 **Word2Vec 단어 임베딩**과 이를 브라우저에서 바로 탐험하는 **웹 탐색기**입니다.
-현재 司馬遷의 **《史記》**(전체 130卷)와 陳壽의 **《三國志》**(裴松之 注 포함, 전체 65卷) 모델이 공개돼
-있고, **《漢書》·《後漢書》**가 같은 파이프라인으로 추가될 예정입니다.
+현재 司馬遷의 **《史記》**(전체 130卷), 班固의 **《漢書》**(전체 100卷, 本文), 陳壽의 **《三國志》**(裴松之 注
+포함, 전체 65卷) 세 모델이 공개돼 있고, **《後漢書》**가 같은 파이프라인으로 추가될 예정입니다.
 
 인물·관직·지명을 하나의 토큰으로 인식하도록 한자 텍스트를 다듬어 학습했기 때문에, `荀彧`과 가까운
 단어로 `程昱`·`荀攸` 같은 인물이 떠오르고, `匈奴`의 이웃으로 `單于`·`月氏`가, `丞相`의 이웃으로 그
@@ -11,6 +11,7 @@
 
 > **라이브 데모**
 > - 《사기》 단어 탐색기 — [zyahan.blog/shiji-word-explorer](https://zyahan.blog/shiji-word-explorer)
+> - 《한서》 단어 탐색기 — [zyahan.blog/hanshu-word-explorer](https://zyahan.blog/hanshu-word-explorer)
 > - 《삼국지》 단어 탐색기 — [zyahan.blog/sanguozhi-word-explorer](https://zyahan.blog/sanguozhi-word-explorer)
 
 ## 웹 탐색기
@@ -32,13 +33,13 @@
 
 ## 모델 개요
 
-| 항목 | 三國志 | 史記 |
-|---|---|---|
-| 코퍼스 | 전체 65卷 (魏書30·蜀書15·吳書20), 本文 + 裴松之 注 | 전체 130卷 (本紀12·表10·書8·世家30·列傳70), 三家注 미수록 |
-| 코퍼스 토큰 | 741,910 | 679,405 |
-| 어휘 | 5,708개 (그중 다자 고유명사 약 1,900) | 4,998개 (그중 다자 고유명사 약 1,550) |
+| 항목 | 史記 | 漢書 | 三國志 |
+|---|---|---|---|
+| 코퍼스 | 전체 130卷 (本紀12·表10·書8·世家30·列傳70), 本文 + 三家注 일부 | 전체 100卷 (紀12·表8·志10·傳70), 本文(顏師古注 제외) | 전체 65卷 (魏書30·蜀書15·吳書20), 本文 + 裴松之 注 |
+| 코퍼스 토큰 | 679,405 | 885,505 | 741,910 |
+| 어휘 | 4,998개 (그중 다자 고유명사 약 1,550) | 5,834개 (그중 다자 고유명사 약 1,900) | 5,708개 (그중 다자 고유명사 약 1,900) |
 
-두 모델 모두 **100차원 skip-gram**, gensim Word2Vec(window 5, min_count 3, negative 10, epochs 15,
+세 모델 모두 **100차원 skip-gram**, gensim Word2Vec(window 5, min_count 3, negative 10, epochs 15,
 고정 시드)로 동일하게 학습했습니다.
 
 특징:
@@ -46,7 +47,9 @@
 - **글자 단위 토큰화**가 기본이라 허사(虛詞)의 분포가 보존됩니다. 통계적 분절·subword를 쓰지 않습니다.
 - **고유명사만 병합** — 인명·관직·지명 가제티어로 결정론적 최장일치 병합(학습형 NER 없음).
   CBDB가 누락한 인물(三國의 周瑜·呂蒙·荀彧, 그리고 CBDB 커버리지가 빈약한 前漢 이전 인물 다수)은
-  코퍼스 전기 도입부의 `{姓名}字{字}` 패턴과 큐레이션 시드로 보충합니다.
+  코퍼스 전기 도입부의 `{姓名}字{字}` 패턴과 큐레이션 시드로 보충합니다. CBDB 노이즈(全왕조 지명·
+  길상 字號)는 게이팅하고, 남은 후보는 LLM이 KWIC 문맥으로 전수 분류해 정밀도·재현율을 함께
+  끌어올립니다([`docs/GAZETTEER_REFINEMENT.md`](docs/GAZETTEER_REFINEMENT.md)).
 - **인용 史書는 통째로 한 토큰** — 《魏略》·《江表傳》·《春秋》 등 괄호 포함 단일 토큰.
 - **별명을 합치지 않음** — 諸葛亮(名)·孔明(字)·武侯(諡), 孔子(호칭)·仲尼(字)는 각각 독립 토큰.
 - **本文/注·문장 경계 보존** — 학습 윈도가 文/注나 문장 경계를 넘지 않습니다.
@@ -66,6 +69,10 @@ m.wv.doesnt_match(["周瑜", "魯肅", "呂蒙", "諸葛亮"])   # → 諸葛亮
 m = Word2Vec.load("models/shiji/w2v_shiji.model")
 m.wv.most_similar("項羽")   # → 龍且·項王·沛公·章邯 …
 m.wv.most_similar("匈奴")   # → 單于·胡·月氏 …
+
+m = Word2Vec.load("models/hanshu/w2v_hanshu.model")
+m.wv.most_similar("王莽")   # → 新都侯·平帝·哀帝 …
+m.wv.most_similar("匈奴")   # → 單于·冒頓·渾邪王 …
 ```
 
 ## 직접 빌드하기
@@ -93,7 +100,7 @@ python src/08_bundle_html.py      # 단일 HTML 한 장으로 묶기(web/<id>/<i
 > **코퍼스 전환** — 환경변수 `CORPUS_CONFIG`로 고릅니다. 《史記》는
 > `CORPUS_CONFIG=config/shiji.yaml python src/01_…`처럼 전 단계를 같은 코드로 빌드하며,
 > 데이터·모델·리포트·웹이 `data/<id>/`·`models/<id>/`·`reports/<id>/`·`web/<id>/`로 분리됩니다.
-> 《漢書》《後漢書》 등 다른 正史도 `config/<id>.yaml` 하나만 새로 쓰면 같은 방식으로 추가할 수 있습니다.
+> 《後漢書》 등 남은 正史도 `config/<id>.yaml` 하나만 새로 쓰면 같은 방식으로 추가할 수 있습니다.
 
 > **CBDB 준비 (Stage 3 전제)** — `src/03`은 `vendor/cbdb_sqlite/*.sqlite3`를 자동 탐색합니다. 없으면
 > [`cbdb-project/cbdb_sqlite`](https://github.com/cbdb-project/cbdb_sqlite)를 클론해 최신 SQLite를 받아 두세요.
@@ -102,7 +109,7 @@ python src/08_bundle_html.py      # 단일 HTML 한 장으로 묶기(web/<id>/<i
 
 ```bash
 python src/07_export_web.py        # 벡터·어휘·독음 추출 → web/<id>/data/ (먼저 1회)
-cd web && python -m http.server    # http://localhost:8000/sanguozhi/ · /shiji/ 에서 미리보기
+cd web && python -m http.server    # http://localhost:8000/shiji/ · /hanshu/ · /sanguozhi/ 에서 미리보기
 ```
 
 - 레이아웃: **공통**(`web/app.js`·`web/style.css`)은 코퍼스 무관, **사서별**(`web/<id>/index.html`·
@@ -117,8 +124,9 @@ cd web && python -m http.server    # http://localhost:8000/sanguozhi/ · /shiji/
 
 | 데이터 | 출처 | 라이선스 |
 |---|---|---|
-| 원문 三國志 (전체 65卷) | 中文維基文庫 zh.wikisource `三國志/卷01–卷65` | CC BY-SA 4.0 |
 | 원문 史記 (전체 130卷) | 中文維基文庫 zh.wikisource `史記/卷001–卷130` | CC BY-SA 4.0 |
+| 원문 漢書 (전체 100卷) | 中文維基文庫 zh.wikisource `漢書/卷001–卷100` | CC BY-SA 4.0 |
+| 원문 三國志 (전체 65卷) | 中文維基文庫 zh.wikisource `三國志/卷01–卷65` | CC BY-SA 4.0 |
 | 인명·관직 | CBDB [`cbdb-project/cbdb_sqlite`](https://github.com/cbdb-project/cbdb_sqlite) | CC BY-NC-SA 4.0 |
 | 지명 | CBDB ADDR_CODES (CHGIS 연계) / TGAZ | CHGIS (Harvard & Fudan) |
 

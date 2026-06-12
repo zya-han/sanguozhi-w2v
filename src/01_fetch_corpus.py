@@ -213,7 +213,10 @@ def preprocess_wikitext(wikitext: str) -> str:
         if name in FIRST_ARG_NAMES or name == "!":
             return pos[0] if pos else "\n"
         if name == "wavybookmark":
-            return "《" + "".join(pos) + "》"
+            # pos는 '|'로 split됐으므로 '|'로 재결합 — 내부 위키링크([[王沈魏書|魏書]])의
+            # 파이프가 보존돼 이후 clean_wiki가 [[a|b]]→b로 언랩한다(《魏書》). join("")이면
+            # 파이프가 사라져 《王沈魏書魏書》처럼 target+display가 붙는 버그.
+            return "《" + "|".join(pos) + "》"
         return m.group(0)
 
     prev = None

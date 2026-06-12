@@ -69,6 +69,9 @@ gazetteer:
   extract_names_from_zi: true
   surname_min_persons: 20
   require_corpus_occurrence: true
+  cbdb_addr:     false      # ADDR(全왕조 지명) 통째 신뢰 안 함 → 시드 三國 州·郡 + corpus_extract
+  cbdb_altname:  zi_only    # CBDB 字/號은 코퍼스가 '字X·號曰X'로 도입한 것만 (길상 字 FP 차단)
+  corpus_extract: true      # 봉호 X王/X侯/X君·別名 코퍼스 패턴 추출 (CBDB 미수록 회복)
   stoplist:        "data/sanguozhi/gazetteer/stoplist.txt"
   seed_supplement: "data/sanguozhi/gazetteer/seed_supplement.tsv"
   user_dict:       "data/sanguozhi/gazetteer/user_dict.tsv"

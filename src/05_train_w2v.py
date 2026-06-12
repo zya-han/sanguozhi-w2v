@@ -18,15 +18,13 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import ensure_dir, get_logger, load_config, resolve, set_seed  # noqa: E402
+from common import REPO_ROOT, ensure_dir, get_logger, load_config, resolve, set_seed  # noqa: E402
 
 log = get_logger("05_train_w2v")
 
 
-def load_sentences(cfg: dict):
-    """corpus.jsonl → segment 단위 토큰 시퀀스 리스트. 文/注 경계는 segment 분리로 보존."""
-    include_peizhu = cfg["corpus"].get("include_peizhu_in_training", True)
-    path = resolve(cfg, "tokenized") / "corpus.jsonl"
+def _read_corpus(path: Path, include_peizhu: bool, label: str = ""):
+    """단일 corpus.jsonl → 토큰 시퀀스 리스트 (注는 include_peizhu에 따라 포함/제외)."""
     sents, n_main, n_pei = [], 0, 0
     with open(path, encoding="utf-8") as f:
         for line in f:
@@ -38,9 +36,33 @@ def load_sentences(cfg: dict):
             else:
                 n_main += 1
             sents.append(rec["tokens"])
-    log.info("학습 문장(segment): %d (本文 %d, 裴注 %d, include_peizhu=%s)",
-             len(sents), n_main, n_pei, include_peizhu)
+    log.info("  %s文 %d (本文 %d, 注 %d, include_peizhu=%s)",
+             f"{label}: " if label else "", len(sents), n_main, n_pei, include_peizhu)
     return sents
+
+
+def load_sentences(cfg: dict):
+    """corpus.jsonl → segment 단위 토큰 시퀀스 리스트. 文/注 경계는 segment 분리로 보존.
+
+    통합 모델(config.corpus.combine): 여러 사서의 corpus.jsonl 을 각자의 include_peizhu
+    로 풀링(segment_id 접두로 출처 추적 가능). 일반 모델: 단일 paths.tokenized/corpus.jsonl.
+    """
+    combine = cfg["corpus"].get("combine")
+    if combine:
+        log.info("통합 학습: %d개 코퍼스 풀링", len(combine))
+        sents = []
+        for src in combine:
+            p = Path(src["tokenized"])
+            if not p.is_absolute():
+                p = REPO_ROOT / p
+            sents.extend(_read_corpus(p / "corpus.jsonl",
+                                      bool(src.get("include_peizhu", True)),
+                                      label=src.get("id", p.name)))
+        log.info("통합 학습 문장(segment) 합계: %d", len(sents))
+        return sents
+
+    include_peizhu = cfg["corpus"].get("include_peizhu_in_training", True)
+    return _read_corpus(resolve(cfg, "tokenized") / "corpus.jsonl", include_peizhu)
 
 
 def main():

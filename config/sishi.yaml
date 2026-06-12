@@ -1,0 +1,60 @@
+# ============================================================================
+# 《前四史》통합(四史) Word2Vec — 코퍼스 설정
+# 史記·漢書·後漢書·三國志의 이미 토큰화·정규화된 corpus.jsonl을 풀링해 단일 모델 학습.
+# 실행: CORPUS_CONFIG=config/sishi.yaml python src/05_train_w2v.py
+#   (01~04는 사서별 config로 이미 수행됨 — 통합 config는 Stage 5~ 만 사용한다.)
+# ============================================================================
+
+seed: 42
+
+paths:
+  vendor:        vendor               # CBDB 등 공유 (Stage 5엔 불필요하나 규약 유지)
+  models:        models/sishi         # 통합 w2v 모델 + vocab + train_meta
+  reports:       reports/sishi        # 검증 리포트(Stage 6)
+  web:           web/sishi            # 웹 탐색기 출력(07·08)
+  # raw/interim/gazetteer/tokenized 없음 — 통합 모델은 신규 코퍼스를 만들지 않고
+  # 아래 corpus.combine 의 네 사서 tokenized 를 풀링한다.
+
+# ----------------------------------------------------------------------------
+# Stage 5 입력 — 네 사서 코퍼스 풀링
+# ----------------------------------------------------------------------------
+corpus:
+  id:          "sishi"
+  provenance:  "前四史 통합 — 史記·漢書·後漢書·三國志 본문 풀링 (唐宋注 제외, 三國志 裴注 포함)"
+  # 통합 학습 입력 = 네 사서의 corpus.jsonl 세그먼트 풀링. 각 세그먼트는 해당 사서의
+  # 가제티어로 이미 개체 병합·정규화(s2t+異體字)된 상태 → Stage 5 는 토큰 시퀀스만 모은다.
+  # segment_id 접두(shj_·hsu_·hhs_·sgz_)로 출처는 그대로 추적 가능.
+  #
+  # 注(주석) 정책 = 本文 ＋ 三國志 裴注 (唐宋注 전부 제외):
+  #   史記 三家注(集解·索隱·正義)·漢書 顏師古注·後漢書 李賢/劉昭注 = 唐宋注 → 제외
+  #     (前四史 standalone 전부 '本文 모델' 의도 — 史記도 三家注 제외로 전환됨 — 을 통합 전체에 일관 적용)
+  #   三國志 裴松之注 = 본문의 45%(339k)인 통합체 → 포함(include_peizhu=true)
+  combine:
+    - { id: shiji,     tokenized: data/shiji/tokenized,     include_peizhu: false }   # 三家注 제외
+    - { id: hanshu,    tokenized: data/hanshu/tokenized,    include_peizhu: false }   # 顏師古注 제외
+    - { id: houhanshu, tokenized: data/houhanshu/tokenized, include_peizhu: false }   # 李賢/劉昭注 제외
+    - { id: sanguozhi, tokenized: data/sanguozhi/tokenized, include_peizhu: true  }   # 裴注 포함
+
+# ----------------------------------------------------------------------------
+# Stage 6 — 검증 센티넬 (四史 횡단; 사서별 강앵커 + 4사 공통 견고 센티넬)
+# ----------------------------------------------------------------------------
+validate:
+  must_single: [孔子, 高祖, 世祖, 諸葛亮, 曹操, 丞相, 太守, 匈奴, 長安, 洛陽]
+  must_char:   [信, 良, 操, 亮]          # 韓信·張良·曹操·諸葛亮 — 단자 名 병합 금지 확인
+  alias_pair:  [孔子, 仲尼]              # 名·字 독립 공존 (前四史 공통 견고 센티넬)
+  title_probe: "《春秋》"                # 《書名》 단일 토큰 확인 (네 사서 모두 출현)
+  sim_probes:  [孔子, 高祖, 諸葛亮, 匈奴, 丞相, 太守, 長安, 洛陽]
+
+# ----------------------------------------------------------------------------
+# Stage 5 — Word2Vec (통합 코퍼스 ≈3.15M 토큰·vocab ~12k → standalone 대비 차원만 상향)
+# ----------------------------------------------------------------------------
+word2vec:
+  sg:              1        # skip-gram — 개체·희소어 유리(standalone과 동일)
+  vector_size:     150      # 코퍼스 ~4×(3.15M)·vocab ~12k → 100은 과소, 150 적정대
+  window:          5        # 문장경계 세그먼트·고전한문 (유지)
+  min_count:       3        # 개체 recall 을 4종 standalone 과 동일 커버리지로 유지
+  negative:        10
+  epochs:          15       # 데이터 4× + 동일 epochs = 품질↑ (비교성 위해 유지)
+  workers:         1        # 재현성 (학습시간 ~4×, 그래도 수 분)
+  seed:            42
+  model_name:      "w2v_sishi.model"

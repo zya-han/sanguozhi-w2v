@@ -14,7 +14,7 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common import ensure_dir, get_logger, load_config, resolve  # noqa: E402
+from common import REPO_ROOT, ensure_dir, get_logger, load_config, resolve  # noqa: E402
 
 log = get_logger("06_validate")
 
@@ -23,10 +23,27 @@ def main():
     cfg = load_config()
     from gensim.models import Word2Vec
 
-    # 로드
-    gaz = pd.read_csv(resolve(cfg, "gazetteer") / "gazetteer.tsv", sep="\t")
+    # 로드 — 통합(corpus.combine)이면 네 사서 gazetteer 합집합 + corpus.jsonl 풀링
+    # (각 사서의 include_peizhu 존중 → tok_freq 가 실제 학습 코퍼스와 일치).
+    combine = cfg["corpus"].get("combine")
+    if combine:
+        gaz_parts, recs = [], []
+        for src in combine:
+            base = Path(src["tokenized"])
+            if not base.is_absolute():
+                base = REPO_ROOT / base
+            gaz_parts.append(pd.read_csv(base.parent / "gazetteer" / "gazetteer.tsv", sep="\t"))
+            keep_pei = bool(src.get("include_peizhu", True))
+            for line in open(base / "corpus.jsonl", encoding="utf-8"):
+                rec = json.loads(line)
+                if rec["is_peizhu"] and not keep_pei:
+                    continue
+                recs.append(rec)
+        gaz = pd.concat(gaz_parts, ignore_index=True).drop_duplicates(subset=["surface"])
+    else:
+        gaz = pd.read_csv(resolve(cfg, "gazetteer") / "gazetteer.tsv", sep="\t")
+        recs = [json.loads(l) for l in open(resolve(cfg, "tokenized") / "corpus.jsonl", encoding="utf-8")]
     gaz_set = set(gaz["surface"].astype(str))
-    recs = [json.loads(l) for l in open(resolve(cfg, "tokenized") / "corpus.jsonl", encoding="utf-8")]
     all_tokens = [t for r in recs for t in r["tokens"]]
     tok_freq = Counter(all_tokens)
     model = Word2Vec.load(str(resolve(cfg, "models")
@@ -96,7 +113,7 @@ def main():
     pei_tok = sum(len(r["tokens"]) for r in recs if r["is_peizhu"])
 
     # ── 리포트 작성 ──
-    book = cfg["corpus"].get("book_title", "三國志")
+    book = cfg["corpus"].get("book_title", "前四史 통합" if combine else "三國志")
     L = []
     L.append(f"# 검증 리포트 — 《{book}》 개체 인식 토큰화 + Word2Vec\n")
     L.append(f"- 코퍼스 토큰: **{total_tok:,}** (本文 {main_tok:,} / 注 {pei_tok:,})")

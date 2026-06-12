@@ -1,0 +1,44 @@
+/* 《前四史 통합》 테마 — 자색(紫)·보라 계열(네 사서를 하나로 엮은 제왕 자색).
+   사서별 색은 이 파일에서만 정의한다. 공통 구조/레이아웃은 ../style.css (var()만 사용). */
+:root {
+  /* 기본 */
+  --bg: #f3f0f8;              /* 옅은 라벤더 회백 */
+  --card: #fffdff;
+  --ink: #2e2140;            /* 짙은 보라먹 */
+  --ink-soft: #4a3d5e;        /* 안내문 본문 */
+  --muted: #8b7fa0;
+  --meta: #7e57a8;           /* 빈도수·보라 계열 */
+  --line: #e4dcef;
+  --link: #7b4fb0;           /* 예시 링크(보라) */
+  /* 강조 */
+  --accent: #5b3a9e;         /* 주 강조: 제왕 자색 */
+  --accent-dk: #472e7e;
+  --accent-soft: #e9e1f5;
+  --accent-soft-dk: #ddd0ef;  /* ghost·내보내기 버튼 hover */
+  --pill: #fffdff;           /* 탭 알약 배경 */
+  --chip-border: #ddd0ef;     /* 스파이 칩 테두리 */
+  --row-hover: #f3eefa;       /* 막대 행 hover */
+  /* 유사도 막대(청보라→자홍) */
+  --bar-a: #7e6fd8;          /* 막대 시작(인디고 보라) */
+  --bar-b: #a02fa0;          /* 막대 끝(자홍 마젠타) */
+  --track: #e8e0f2;
+  --common: #ece0f6;          /* 양쪽 공통 강조 배경(옅은 보라) */
+  /* 스파이 박스 */
+  --spybg: #261a3a;          /* 짙은 보라-자정(紫晶) */
+  --spy-text: #ece3f5;
+  --spy-quote: #b3a5c9;
+  --spy-scores: #a596bd;
+  --gold: #d9a93e;           /* 스파이 이름(금색 — 자색 배경 대비) */
+  --gold-soft: #ecd18f;       /* 스파이 이름 독음 */
+  /* 양쪽 공통 단어 색(보라·자홍·인디고 보석 계열, 서로 구분) — bg(연한 배경)·bar(좌측 색띠) */
+  --cm1-bg: #e3d9f3;  --cm1-bar: #6a44c0;   /* 보라 */
+  --cm2-bg: #e9d6ef;  --cm2-bar: #9c39ad;   /* 자홍 */
+  --cm3-bg: #dcd9f0;  --cm3-bar: #5350c0;   /* 인디고 */
+  --cm4-bg: #f0d6e6;  --cm4-bar: #b03473;   /* 로즈 마젠타 */
+  --cm5-bg: #dee0f2;  --cm5-bar: #46569e;   /* 블루 바이올렛 */
+  --cm6-bg: #ecd9ec;  --cm6-bar: #8c3a9e;   /* 퍼플 */
+  --cm7-bg: #e6dcef;  --cm7-bar: #7a4aa8;   /* 라벤더 퍼플 */
+  --cm8-bg: #f1d8e2;  --cm8-bar: #b23a5e;   /* 라즈베리 */
+  --cm9-bg: #ddd9f0;  --cm9-bar: #5a45b0;   /* 바이올렛 */
+  --cm10-bg: #e0dcec; --cm10-bar: #6a5a8e;  /* 그레이 퍼플 */
+}

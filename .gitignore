@@ -34,6 +34,7 @@ vendor/
 sanguozhi_word2vec_spec.md
 docs/ADDING_A_CORPUS.md
 docs/ADDING_AN_EXPLORER.md
+docs/GAZETTEER_REFINEMENT.md
 
 # 개인 튜토리얼 노트북 (배포 제외)
 tutorial.ipynb

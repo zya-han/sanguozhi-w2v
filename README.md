@@ -38,9 +38,9 @@
 |---|---|---|---|---|
 | 코퍼스 | 전체 130卷 (本紀12·表10·書8·世家30·列傳70), 本文 + 三家注 일부 | 전체 100卷 (紀12·表8·志10·傳70), 本文(顏師古注 제외) | 전체 120卷 (紀10·列傳80 + 司馬彪 續漢書 志30), 本文(李賢·劉昭注 제외) | 전체 65卷 (魏書30·蜀書15·吳書20), 本文 + 裴松之 注 |
 | 코퍼스 토큰 | 679,405 | 885,505 | 856,705 | 741,910 |
-| 어휘 | 4,998개 (그중 다자 고유명사 약 1,550) | 5,834개 (그중 다자 고유명사 약 1,900) | 6,093개 (그중 다자 고유명사 약 1,790) | 5,708개 (그중 다자 고유명사 약 1,900) |
+| 어휘 | 4,998개 (그중 다자 고유명사 약 1,550) | 5,834개 (그중 다자 고유명사 약 1,900) | 6,093개 (그중 다자 고유명사 약 1,840) | 5,708개 (그중 다자 고유명사 약 1,900) |
 
-세 모델 모두 **100차원 skip-gram**, gensim Word2Vec(window 5, min_count 3, negative 10, epochs 15,
+네 모델 모두 **100차원 skip-gram**, gensim Word2Vec(window 5, min_count 3, negative 10, epochs 15,
 고정 시드)로 동일하게 학습했습니다.
 
 특징:
@@ -76,8 +76,8 @@ m.wv.most_similar("王莽")   # → 新都侯·平帝·哀帝 …
 m.wv.most_similar("匈奴")   # → 單于·冒頓·渾邪王 …
 
 m = Word2Vec.load("models/houhanshu/w2v_houhanshu.model")
-m.wv.most_similar("世祖")   # → 光武帝·顯宗·高邑 …  (光武帝의 廟號)
-m.wv.most_similar("班超")   # → 西域長史·疏勒·班勇 …
+m.wv.most_similar("世祖")   # → 光武·光武帝·高邑 …  (光武帝의 廟號)
+m.wv.most_similar("班超")   # → 西域長史·疏勒王·軍司馬 …
 ```
 
 ## 직접 빌드하기
@@ -105,7 +105,7 @@ python src/08_bundle_html.py      # 단일 HTML 한 장으로 묶기(web/<id>/<i
 > **코퍼스 전환** — 환경변수 `CORPUS_CONFIG`로 고릅니다. 《史記》는
 > `CORPUS_CONFIG=config/shiji.yaml python src/01_…`처럼 전 단계를 같은 코드로 빌드하며,
 > 데이터·모델·리포트·웹이 `data/<id>/`·`models/<id>/`·`reports/<id>/`·`web/<id>/`로 분리됩니다.
-> 《後漢書》 등 남은 正史도 `config/<id>.yaml` 하나만 새로 쓰면 같은 방식으로 추가할 수 있습니다.
+> 前四史 밖의 다른 正史(《晉書》 등)도 `config/<id>.yaml` 하나만 새로 쓰면 같은 방식으로 추가할 수 있습니다.
 
 > **CBDB 준비 (Stage 3 전제)** — `src/03`은 `vendor/cbdb_sqlite/*.sqlite3`를 자동 탐색합니다. 없으면
 > [`cbdb-project/cbdb_sqlite`](https://github.com/cbdb-project/cbdb_sqlite)를 클론해 최신 SQLite를 받아 두세요.
@@ -114,7 +114,7 @@ python src/08_bundle_html.py      # 단일 HTML 한 장으로 묶기(web/<id>/<i
 
 ```bash
 python src/07_export_web.py        # 벡터·어휘·독음 추출 → web/<id>/data/ (먼저 1회)
-cd web && python -m http.server    # http://localhost:8000/shiji/ · /hanshu/ · /sanguozhi/ 에서 미리보기
+cd web && python -m http.server    # http://localhost:8000/shiji/ · /hanshu/ · /houhanshu/ · /sanguozhi/ 에서 미리보기
 ```
 
 - 레이아웃: **공통**(`web/app.js`·`web/style.css`)은 코퍼스 무관, **사서별**(`web/<id>/index.html`·

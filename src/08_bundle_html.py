@@ -4,7 +4,7 @@
 **단일 HTML** 한 장으로 합친다. 벡터(.bin)는 base64로 내장 → `file://`에서
 더블클릭만으로 열림(서버 불필요). 중복을 피하려 기존 소스를 그대로 인라인한다.
 
-출력: web/sanguozhi_explorer.html  (Stage 7을 먼저 실행해 web/data/* 가 있어야 함)
+출력: web/<id>/explorer-<id>.html  (Stage 7을 먼저 실행해 web/data/* 가 있어야 함)
 """
 from __future__ import annotations
 
@@ -71,7 +71,7 @@ def main():
     )
 
     cid = Path(cfg["word2vec"]["model_name"]).stem.replace("w2v_", "")  # w2v_shiji.model → shiji
-    out = web / f"{cid}_explorer.html"
+    out = web / f"explorer-{cid}.html"
     out.write_text(html, encoding="utf-8")
     mb = out.stat().st_size / 1e6
     log.info("단일 HTML 생성: %s (%.2f MB)", out, mb)

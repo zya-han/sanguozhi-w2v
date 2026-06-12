@@ -20,7 +20,7 @@ data/*/gazetteer/gazetteer_stats.json
 # 웹 탐색기: 프런트엔드 소스(공통 app.js·style.css, 사서별 index.html·theme.css·og 이미지)는
 # 추적. 추출물(데이터·단일 HTML)은 미추적(src/07·08로 재생성). 구조: web/<id>/{index,theme,data,번들}.
 web/*/data/
-web/*/*_explorer.html
+web/*/explorer-*.html
 
 # Cloned upstream sources
 vendor/

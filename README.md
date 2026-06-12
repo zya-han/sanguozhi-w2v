@@ -105,7 +105,7 @@ python src/04_tokenize.py         # 결정론적 최장일치 토큰화
 python src/05_train_w2v.py        # Word2Vec 학습 → models/<id>/w2v_<id>.model
 python src/06_validate.py         # 정합성·커버리지 검증 → reports/<id>/validation.md
 python src/07_export_web.py       # 모델 → 웹 탐색기용 데이터(web/<id>/data/)
-python src/08_bundle_html.py      # 단일 HTML 한 장으로 묶기(web/<id>/<id>_explorer.html)
+python src/08_bundle_html.py      # 단일 HTML 한 장으로 묶기(web/<id>/explorer-<id>.html)
 ```
 
 > **코퍼스 전환** — 환경변수 `CORPUS_CONFIG`로 고릅니다. 《史記》는
@@ -132,7 +132,7 @@ cd web && python -m http.server    # http://localhost:8000/shiji/ · /hanshu/ ·
   공통 `style.css`는 `var()`만 쓴다. 추출 데이터(`web/<id>/data/`)·단일 HTML 번들은 미추적(재생성).
 - **배포**: `web/` 트리를 정적 호스팅에 올리면 됩니다(사서별 `index.html`이 `../app.js`·`../style.css` 참조).
 - **단일 파일 배포**: `src/08_bundle_html.py`가 theme+공통 CSS·JS·벡터(base64)를 한 파일에 담아
-  `web/<id>/<id>_explorer.html`(예 `web/sanguozhi/sanguozhi_explorer.html`)로 묶습니다.
+  `web/<id>/explorer-<id>.html`(예 `web/sanguozhi/explorer-sanguozhi.html`)로 묶습니다.
   더블클릭(`file://`)만으로 서버 없이 열립니다.
 
 ## 데이터 출처 · 라이선스

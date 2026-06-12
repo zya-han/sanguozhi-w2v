@@ -188,4 +188,4 @@ button.ghost:hover { background: var(--accent-soft-dk); }
   padding: 14px 18px 44px; text-align: center; }
 .site-foot a { color: var(--accent); }
 .credits { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--meta); }
-.credits .ver { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--muted); }
+.ver { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--muted); }

@@ -76,8 +76,10 @@ def extract_per(con: sqlite3.Connection, dy_codes: list[int],
     """, (y1, y0))
     rows = cur.fetchall()
     pids = {r[0] for r in rows}
-    out = [(r[1], "PER") for r in rows]
-    # 별명: 위 인물의 字·號·諡 등 (각각 독립 표면형, 병합 금지)
+    biog = [(r[1], "PER") for r in rows]
+    # 별명: 위 인물의 字·號·諡 등 (각각 독립 표면형, 병합 금지). 시대 무관 길상 字/號가
+    # 섞여 위양성원이 되므로 호출부에서 cbdb_altname(zi_only 등)로 게이팅한다.
+    altnames = []
     if pids:
         qm = ",".join("?" * len(pids))
         cur.execute(f"""
@@ -85,9 +87,9 @@ def extract_per(con: sqlite3.Connection, dy_codes: list[int],
             WHERE c_alt_name_chn IS NOT NULL AND c_alt_name_chn <> ''
               AND c_personid IN ({qm})
         """, tuple(pids))
-        out += [(r[0], "PER") for r in cur.fetchall()]
-    log.info("PER: 인물 %d명, 표면형(본명+별명) %d개(정제 전)", len(pids), len(out))
-    return out
+        altnames = [(r[0], "PER") for r in cur.fetchall()]
+    log.info("PER: 인물 %d명, 본명 %d개 + 별명(字·號) %d개(정제 전)", len(pids), len(biog), len(altnames))
+    return biog, altnames
 
 
 # 전기 도입부 인명: 한자만(부호 불포함) 2~4자 + 字 + 한자. 문장 내 어디서나.
@@ -145,6 +147,57 @@ def extract_loc(con: sqlite3.Connection) -> list[tuple[str, str]]:
     return out
 
 
+def corpus_name_context(cfg: dict) -> set[str]:
+    """코퍼스 본문에서 '字X·號曰X·名曰X·自號X'로 도입된 별명(字/號) 집합.
+
+    CBDB ALTNAME(字/號)을 zi_only로 게이팅할 때, 실제 코퍼스가 '字子房'처럼 도입한
+    별명만 채택하기 위함 — 他왕조 인물의 길상 字(無咎·可久…)는 코퍼스에 字로 안 나와 탈락.
+    """
+    norm = pd.read_parquet(resolve(cfg, "interim") / "normalized.parquet")
+    text = "\n".join(norm["text"].astype(str))
+    ctx = set()
+    for m in re.finditer(r"(?:字|號曰|名曰|自號|更名|改名)(\p{Han}{2,3})", text):
+        ctx.add(m.group(1))
+    log.info("코퍼스 별명 도입부(字X·號曰X 등): %d개", len(ctx))
+    return ctx
+
+
+def extract_corpus_patterns(cfg: dict) -> list[tuple[str, str]]:
+    """코퍼스 자체에서 결정론 패턴으로 개체 추출 (CBDB 미수록 코퍼스 고유 개체).
+
+    CBDB는 前漢 커버리지가 빈약 → 昆彌(烏孫王號)처럼 CBDB에 아예 없는 개체를 코퍼스에서 확보.
+    LLM 분류(Phase B)가 최종 정밀도를 담당하므로 다소 관대히 채굴한다.
+      - 봉호/작위: 封·立·為·徙 뒤 X(王|侯|君) → PER (봉호로 사람 지칭)
+      - 군주·번왕 號: X(單于|昆彌|昆莫|閼氏) + 烏孫/匈奴 + 號 → PER/OFI
+      - 별명 도입: 字X·號曰X·名曰X → PER
+    출력은 빈도 임계 이상만(노이즈 억제).
+    """
+    norm = pd.read_parquet(resolve(cfg, "interim") / "normalized.parquet")
+    text = "\n".join(norm["text"].astype(str))
+    from collections import Counter
+    per, ofi = Counter(), Counter()
+    # 봉호/작위 (封/立/為/徙/拜 … X[王侯君])
+    for m in re.finditer(r"(?:封|立|為|徙|拜|襲)\p{Han}{0,3}?(\p{Han}{2,3}?(?:王|侯|君))(?![\p{Han}])", text):
+        per[m.group(1)] += 1
+    # 諸侯王·봉호 일반 (X王/X侯/X君, 2~3자)
+    for m in re.finditer(r"(\p{Han}{2,3}(?:王|侯|君))(?![\p{Han}])", text):
+        per[m.group(1)] += 1
+    # 군주·번왕 號 (X單于·X昆彌·昆莫·閼氏 등)
+    for m in re.finditer(r"(\p{Han}{1,2}(?:單于|昆彌|昆莫|閼氏|大昆彌|小昆彌))", text):
+        ofi[m.group(1)] += 1
+    for kw in ("昆彌", "昆莫", "單于", "閼氏"):
+        n = text.count(kw)
+        if n >= 3:
+            ofi[kw] += n
+    # 별명 도입부
+    for m in re.finditer(r"(?:字|號曰|名曰|自號)(\p{Han}{2,3})", text):
+        per[m.group(1)] += 1
+    out = [(s, "PER") for s, n in per.items() if n >= 3 and 2 <= len(s) <= 3] \
+        + [(s, "OFI") for s, n in ofi.items() if n >= 3 and 2 <= len(s) <= 4]
+    log.info("코퍼스 패턴 추출(봉호·君長號·別名): %d개", len(out))
+    return out
+
+
 def load_stoplist(path: str | None) -> set[str]:
     if not path:
         return set()
@@ -192,11 +245,26 @@ def main():
 
     user_entries = load_seed(g.get("user_dict"))
     user_surfaces = {s for s, _ in user_entries}
-    raw = (extract_per(con, g["dynasty_codes"], g["year_start"], g["year_end"])
-           + extract_ofi(con)
-           + extract_loc(con)
-           + load_seed(g.get("seed_supplement"))
-           + user_entries)
+
+    # PER: 본명(시대필터) + 별명(字/號 — cbdb_altname 게이팅)
+    biog, altnames = extract_per(con, g["dynasty_codes"], g["year_start"], g["year_end"])
+    am = g.get("cbdb_altname", "all")           # all | zi_only | none
+    if am == "none":
+        altnames = []
+    elif am == "zi_only":
+        zictx = corpus_name_context(cfg)
+        n0 = len(altnames)
+        altnames = [(s, t) for s, t in altnames if clean_surface(s) in zictx]
+        log.info("cbdb_altname=zi_only: 별명 %d → %d (코퍼스 字/號 도입분만)", n0, len(altnames))
+
+    raw = biog + altnames + extract_ofi(con)
+    if g.get("cbdb_addr", True):                # ADDR 통째 신뢰(기본). 漢書는 false → 시드+패턴
+        raw += extract_loc(con)
+    else:
+        log.info("cbdb_addr=false: CBDB ADDR 미사용 (지명은 시드+코퍼스패턴)")
+    raw += load_seed(g.get("seed_supplement")) + user_entries
+    if g.get("corpus_extract", False):
+        raw += extract_corpus_patterns(cfg)
     if g.get("extract_names_from_zi", True):
         raw += extract_per_from_zi(con, cfg, int(g.get("surname_min_persons", 20)))
     con.close()

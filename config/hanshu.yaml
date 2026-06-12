@@ -64,6 +64,10 @@ gazetteer:
   extract_names_from_zi: true
   surname_min_persons: 20
   require_corpus_occurrence: true
+  # 가제티어 재설계(2026-06-12) — CBDB 노이즈 차단 + 코퍼스 고유 개체 회복:
+  cbdb_addr:     false      # ADDR(全왕조 지명) 통째 신뢰 안 함 → 시드 西漢 郡國 + corpus_extract
+  cbdb_altname:  zi_only    # CBDB 字/號은 코퍼스가 '字X·號曰X'로 도입한 것만 (길상 字 FP 차단)
+  corpus_extract: true      # 봉호·君長號(昆彌·單于)·別名 코퍼스 패턴 추출 (CBDB 미수록분)
   stoplist:        "data/hanshu/gazetteer/stoplist.txt"
   seed_supplement: "data/hanshu/gazetteer/seed_supplement.tsv"
   user_dict:       "data/hanshu/gazetteer/user_dict.tsv"

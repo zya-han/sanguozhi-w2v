@@ -76,6 +76,22 @@ function doesntMatch(indices) {
   });
   return { worst, scored };
 }
+// 평행사변형(유추): a:b = c:? → 타깃 = normalize(b − a + c) 와 코사인 최대(입력 3개 제외).
+function analogy(ia, ib, ic, topn) {
+  const t = new Float32Array(DIM), A = ia * DIM, B = ib * DIM, C = ic * DIM;
+  for (let k = 0; k < DIM; k++) t[k] = V[B + k] - V[A + k] + V[C + k];
+  let nrm = 0; for (let k = 0; k < DIM; k++) nrm += t[k] * t[k];
+  nrm = Math.sqrt(nrm) || 1; for (let k = 0; k < DIM; k++) t[k] /= nrm;
+  const skip = new Set([ia, ib, ic]), out = [];
+  for (let j = 0; j < COUNT; j++) {
+    if (skip.has(j)) continue;
+    let s = 0; const off = j * DIM;
+    for (let k = 0; k < DIM; k++) s += V[off + k] * t[k];
+    out.push([j, s]);
+  }
+  out.sort((a, b) => b[1] - a[1]);
+  return out.slice(0, topn).map(([j, s]) => [TOKENS[j], s]);
+}
 
 /* ---------- 입력 해석 (한자 또는 한글 음) ---------- */
 // 반환: {token} | {candidates:[...]} | {missing:str}
@@ -243,6 +259,26 @@ function runSim(term) {
   setURL({ task: 'similar', q: t, topn });
 }
 
+/* ---------- 4. 평행사변형(유추) ---------- */
+function runAnalogy() {
+  const box = document.getElementById('anaResult');
+  const rawA = document.getElementById('anaA').value;
+  const rawB = document.getElementById('anaB').value;
+  const rawC = document.getElementById('anaC').value;
+  const ta = pickFirst(resolve(rawA)), tb = pickFirst(resolve(rawB)), tc = pickFirst(resolve(rawC));
+  if (!ta) return notFound(box, rawA);
+  if (!tb) return notFound(box, rawB);
+  if (!tc) return notFound(box, rawC);
+  const N = 20;
+  const list = analogy(tokenToIndex.get(ta), tokenToIndex.get(tb), tokenToIndex.get(tc), N);
+  const w = tok => `<span class="han">${esc(tok)}</span>${rdSpan(tok)}`;
+  box.innerHTML = `${exportBtn()}
+    <div class="ana-eq">${w(ta)} <span class="ana-op">:</span> ${w(tb)} <span class="ana-op">=</span> ${w(tc)} <span class="ana-op">:</span> <span class="ana-q">?</span></div>
+    <p class="common-note"><span class="han">${esc(ta)}</span>→<span class="han">${esc(tb)}</span> 관계를 <span class="han">${esc(tc)}</span>에 적용한 빈칸 후보 상위 ${N}개</p>
+    <div class="bars">${bars(list, null, true)}</div>`;
+  setURL({ task: 'analogy', anaA: ta, anaB: tb, anaC: tc });
+}
+
 /* ---------- 자동완성 (빈도순) ---------- */
 const SUGGEST_N = 10;
 function suggestList(q) {
@@ -307,6 +343,7 @@ function applyURL() {
     if (p.get('spy')) task = 'spy';
     else if (p.get('cmpA') && p.get('cmpB')) task = 'compare';
     else if (p.get('q') || p.get('word')) task = 'similar';
+    else if (p.get('anaA') && p.get('anaB') && p.get('anaC')) task = 'analogy';
     else return;
   }
   if (task === 'compare') {
@@ -333,6 +370,14 @@ function applyURL() {
     });
     renderSpyChips();
     if (spyTokens.length >= 3) runSpy();
+  } else if (task === 'analogy') {
+    if (!document.getElementById('anaA')) return;   // 패널 없는 탐색기(siblings) 보호
+    showTab('analogy');
+    const a = p.get('anaA') || '', b = p.get('anaB') || '', c = p.get('anaC') || '';
+    document.getElementById('anaA').value = a;
+    document.getElementById('anaB').value = b;
+    document.getElementById('anaC').value = c;
+    if (a && b && c) runAnalogy();
   }
 }
 
@@ -365,6 +410,11 @@ function wire() {
       showTab('spy'); spyTokens = a.dataset.list.split('·'); renderSpyChips(); runSpy();
     } else if (k === 'similar') {
       showTab('similar'); document.getElementById('simInput').value = a.dataset.a; runSim(a.dataset.a);
+    } else if (k === 'analogy') {
+      showTab('analogy');
+      document.getElementById('anaA').value = a.dataset.a;
+      document.getElementById('anaB').value = a.dataset.b;
+      document.getElementById('anaC').value = a.dataset.c; runAnalogy();
     }
   }));
 
@@ -388,6 +438,17 @@ function wire() {
   const tn = document.getElementById('simTopn');
   tn.addEventListener('input', () => document.getElementById('simTopnVal').textContent = tn.value);
   attachSuggest('simInput', 'simInputSuggest', t => { document.getElementById('simInput').value = t; runSim(t); });
+
+  // 평행사변형(유추) — 통합 탐색기에만 패널 존재(공유 app.js라 방어적 와이어링)
+  if (document.getElementById('anaBtn')) {
+    document.getElementById('anaBtn').addEventListener('click', runAnalogy);
+    ['anaA', 'anaB', 'anaC'].forEach(id =>
+      document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') runAnalogy(); }));
+    attachSuggest('anaA', 'anaASuggest', t => { document.getElementById('anaA').value = t; });
+    attachSuggest('anaB', 'anaBSuggest', t => { document.getElementById('anaB').value = t; });
+    attachSuggest('anaC', 'anaCSuggest', t => { document.getElementById('anaC').value = t; });
+    delegateBars('anaResult');
+  }
 
   ['cmpResult', 'simResult'].forEach(delegateBars);
 

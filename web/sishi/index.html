@@ -57,8 +57,9 @@
 </header>
 
 <nav class="tabs" id="tabs">
-  <button class="tab active" data-tab="compare">두 단어 비교</button>
+  <button class="tab active" data-tab="analogy">🧩 관계 유추</button>
   <button class="tab" data-tab="spy">🕵️ 스파이 찾기</button>
+  <button class="tab" data-tab="compare">두 단어 비교</button>
   <button class="tab" data-tab="similar">비슷한 단어 찾기</button>
 </nav>
 
@@ -101,7 +102,7 @@
   </details>
 
   <!-- 두 단어 비교 -->
-  <section class="card panel" data-panel="compare">
+  <section class="card panel" data-panel="compare" hidden>
     <h2>두 단어 비교</h2>
     <p class="hint">두 단어가 네 사서에서 얼마나 비슷한 맥락에 쓰였는지 보기 위해, 각 단어와 비슷한 환경에서 출현한 단어들의 목록을 나란히 놓고 비교합니다.
       <a class="ex" data-ex="compare" data-a="高祖" data-b="世祖">예시: <span class="han">高祖</span> vs <span class="han">世祖</span></a></p>
@@ -143,6 +144,23 @@
       <input type="range" id="simTopn" min="5" max="50" value="20" step="1"></label>
     <button class="primary" id="simBtn">비슷한 단어 보기</button>
     <div id="simResult" class="result"></div>
+  </section>
+
+  <!-- 평행사변형 (유추) -->
+  <section class="card panel" data-panel="analogy">
+    <h2>🧩 관계 유추 <span class="sub">a : b = c : ?</span></h2>
+    <p class="hint">두 단어의 관계를 세 번째 단어에 적용해 빈칸(?)을 추론합니다 (예: 의사 : 병원 = 교사 : ?). 통합 모델이라 前漢→後漢처럼 사서를 가로지른 유추가 잘 보여요.
+      <a class="ex" data-ex="analogy" data-a="高祖" data-b="蕭何" data-c="光武">예시: <span class="han">高祖</span> : <span class="han">蕭何</span> = <span class="han">光武</span> : ?</a></p>
+    <div class="grid3">
+      <div class="field"><label>a (기준 1)</label><input type="text" id="anaA" placeholder="예: 高祖" autocomplete="off">
+        <div class="suggest" id="anaASuggest" hidden></div></div>
+      <div class="field"><label>b (기준 2)</label><input type="text" id="anaB" placeholder="예: 蕭何" autocomplete="off">
+        <div class="suggest" id="anaBSuggest" hidden></div></div>
+      <div class="field"><label>c (적용 대상)</label><input type="text" id="anaC" placeholder="예: 光武" autocomplete="off">
+        <div class="suggest" id="anaCSuggest" hidden></div></div>
+    </div>
+    <button class="primary" id="anaBtn">빈칸 채우기</button>
+    <div id="anaResult" class="result"></div>
   </section>
 
 </main>

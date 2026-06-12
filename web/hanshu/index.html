@@ -56,8 +56,8 @@
 </header>
 
 <nav class="tabs" id="tabs">
-  <button class="tab active" data-tab="compare">두 단어 비교</button>
-  <button class="tab" data-tab="spy">🕵️ 스파이 찾기</button>
+  <button class="tab active" data-tab="spy">🕵️ 스파이 찾기</button>
+  <button class="tab" data-tab="compare">두 단어 비교</button>
   <button class="tab" data-tab="similar">비슷한 단어 찾기</button>
 </nav>
 
@@ -97,7 +97,7 @@
   </details>
 
   <!-- 두 단어 비교 -->
-  <section class="card panel" data-panel="compare">
+  <section class="card panel" data-panel="compare" hidden>
     <h2>두 단어 비교</h2>
     <p class="hint">두 단어가 《한서》에서 얼마나 비슷한 맥락에 쓰였는지 보기 위해, 각 단어와 비슷한 환경에서 출현한 단어들의 목록을 나란히 놓고 비교합니다.
       <a class="ex" data-ex="compare" data-a="蕭望之" data-b="望之">예시: <span class="han">蕭望之</span> vs <span class="han">望之</span></a></p>
@@ -112,7 +112,7 @@
   </section>
 
   <!-- 스파이 찾기 -->
-  <section class="card panel" data-panel="spy" hidden>
+  <section class="card panel" data-panel="spy">
     <h2>🕵️ 스파이 찾기 <span class="sub">(어몽어스)</span></h2>
     <p class="hint">단어 3개 이상을 모으면, 무리에서 가장 이질적인 단어 — 스파이 — 를 찾아냅니다.
       <a class="ex" data-ex="spy" data-list="衛青·霍去病·公孫弘·李廣·李廣利">예시: <span class="han">衛青·霍去病·公孫弘·李廣·李廣利</span></a></p>

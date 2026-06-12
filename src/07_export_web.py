@@ -78,11 +78,12 @@ def fix_special_readings(bare: str, reading: str) -> str:
       - 寧은 hanja가 비어두에서 '령'으로 잘못 주므로 '녕'으로 교정(어두는 두음 '영' 유지)
         → 甘寧 감녕·管寧 관녕·安寧 안녕, 寧國 영국(어두)은 그대로.
       - 月氏의 氏는 '씨'가 아니라 '지' → 월지·대월지·소월지
-      - 琅邪의 邪는 '사'가 아니라 '야' → 낭야
+      - 邪는 琅邪·渾邪·昆邪에서 '사'가 아니라 '야' → 낭야·혼야왕·곤야왕
       - 中行·太行의 行은 '행'이 아니라 '항' → 중항(씨)·태항(산). 大行(대행)은 그대로.
       - 車騎·車府의 車는 '차'가 아니라 '거' → 거기장군·중거부령
       - 食其(인명)의 食은 '식'이 아니라 '이' → 역이기(酈食其)·심이기(審食其)
-      - 單于의 單은 '단'이 아니라 '선' → 선우·질지선우(郅支單于)·흉노선우(匈奴單于)"""
+      - 單于의 單은 '단'이 아니라 '선' → 선우·질지선우(郅支單于)·흉노선우(匈奴單于)
+      - 休屠의 屠는 '도'가 아니라 '저' → 휴저왕(休屠王). (屠耆 등은 '도' 유지)"""
     if len(reading) != len(bare):
         return reading                       # 1:1 매핑이 아니면 손대지 않음
     out = list(reading)
@@ -101,8 +102,8 @@ def fix_special_readings(bare: str, reading: str) -> str:
             out[i] = "소"
         elif ch == "氏" and i > 0 and bare[i - 1] == "月":
             out[i] = "지"
-        elif ch == "邪" and i > 0 and bare[i - 1] == "琅":
-            out[i] = "야"
+        elif ch == "邪" and i > 0 and bare[i - 1] in "琅渾昆":
+            out[i] = "야"          # 邪=야 (琅邪 낭야·渾邪王 혼야왕·昆邪王 곤야왕)
         elif ch == "行" and i > 0 and bare[i - 1] in "中太":
             out[i] = "항"
         elif ch == "車" and i + 1 < len(bare) and bare[i + 1] in "騎府":
@@ -111,6 +112,8 @@ def fix_special_readings(bare: str, reading: str) -> str:
             out[i] = "이"
         elif ch == "單" and i + 1 < len(bare) and bare[i + 1] == "于":
             out[i] = "선"          # 흉노 君長號 單于=선우 → 郅支單于 질지선우·匈奴單于 흉노선우
+        elif ch == "屠" and i > 0 and bare[i - 1] == "休":
+            out[i] = "저"          # 休屠=휴저 (匈奴 王號; 金日磾가 休屠王 太子). 屠耆 등은 도 유지
     return "".join(out)
 
 

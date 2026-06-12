@@ -17,6 +17,7 @@
   --accent-dk: #b5532a;
   --accent-soft: #2a1d10;     /* ghost 배경(다크 — 밝은 글자 유지) */
   --accent-soft-dk: #38260f;  /* ghost·내보내기 hover */
+  --target-ink: #e0a35a;      /* 비교 상대 단어 강조 글자(다크 — 밝은 호박) */
   --pill: #1f1810;            /* 탭 알약 배경 */
   --chip-border: #4a3820;     /* 스파이 칩 테두리 */
   --row-hover: #241a10;       /* 막대 행 hover */
@@ -33,13 +34,13 @@
   --gold: #e8c07a;            /* 스파이 이름(밝은 호박금) */
   --gold-soft: #f0d49a;       /* 스파이 이름 독음 */
   /* 양쪽 공통 단어 색(따뜻한 다크 톤 — bg는 짙은 색, bar는 밝은 색띠) */
-  --cm1-bg: #3a2410;  --cm1-bar: #e0a35a;   /* 호박 */
+  --cm1-bg: #0f2b34;  --cm1-bar: #2fc6d8;   /* 시안(대비) */
   --cm2-bg: #3a1c10;  --cm2-bar: #e07a3d;   /* 주황 */
   --cm3-bg: #3a1410;  --cm3-bar: #d9542f;   /* 진홍(火) */
   --cm4-bg: #332810;  --cm4-bar: #d4a72f;   /* 금 */
   --cm5-bg: #2e2410;  --cm5-bar: #b89a4c;   /* 황토 */
   --cm6-bg: #14291d;  --cm6-bar: #4caf6a;   /* 초록(대비) */
-  --cm7-bg: #0f2b34;  --cm7-bar: #2fc6d8;   /* 시안(대비) */
+  --cm7-bg: #3a2410;  --cm7-bar: #e0a35a;   /* 호박 */
   --cm8-bg: #1c2148;  --cm8-bar: #6f6cf0;   /* 인디고(대비) */
   --cm9-bg: #2a1730;  --cm9-bar: #c456b0;   /* 마젠타(대비) */
   --cm10-bg: #1b2330; --cm10-bar: #6f86b8;  /* 슬레이트(대비) */

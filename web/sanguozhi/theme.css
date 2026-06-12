@@ -31,10 +31,10 @@
   --gold: #e8b73e;           /* 스파이 이름(밝은 금색·노랑) */
   --gold-soft: #f0d68f;       /* 스파이 이름 독음 */
   /* 양쪽 공통 단어 색(따뜻한 계열, 서로 구분) — bg(연한 배경)·bar(좌측 색띠) */
-  --cm1-bg: #f4d8d2;  --cm1-bar: #b3271b;   /* 빨강 */
+  --cm1-bg: #e8e6c6;  --cm1-bar: #7d7a2c;   /* 올리브 */
   --cm2-bg: #f8e0c8;  --cm2-bar: #c2611c;   /* 번트 오렌지 */
   --cm3-bg: #f4e7c9;  --cm3-bar: #ad8a1f;   /* 금색 */
-  --cm4-bg: #e8e6c6;  --cm4-bar: #7d7a2c;   /* 올리브 */
+  --cm4-bg: #f4d8d2;  --cm4-bar: #b3271b;   /* 빨강 */
   --cm5-bg: #eaded0;  --cm5-bar: #7a5638;   /* 갈색 */
   --cm6-bg: #efd5d2;  --cm6-bar: #8c2a2a;   /* 마룬 */
   --cm7-bg: #f1dccf;  --cm7-bar: #a8542f;   /* 테라코타 */

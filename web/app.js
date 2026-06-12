@@ -120,15 +120,16 @@ function josaText(text, withB, noB) {
 }
 
 // 막대 행들 (정규화: 최댓값 = 100%). colorMap: token→{bg,bar} (양쪽 공통 단어 색칠).
-// withRank=true면 좌측에 순위(1위·2위…) 표시.
-function bars(list, colorMap, withRank) {
+// withRank=true면 좌측에 순위(1위·2위…) 표시. partner: 비교 상대 단어 → 해당 행 강조(target).
+function bars(list, colorMap, withRank, partner) {
   const max = list.length ? list[0][1] : 1;
   return list.map(([t, s], i) => {
     const pct = Math.max(5, Math.round((s / max) * 100));
     const c = colorMap && colorMap.get(t);
     const style = c ? ` style="background:${c.bg};box-shadow:inset 5px 0 0 ${c.bar}"` : '';
     const rank = withRank ? `<span class="bar-rank">${i + 1}위</span>` : '';
-    return `<div class="bar-row${withRank ? ' has-rank' : ''}${c ? ' common' : ''}" data-token="${esc(t)}"${style}>
+    const tgt = (partner && t === partner) ? ' target' : '';
+    return `<div class="bar-row${withRank ? ' has-rank' : ''}${c ? ' common' : ''}${tgt}" data-token="${esc(t)}"${style}>
       ${rank}<span class="bar-label"><span class="bw han">${esc(t)}</span>${rdSpan(t)}</span>
       <span class="bar-track"><span class="bar-cover" style="width:${100 - pct}%"></span></span>
       <span class="bar-freq">${freqOf(t).toLocaleString()}회</span>
@@ -191,10 +192,10 @@ function runCmp() {
       </div>
       <div class="simlabel">코사인 유사도</div>
       <div class="num">${sim.toFixed(3)}</div></div>
-    <p class="common-note">양쪽 목록에 모두 나오는 단어는 같은 색으로 표시됩니다.</p>
+    <p class="common-note">양쪽 목록에 모두 나오는 단어는 같은 색으로, 비교한 상대 단어는 <strong>굵게</strong> 표시됩니다.</p>
     <div class="cols">
-      <div><div class="col-head">${head(ta)}</div><div class="bars">${bars(la, colorMap, true)}</div></div>
-      <div><div class="col-head">${head(tb)}</div><div class="bars">${bars(lb, colorMap, true)}</div></div>
+      <div><div class="col-head">${head(ta)}</div><div class="bars">${bars(la, colorMap, true, tb)}</div></div>
+      <div><div class="col-head">${head(tb)}</div><div class="bars">${bars(lb, colorMap, true, ta)}</div></div>
     </div>`;
   setURL({ task: 'compare', cmpA: ta, cmpB: tb });
 }

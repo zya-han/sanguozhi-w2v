@@ -3,21 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>前四史 통합 단어 탐색기</title>
-<meta name="description" content="사기·한서·후한서·삼국지 — 전사사(前四史) 본문을 하나로 통합 학습한 Word2Vec 임베딩 탐색기. 전한·후한·삼국을 가로질러 한자 단어의 쓰임을 코사인 유사도로 비교하고, 비슷한 단어·스파이를 찾아보세요.">
+<title>전4사 통합 단어 탐색기</title>
+<meta name="description" content="사기·한서·후한서·삼국지 — 전4사 본문을 하나로 통합 학습한 Word2Vec 임베딩 탐색기. 전한·후한·삼국을 가로질러 한자 단어의 쓰임을 코사인 유사도로 비교하고, 비슷한 단어·스파이를 찾아보세요.">
 <!-- Open Graph / SNS 공유 카드 -->
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="前四史 통합 단어 탐색기">
-<meta property="og:title" content="前四史 통합 단어 탐색기">
+<meta property="og:site_name" content="전4사 통합 단어 탐색기">
+<meta property="og:title" content="전4사 통합 단어 탐색기">
 <meta property="og:description" content="사기·한서·후한서·삼국지 네 정사 본문을 하나로 통합 학습한 Word2Vec 임베딩 탐색기 — 전한·후한·삼국을 가로질러 한자 단어의 쓰임을 비교하고, 비슷한 단어·스파이를 찾아보세요.">
 <meta property="og:url" content="https://zyahan.blog/sishi-word-explorer">
 <meta property="og:image" content="https://zyahan.blog/assets/images/sishi-explorer-og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="前四史 통합 단어 탐색기 — Word2Vec 임베딩 탐색기">
+<meta property="og:image:alt" content="전4사 통합 단어 탐색기 — Word2Vec 임베딩 탐색기">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="前四史 통합 단어 탐색기">
+<meta name="twitter:title" content="전4사 통합 단어 탐색기">
 <meta name="twitter:description" content="사기·한서·후한서·삼국지 네 정사 본문을 하나로 통합 학습한 Word2Vec 임베딩 탐색기 — 전한·후한·삼국을 가로질러 한자 단어의 쓰임을 비교하고, 비슷한 단어·스파이를 찾아보세요.">
 <meta name="twitter:image" content="https://zyahan.blog/assets/images/sishi-explorer-og-image.png">
 <!-- Canonical -->
@@ -47,8 +47,8 @@
 <body>
 <header class="site-head">
   <a class="blog-link" href="https://zyahan.blog" rel="noopener">미남과 오컬트와 자살</a>
-  <nav class="series-nav"><span class="han">前四史</span> 단어 탐색기 · <strong class="current">통합</strong> · <a href="../shiji/index.html">《사기》</a> · <a href="../hanshu/index.html">《한서》</a> · <a href="../houhanshu/index.html">《후한서》</a> · <a href="../sanguozhi/index.html">《삼국지》</a></nav>
-  <h1>前四史 통합 단어 탐색기</h1>
+  <nav class="series-nav">전4사 단어 탐색기 · <strong class="current">통합</strong> · <a href="../shiji/index.html">《사기》</a> · <a href="../hanshu/index.html">《한서》</a> · <a href="../houhanshu/index.html">《후한서》</a> · <a href="../sanguozhi/index.html">《삼국지》</a></nav>
+  <h1>전4사 통합 단어 탐색기</h1>
   <p class="subtitle">사기·한서·후한서·삼국지 네 정사의 본문을 <strong>하나로 통합 학습</strong>한 Word2Vec 모델로 한문 단어의 쓰임을 비교합니다.
   한 모델 안에서 전한·후한·삼국을 가로질러 — 예컨대 <span class="han">高祖</span>(전한 창업)와 <span class="han">世祖</span>(후한 창업)를 — 견줄 수 있어요.
   <strong>한글 독음으로도 검색</strong>할 수 있어요.</p>
@@ -68,7 +68,7 @@
     <summary>📖 처음이신가요? — 결과 읽는 법과 한계 (코사인 유사도란?)</summary>
     <div class="guide-body">
       <h4>이 도구는 무엇을 보여주나요?</h4>
-      <p>네 정사(前四史) 본문에서 각 단어가 <strong>어떤 말들과 함께 등장하는지</strong>(문맥)를 컴퓨터가 학습한 것입니다.
+      <p>네 정사(전4사) 본문에서 각 단어가 <strong>어떤 말들과 함께 등장하는지</strong>(문맥)를 컴퓨터가 학습한 것입니다.
       낱말의 ‘뜻’을 아는 게 아니라, <strong>쓰임새가 닮은 단어</strong>를 찾아 줍니다. 그래서
       <span class="han">荀彧</span>(순욱)의 이웃으로 <span class="han">程昱</span>(정욱)·<span class="han">郭嘉</span>(곽가) 같은
       조조 진영 문관들이 떠오르고, ‘승상’ 옆에는 전한·삼국의 역대 승상과 그 속관 벼슬들이 함께 모입니다.</p>
@@ -88,7 +88,7 @@
       <strong>수십~수백 회 이상</strong> 등장한 단어일수록 결과를 믿을 만합니다.</p>
 
       <h4>그 밖에 알아둘 점</h4>
-      <p>· 이 모델은 <strong>사기·한서·후한서·삼국지(前四史)의 본문</strong>을 하나로 합쳐 학습했습니다.
+      <p>· 이 모델은 <strong>사기·한서·후한서·삼국지(전4사)의 본문</strong>을 하나로 합쳐 학습했습니다.
       당·송대 주석(<span class="han">史記</span> 三家注·<span class="han">漢書</span> 顏師古注·<span class="han">後漢書</span> 李賢注)은 제외하고,
       <span class="han">三國志</span> 배송지(裴松之) 주는 본문의 일부로 포함했습니다. 《삼국지연의》(소설)나 역사적 사실 전체가 아니라,
       네 사서 원문의 서술 습관·치우침이 그대로 담깁니다.<br>

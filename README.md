@@ -2,14 +2,16 @@
 
 二十四史의 첫 네 정사 **前四史**(《史記》·《漢書》·《後漢書》·《三國志》)를 대상으로, 각 사서를 한자
 텍스트로 다듬어 학습한 **Word2Vec 단어 임베딩**과 이를 브라우저에서 바로 탐험하는 **웹 탐색기**입니다.
-司馬遷의 **《史記》**(전체 130卷), 班固의 **《漢書》**(전체 100卷, 本文), 范曄의 **《後漢書》**(紀傳 90卷 +
-司馬彪 續漢書 志 30卷, 本文), 陳壽의 **《三國志》**(裴松之 注 포함, 전체 65卷) — **前四史 네 모델이 모두 공개**돼 있습니다.
+司馬遷의 **《史記》**(전체 130卷, 本文), 班固의 **《漢書》**(전체 100卷, 本文), 范曄의 **《後漢書》**(紀傳 90卷 +
+司馬彪 續漢書 志 30卷, 本文), 陳壽의 **《三國志》**(裴松之 注 포함, 전체 65卷) — **前四史 네 모델**에 더해, 네 사서
+本文을 하나로 합쳐 학습해 전한·후한·삼국을 가로질러 비교하는 **前四史 통합(四史) 모델**까지 모두 공개돼 있습니다.
 
 인물·관직·지명을 하나의 토큰으로 인식하도록 한자 텍스트를 다듬어 학습했기 때문에, `荀彧`과 가까운
 단어로 `程昱`·`荀攸` 같은 인물이 떠오르고, `匈奴`의 이웃으로 `單于`·`月氏`가, `丞相`의 이웃으로 그
 속관(屬官)들이 나옵니다.
 
 > **라이브 데모**
+> - 《前四史 통합》 단어 탐색기 — [zyahan.blog/sishi-word-explorer](https://zyahan.blog/sishi-word-explorer) — 네 사서를 가로질러 비교
 > - 《사기》 단어 탐색기 — [zyahan.blog/shiji-word-explorer](https://zyahan.blog/shiji-word-explorer)
 > - 《한서》 단어 탐색기 — [zyahan.blog/hanshu-word-explorer](https://zyahan.blog/hanshu-word-explorer)
 > - 《후한서》 단어 탐색기 — [zyahan.blog/houhanshu-word-explorer](https://zyahan.blog/houhanshu-word-explorer)
@@ -34,14 +36,14 @@
 
 ## 모델 개요
 
-| 항목 | 史記 | 漢書 | 後漢書 | 三國志 |
-|---|---|---|---|---|
-| 코퍼스 | 전체 130卷 (本紀12·表10·書8·世家30·列傳70), 本文(三家注 제외) | 전체 100卷 (紀12·表8·志10·傳70), 本文(顏師古注 제외) | 전체 120卷 (紀10·列傳80 + 司馬彪 續漢書 志30), 本文(李賢·劉昭注 제외) | 전체 65卷 (魏書30·蜀書15·吳書20), 本文 + 裴松之 注 |
-| 코퍼스 토큰 | 656,411 | 885,505 | 856,705 | 753,858 |
-| 어휘 | 4,937개 (그중 다자 고유명사 약 1,540) | 5,834개 (그중 다자 고유명사 약 1,900) | 6,093개 (그중 다자 고유명사 약 1,840) | 5,456개 (그중 다자 고유명사 약 1,640) |
+| 항목 | 史記 | 漢書 | 後漢書 | 三國志 | 前四史 통합 |
+|---|---|---|---|---|---|
+| 코퍼스 | 전체 130卷 (本紀12·表10·書8·世家30·列傳70), 本文(三家注 제외) | 전체 100卷 (紀12·表8·志10·傳70), 本文(顏師古注 제외) | 전체 120卷 (紀10·列傳80 + 司馬彪 續漢書 志30), 本文(李賢·劉昭注 제외) | 전체 65卷 (魏書30·蜀書15·吳書20), 本文 + 裴松之 注 | 네 사서 本文 풀링 (三國志 裴注 포함) |
+| 코퍼스 토큰 | 656,411 | 885,505 | 856,705 | 753,858 | 3,152,479 |
+| 어휘 | 4,937개 (그중 다자 고유명사 약 1,540) | 5,834개 (그중 다자 고유명사 약 1,900) | 6,093개 (그중 다자 고유명사 약 1,840) | 5,456개 (그중 다자 고유명사 약 1,640) | 10,374개 (그중 다자 고유명사 약 4,600) |
 
-네 모델 모두 **100차원 skip-gram**, gensim Word2Vec(window 5, min_count 3, negative 10, epochs 15,
-고정 시드)로 동일하게 학습했습니다.
+사서별 네 모델은 **100차원**, 코퍼스가 ~4배인 통합 모델은 **150차원** skip-gram이며, 나머지 하이퍼파라미터
+(gensim Word2Vec · window 5, min_count 3, negative 10, epochs 15, 고정 시드)는 모두 동일합니다.
 
 특징:
 
@@ -68,8 +70,8 @@ m.wv.most_similar("劉備")   # → 關羽 …
 m.wv.doesnt_match(["周瑜", "魯肅", "呂蒙", "諸葛亮"])   # → 諸葛亮
 
 m = Word2Vec.load("models/shiji/w2v_shiji.model")
-m.wv.most_similar("項羽")   # → 龍且·項王·沛公·章邯 …
-m.wv.most_similar("匈奴")   # → 單于·胡·月氏 …
+m.wv.most_similar("項羽")   # → 項梁·項王·范增 …
+m.wv.most_similar("匈奴")   # → 單于·冒頓·月氏 …
 
 m = Word2Vec.load("models/hanshu/w2v_hanshu.model")
 m.wv.most_similar("王莽")   # → 新都侯·平帝·哀帝 …
@@ -78,6 +80,10 @@ m.wv.most_similar("匈奴")   # → 單于·冒頓·渾邪王 …
 m = Word2Vec.load("models/houhanshu/w2v_houhanshu.model")
 m.wv.most_similar("世祖")   # → 光武·光武帝·高邑 …  (光武帝의 廟號)
 m.wv.most_similar("班超")   # → 西域長史·疏勒王·軍司馬 …
+
+m = Word2Vec.load("models/sishi/w2v_sishi.model")   # 前四史 통합 (150차원)
+m.wv.most_similar("諸葛亮")   # → 蔣琬·軍師將軍·孟達 …
+m.wv.most_similar("匈奴")     # → 單于·南單于·冒頓 …  (前漢~後漢 가로질러)
 ```
 
 ## 직접 빌드하기
@@ -107,6 +113,10 @@ python src/08_bundle_html.py      # 단일 HTML 한 장으로 묶기(web/<id>/<i
 > 데이터·모델·리포트·웹이 `data/<id>/`·`models/<id>/`·`reports/<id>/`·`web/<id>/`로 분리됩니다.
 > 前四史 밖의 다른 正史(《晉書》 등)도 `config/<id>.yaml` 하나만 새로 쓰면 같은 방식으로 추가할 수 있습니다.
 
+> **前四史 통합 모델** — `config/sishi.yaml`은 새 코퍼스를 만들지 않고 네 사서의 토큰화 결과
+> (`data/<id>/tokenized`)를 풀링해 **Stage 5~8만** 실행합니다(01~04는 사서별 config로 선행 필요).
+> `CORPUS_CONFIG=config/sishi.yaml python src/05_train_w2v.py`부터 차례로 돌리면 통합 모델·탐색기가 나옵니다.
+
 > **CBDB 준비 (Stage 3 전제)** — `src/03`은 `vendor/cbdb_sqlite/*.sqlite3`를 자동 탐색합니다. 없으면
 > [`cbdb-project/cbdb_sqlite`](https://github.com/cbdb-project/cbdb_sqlite)를 클론해 최신 SQLite를 받아 두세요.
 
@@ -114,7 +124,7 @@ python src/08_bundle_html.py      # 단일 HTML 한 장으로 묶기(web/<id>/<i
 
 ```bash
 python src/07_export_web.py        # 벡터·어휘·독음 추출 → web/<id>/data/ (먼저 1회)
-cd web && python -m http.server    # http://localhost:8000/shiji/ · /hanshu/ · /houhanshu/ · /sanguozhi/ 에서 미리보기
+cd web && python -m http.server    # http://localhost:8000/shiji/ · /hanshu/ · /houhanshu/ · /sanguozhi/ · /sishi/ 에서 미리보기
 ```
 
 - 레이아웃: **공통**(`web/app.js`·`web/style.css`)은 코퍼스 무관, **사서별**(`web/<id>/index.html`·

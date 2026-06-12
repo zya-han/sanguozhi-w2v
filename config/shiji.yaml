@@ -34,8 +34,10 @@ corpus:
     - [130, 列傳]
   sentence_close: "。！？」』"
   sentence_open:  "「『"
-  # 史記는 注 미수록이라 무관(peizhu 세그먼트가 생기지 않음).
-  include_peizhu_in_training: true
+  # 史記 三家注(集解·索隱·正義: 卷027 天官書 등 ~23k 토큰)는 학습 제외 → 本文만 학습.
+  # 唐宋 注釋家(裴駰·司馬貞·張守節) register·이름(孟康·蘇林 등) 오염 회피 — 漢書 顏師古注 제외와 동일.
+  # 注 데이터는 corpus.jsonl·가제티어엔 유지(Stage 5만 필터). 통합 sishi 모델도 shiji=false로 동일.
+  include_peizhu_in_training: false
 
 # ----------------------------------------------------------------------------
 # Stage 2 — 정규화

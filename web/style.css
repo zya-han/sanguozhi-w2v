@@ -195,6 +195,12 @@ button.ghost:hover { background: var(--accent-soft-dk); }
 .ana-eq .rd { font-size: .46em; color: var(--muted); font-family: system-ui, sans-serif; margin-left: 3px; }
 .ana-op { color: var(--muted); font-weight: 400; }
 .ana-q { color: var(--accent); font-weight: 800; }
+/* 모바일(≤440px): 유추 식이 한 줄에 들어오도록 축소 (iPhone 14 Pro·360px 기준) */
+@media (max-width: 440px) {
+  .ana-eq { font-size: 1.15rem; gap: 4px; }
+  .ana-eq .rd { margin-left: 2px; }
+  .common-note { font-size: .72rem; }   /* 유추 설명문이 360px 한 줄에 들어오도록 */
+}
 .warn { color: var(--accent); }
 
 .load-status { text-align: center; color: var(--accent); font-weight: 600; padding: 30px; }

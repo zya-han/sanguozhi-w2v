@@ -136,7 +136,7 @@ function josaText(text, withB, noB) {
 }
 
 // 막대 행들 (정규화: 최댓값 = 100%). colorMap: token→{bg,bar} (양쪽 공통 단어 색칠).
-// withRank=true면 좌측에 순위(1위·2위…) 표시. partner: 비교 상대 단어 → 해당 행 강조(target).
+// withRank=true면 좌측에 순위(1위·2위…) 표시. partner: 강조할 토큰(비교 상대어 또는 유추 1위) → 해당 행 강조(target).
 function bars(list, colorMap, withRank, partner) {
   const max = list.length ? list[0][1] : 1;
   return list.map(([t, s], i) => {
@@ -275,7 +275,7 @@ function runAnalogy() {
   box.innerHTML = `${exportBtn()}
     <div class="ana-eq">${w(ta)} <span class="ana-op">:</span> ${w(tb)} <span class="ana-op">=</span> ${w(tc)} <span class="ana-op">:</span> <span class="ana-q">?</span></div>
     <p class="common-note"><span class="han">${esc(ta)}</span>→<span class="han">${esc(tb)}</span> 관계를 <span class="han">${esc(tc)}</span>에 적용한 빈칸 후보 상위 ${N}개</p>
-    <div class="bars">${bars(list, null, true)}</div>`;
+    <div class="bars">${bars(list, null, true, list[0] && list[0][0])}</div>`;
   setURL({ task: 'analogy', anaA: ta, anaB: tb, anaC: tc });
 }
 

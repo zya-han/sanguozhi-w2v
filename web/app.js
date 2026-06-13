@@ -292,10 +292,12 @@ function suggestList(q) {
     const i = r.indexOf(q); if (i < 0) continue;
     const rk = i === 0 ? 0 : 1; for (const t of toks) mark(t, rk);
   }
+  // 독음과 정확히 일치하면 동음 한자를 전부 보여준다(상한 없음). 한자·부분입력은 10개 유지.
+  const cap = readingToTokens.has(q) ? Infinity : SUGGEST_N;
   return [...rank.keys()].sort((a, b) => {
     const d = rank.get(a) - rank.get(b);
     return d || (FREQ[tokenToIndex.get(b)] || 0) - (FREQ[tokenToIndex.get(a)] || 0);
-  }).slice(0, SUGGEST_N);
+  }).slice(0, cap);
 }
 function attachSuggest(inputId, boxId, onSelect) {
   const input = document.getElementById(inputId), box = document.getElementById(boxId);

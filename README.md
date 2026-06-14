@@ -43,8 +43,9 @@
 | 코퍼스 토큰 | 656,411 | 885,488 | 856,705 | 753,858 | 3,152,479 |
 | 어휘 | 4,937개 (그중 다자 고유명사 약 1,540) | 5,836개 (그중 다자 고유명사 약 1,900) | 6,093개 (그중 다자 고유명사 약 1,840) | 5,456개 (그중 다자 고유명사 약 1,640) | 10,374개 (그중 다자 고유명사 약 4,600) |
 
-사서별 네 모델은 **100차원**, 코퍼스가 ~4배인 통합 모델은 **150차원** skip-gram이며, 나머지 하이퍼파라미터
-(gensim Word2Vec · window 5, min_count 3, negative 10, epochs 15, 고정 시드)는 모두 동일합니다.
+사서별 네 모델은 **100차원**, 코퍼스가 ~4배인 통합 모델은 **150차원** skip-gram입니다. 학습 반복(epochs)은
+코퍼스가 작은 사서별 모델이 **25회**, 노출량이 이미 약 3배인 통합 모델이 **15회**이며, 나머지 하이퍼파라미터
+(gensim Word2Vec · window 5, min_count 3, negative 10, 고정 시드)는 모두 동일합니다.
 
 특징:
 
@@ -67,7 +68,7 @@ from gensim.models import Word2Vec
 
 m = Word2Vec.load("models/sanguozhi/w2v_sanguozhi.model")
 m.wv.most_similar("丞相")   # → 兵曹·掾·倉曹 … (丞相府 속관)
-m.wv.most_similar("劉備")   # → 關羽 …
+m.wv.most_similar("劉備")   # → 曹公·孫權·關羽 …
 m.wv.doesnt_match(["周瑜", "魯肅", "呂蒙", "諸葛亮"])   # → 諸葛亮
 
 m = Word2Vec.load("models/shiji/w2v_shiji.model")
@@ -75,12 +76,12 @@ m.wv.most_similar("項羽")   # → 項梁·項王·范增 …
 m.wv.most_similar("匈奴")   # → 單于·冒頓·月氏 …
 
 m = Word2Vec.load("models/hanshu/w2v_hanshu.model")
-m.wv.most_similar("王莽")   # → 新都侯·平帝·哀帝 …
-m.wv.most_similar("匈奴")   # → 單于·冒頓·渾邪王 …
+m.wv.most_similar("王莽")   # → 新都侯·篡·平帝 …
+m.wv.most_similar("匈奴")   # → 單于·烏孫·冒頓 …
 
 m = Word2Vec.load("models/houhanshu/w2v_houhanshu.model")
 m.wv.most_similar("世祖")   # → 光武·光武帝·高邑 …  (光武帝의 廟號)
-m.wv.most_similar("班超")   # → 西域長史·疏勒王·軍司馬 …
+m.wv.most_similar("班超")   # → 西域長史·疏勒王·疏勒 …
 
 m = Word2Vec.load("models/sishi/w2v_sishi.model")   # 前四史 통합 (150차원)
 m.wv.most_similar("諸葛亮")   # → 蔣琬·軍師將軍·孟達 …

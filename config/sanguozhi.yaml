@@ -93,7 +93,7 @@ validate:
   must_char:   [亮, 操, 備, 羽]          # 단자 名 — 병합 금지 확인
   alias_pair:  [諸葛亮, 孔明]            # 名·字 독립 공존
   title_probe: "《魏略》"                # 《書名》 단일 토큰 확인
-  sim_probes:  [諸葛亮, 曹操, 劉備, 孫權, 丞相, 太守, 益州, 荆州]
+  sim_probes:  [諸葛亮, 曹操, 劉備, 孫權, 丞相, 太守, 益州, 荊州]
 
 # ----------------------------------------------------------------------------
 # Stage 5 — Word2Vec
@@ -104,7 +104,7 @@ word2vec:
   window:          5
   min_count:       3
   negative:        10
-  epochs:          15
+  epochs:          25       # 소규모 코퍼스 노출 보강 (epochs 스윕 검증; 통합 sishi 는 노출 ~3× 라 15 유지)
   workers:         1        # 재현성
   seed:            42
   model_name:      "w2v_sanguozhi.model"

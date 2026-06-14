@@ -99,7 +99,7 @@ word2vec:
   window:          5
   min_count:       3
   negative:        10
-  epochs:          15
+  epochs:          25       # 소규모 코퍼스 노출 보강 (epochs 스윕 검증; 통합 sishi 는 노출 ~3× 라 15 유지)
   workers:         1        # 재현성
   seed:            42
   model_name:      "w2v_houhanshu.model"

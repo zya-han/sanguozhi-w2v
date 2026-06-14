@@ -76,17 +76,19 @@ function doesntMatch(indices) {
   });
   return { worst, scored };
 }
-// 평행사변형(유추): a:b = c:? → 타깃 = normalize(b − a + c) 와 코사인 최대(입력 3개 제외).
+// 평행사변형(유추): a:b = c:? → 3CosMul (Levy & Goldberg 2014). 입력 3개 제외.
+//   score(d) = sim(d,b)·sim(d,c) / (sim(d,a)+ε),  sim(x,y) = (cos(x,y)+1)/2
+// 덧셈식(b−a+c)은 랭킹이 cos(d,c)+cos(d,b)−cos(d,a)와 동치라, c와 매우 가까운 한 단어
+// (先主↔曹公 등)의 cos(d,c)항이 합을 지배해 a·b 관계가 묻힘 → 곱셈으로 세 항을 균형.
+// (cos+1)/2 시프트는 음수 코사인에서 곱/몫이 깨지는 것 방지(gensim most_similar_cosmul과 동일).
 function analogy(ia, ib, ic, topn) {
-  const t = new Float32Array(DIM), A = ia * DIM, B = ib * DIM, C = ic * DIM;
-  for (let k = 0; k < DIM; k++) t[k] = V[B + k] - V[A + k] + V[C + k];
-  let nrm = 0; for (let k = 0; k < DIM; k++) nrm += t[k] * t[k];
-  nrm = Math.sqrt(nrm) || 1; for (let k = 0; k < DIM; k++) t[k] /= nrm;
+  const A = ia * DIM, B = ib * DIM, C = ic * DIM, EPS = 1e-6;
   const skip = new Set([ia, ib, ic]), out = [];
   for (let j = 0; j < COUNT; j++) {
     if (skip.has(j)) continue;
-    let s = 0; const off = j * DIM;
-    for (let k = 0; k < DIM; k++) s += V[off + k] * t[k];
+    let ca = 0, cb = 0, cc = 0; const off = j * DIM;
+    for (let k = 0; k < DIM; k++) { const v = V[off + k]; ca += v * V[A + k]; cb += v * V[B + k]; cc += v * V[C + k]; }
+    const s = ((cb + 1) / 2) * ((cc + 1) / 2) / ((ca + 1) / 2 + EPS);
     out.push([j, s]);
   }
   out.sort((a, b) => b[1] - a[1]);

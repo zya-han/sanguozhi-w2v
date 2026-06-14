@@ -271,7 +271,7 @@ function runAnalogy() {
   if (!ta) return notFound(box, rawA);
   if (!tb) return notFound(box, rawB);
   if (!tc) return notFound(box, rawC);
-  const N = 20;
+  const N = 10;
   const list = analogy(tokenToIndex.get(ta), tokenToIndex.get(tb), tokenToIndex.get(tc), N);
   const w = tok => `<span class="han">${esc(tok)}</span>${rdSpan(tok)}`;
   box.innerHTML = `${exportBtn()}

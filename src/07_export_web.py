@@ -81,6 +81,7 @@ def fix_special_readings(bare: str, reading: str) -> str:
       - 寧은 hanja가 비어두에서 '령'으로 잘못 주므로 '녕'으로 교정(어두는 두음 '영' 유지)
         → 甘寧 감녕·管寧 관녕·安寧 안녕, 寧國 영국(어두)은 그대로.
       - 月氏의 氏는 '씨'가 아니라 '지' → 월지·대월지·소월지
+      - 閼氏(흉노 왕비 칭호)는 '알씨'가 아니라 '연지' → 연지·전거연지(顓渠閼氏)·대연지(大閼氏)·선우연지(單于閼氏)
       - 邪는 琅邪·渾邪·昆邪에서 '사'가 아니라 '야' → 낭야·혼야왕·곤야왕
       - 中行·太行의 行은 '행'이 아니라 '항' → 중항(씨)·태항(산). 大行(대행)은 그대로.
       - 車騎·車府의 車는 '차'가 아니라 '거' → 거기장군·중거부령
@@ -103,8 +104,10 @@ def fix_special_readings(bare: str, reading: str) -> str:
             out[i] = "녕"
         elif ch == "劭":          # hanja가 '초'로 잘못 줌 → 항상 '소'(應劭 응소·劉劭 유소)
             out[i] = "소"
-        elif ch == "氏" and i > 0 and bare[i - 1] == "月":
-            out[i] = "지"
+        elif ch == "氏" and i > 0 and bare[i - 1] in "月閼":
+            out[i] = "지"          # 月氏=월지·閼氏=연지
+        elif ch == "閼" and i + 1 < len(bare) and bare[i + 1] == "氏":
+            out[i] = "연"          # 閼氏=연지 (흉노 왕비 칭호)
         elif ch == "邪" and i > 0 and bare[i - 1] in "琅渾昆":
             out[i] = "야"          # 邪=야 (琅邪 낭야·渾邪王 혼야왕·昆邪王 곤야왕)
         elif ch == "行" and i > 0 and bare[i - 1] in "中太":

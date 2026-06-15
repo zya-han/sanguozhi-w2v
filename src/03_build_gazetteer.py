@@ -129,6 +129,39 @@ def extract_per_from_zi(con: sqlite3.Connection, cfg: dict, threshold: int) -> l
     return [(n, "PER") for n in names]
 
 
+# 世說新語式 官+姓 호칭 접미(王丞相·謝太傅·庾太尉·桓車騎·王右軍·謝鎮西 …).
+# 긴 접미 우선(최장일치) — 호출부에서 길이 내림 정렬해 '大將軍'이 '將軍'보다 먼저 매칭된다.
+# 고전 한문은 띄어쓰기가 없어(접미 뒤가 거의 항상 한자) 뒤 경계를 두지 않는다 — 姓 앵커 + 빈도
+# 임계 + LLM 정제로 정밀도를 확보한다. 오탐이 큰 단자 접미(令·尹)는 제외하고 필요분만 시드로 둔다.
+OFFICE_SUFFIX = (
+    "大將軍", "驃騎將軍", "車騎將軍", "鎮西", "鎮東", "鎮南", "鎮北", "征西", "征東",
+    "丞相", "太傅", "太尉", "太保", "司徒", "司空", "中軍", "右軍", "左軍", "前軍", "後軍",
+    "將軍", "車騎", "驃騎", "僕射", "尚書", "侍中", "刺史", "太守", "都督", "長史", "公",
+)
+
+
+def extract_office_surname(con: sqlite3.Connection, cfg: dict, threshold: int) -> list[tuple[str, str]]:
+    """世說式 官+姓 호칭(王丞相·謝太傅 …)을 코퍼스에서 추출 — 별명 비정규화 원칙대로 독립 PER.
+
+    빈출 1자 姓(common_surnames) + 官職 접미(OFFICE_SUFFIX, 최장일치)가 결합한 형태만 빈도
+    임계 이상 채굴. 官職 단독(丞相·太守 등)과 충돌하지 않도록 姓 앵커(앞 글자 ∈ 빈출 姓)를
+    필수로 둔다. 위양성(王公子의 王公 등)은 LLM 정제(Phase B)가 KWIC 문맥으로 거른다.
+    """
+    sur1, _ = common_surnames(con, threshold)
+    norm = pd.read_parquet(resolve(cfg, "interim") / "normalized.parquet")
+    text = "\n".join(norm["text"].astype(str))
+    from collections import Counter
+    suf = "|".join(sorted(OFFICE_SUFFIX, key=len, reverse=True))
+    pat = re.compile(rf"(\p{{Han}})(?:{suf})")
+    cnt: Counter = Counter()
+    for m in pat.finditer(text):
+        if m.group(1) in sur1:                 # 앞 글자가 빈출 姓일 때만(官職 단독 배제)
+            cnt[m.group(0)] += 1
+    out = [(s, "PER") for s, n in cnt.items() if n >= 3]
+    log.info("官+姓 호칭 추출(王丞相·謝太傅 …): %d개 (빈출 姓 %d)", len(out), len(sur1))
+    return out
+
+
 def extract_ofi(con: sqlite3.Connection) -> list[tuple[str, str]]:
     cur = con.cursor()
     out = []
@@ -267,6 +300,8 @@ def main():
         raw += extract_corpus_patterns(cfg)
     if g.get("extract_names_from_zi", True):
         raw += extract_per_from_zi(con, cfg, int(g.get("surname_min_persons", 20)))
+    if g.get("extract_office_surname", False):   # 世說式 官+姓 호칭(王丞相 …)
+        raw += extract_office_surname(con, cfg, int(g.get("surname_min_persons", 20)))
     con.close()
 
     # 정제: 괄호주기·공백 제거 → DataFrame

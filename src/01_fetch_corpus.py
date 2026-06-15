@@ -42,18 +42,27 @@ UA = {"User-Agent": "han-w2v-research/1.0 (academic; contact via github)"}
 
 
 def list_juan_pages(cfg: dict) -> list[str]:
-    """`<書名>/卷…` 페이지를 allpages API로 발견, 卷 번호 자연 정렬.
+    """`<書名>/<page_prefix>…` 페이지를 allpages API로 발견, 卷 번호 자연 정렬.
 
     리다이렉트도 포함해 수집한다 — 일부 卷은 편명 페이지(史記/卷092→史記/淮陰侯列傳)로의
     리다이렉트로만 존재한다. 대신 리다이렉트 타깃을 해석해 같은 본문을 가리키는 중복
     (漢書 卷NNN上/下→卷NNN 등)은 낮은 卷 번호 하나만 남긴다. fetch는 redirects=1로 따라간다.
+
+    page_prefix(기본 '卷') — 正史는 `/卷NNN`이라 '卷'. 卷NNN 체계가 아닌 텍스트(世說新語의
+    `/卷上·卷中·卷下` 또는 `/德行第一`… 36篇 등)는 빈 문자열로 두면 `<書名>/` 하위 전체를
+    발견한다. page_exclude(정규식)에 걸리는 비본문 페이지(序·跋·目錄 등)는 제외한다.
+    번호(卷N) 없는 페이지는 정렬 키가 (9999, …)로 안정 정렬되며, 최장일치 토큰화·W2V는
+    페이지 순서에 민감하지 않다.
     """
     book = cfg["corpus"]["book_title"]
     api = cfg["corpus"]["wikisource_api"]
+    prefix = cfg["corpus"].get("page_prefix", "卷")
+    excl_pat = cfg["corpus"].get("page_exclude")
+    excl = re.compile(excl_pat) if excl_pat else None
     pages, cont = [], None
     while True:
         params = {"action": "query", "list": "allpages",
-                  "apprefix": f"{book}/卷", "apnamespace": 0,
+                  "apprefix": f"{book}/{prefix}", "apnamespace": 0,
                   "apfilterredir": "all", "aplimit": "max", "format": "json"}
         if cont:
             params["apcontinue"] = cont
@@ -64,6 +73,11 @@ def list_juan_pages(cfg: dict) -> list[str]:
         cont = j.get("continue", {}).get("apcontinue")
         if not cont:
             break
+    if excl:                                   # 비본문 페이지(序·跋·目錄 등) 제외
+        kept = [t for t in pages if not excl.search(t)]
+        if len(kept) < len(pages):
+            log.info("page_exclude 적용: %d → %d 페이지", len(pages), len(kept))
+        pages = kept
     # 자연 정렬: 卷 뒤 숫자 + 上中下
     ord_ = {"上": 0, "中": 1, "下": 2}
 

@@ -1,0 +1,44 @@
+/* 《世說新語》 테마 — 청자(靑瓷)·비취 계열(위진 풍류·청담의 맑은 녹청).
+   사서별 색은 이 파일에서만 정의한다. 공통 구조/레이아웃은 ../style.css (var()만 사용). */
+:root {
+  /* 기본 */
+  --bg: #eef3ef;              /* 맑은 청회색 미색 */
+  --card: #fbfdfb;
+  --ink: #1c302b;            /* 짙은 청록먹 */
+  --ink-soft: #38514a;        /* 안내문 본문 */
+  --muted: #6f8a82;
+  --meta: #2f8a76;           /* 빈도수·청록 계열 */
+  --line: #d4e2db;
+  --link: #2a8c7a;           /* 예시 링크(비취 녹청) */
+  /* 강조 */
+  --accent: #1f7a6b;         /* 주 강조: 짙은 청록 */
+  --accent-dk: #155d52;
+  --accent-soft: #d8ece5;
+  --accent-soft-dk: #c4e0d6;  /* ghost·내보내기 버튼 hover */
+  --pill: #fbfdfb;           /* 탭 알약 배경 */
+  --chip-border: #c8ddd4;     /* 스파이 칩 테두리 */
+  --row-hover: #eaf3ee;       /* 막대 행 hover */
+  /* 유사도 막대(연청→짙은청록) */
+  --bar-a: #5bb7a3;          /* 막대 시작(연한 비취) */
+  --bar-b: #176a5c;          /* 막대 끝(짙은 청록) */
+  --track: #dde9e3;
+  --common: #d6ecdf;          /* 양쪽 공통 강조 배경(옅은 녹청) */
+  /* 스파이 박스 */
+  --spybg: #16302a;          /* 짙은 청록-먹 */
+  --spy-text: #e6f1ec;
+  --spy-quote: #9bbab0;
+  --spy-scores: #88a89e;
+  --gold: #54c4a8;           /* 스파이 이름(밝은 비취) */
+  --gold-soft: #a7ddcd;       /* 스파이 이름 독음 */
+  /* 양쪽 공통 단어 색(녹청 계열, 서로 구분) — bg(연한 배경)·bar(좌측 색띠) */
+  --cm1-bg: #d7e9c9;  --cm1-bar: #5a8a3c;   /* 연두 */
+  --cm2-bg: #c9e8e0;  --cm2-bar: #1f8c79;   /* 청록 */
+  --cm3-bg: #cfe7d4;  --cm3-bar: #3a8a5a;   /* 초록 */
+  --cm4-bg: #d2e4ec;  --cm4-bar: #2b6f93;   /* 청 */
+  --cm5-bg: #dce3d0;  --cm5-bar: #6a7a3a;   /* 카키 */
+  --cm6-bg: #cfe1de;  --cm6-bar: #2a7a72;   /* 틸 */
+  --cm7-bg: #d6e8df;  --cm7-bar: #2f8a6a;   /* 에메랄드 */
+  --cm8-bg: #d2dde8;  --cm8-bar: #3a5fa8;   /* 인디고 */
+  --cm9-bg: #cbe6da;  --cm9-bar: #1f9c7e;   /* 민트 */
+  --cm10-bg: #dde1cd; --cm10-bar: #6f6a3a;  /* 올리브 */
+}

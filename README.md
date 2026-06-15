@@ -16,6 +16,7 @@
 > - 《한서》 단어 탐색기 — [zyahan.blog/hanshu-word-explorer](https://zyahan.blog/hanshu-word-explorer)
 > - 《후한서》 단어 탐색기 — [zyahan.blog/houhanshu-word-explorer](https://zyahan.blog/houhanshu-word-explorer)
 > - 《삼국지》 단어 탐색기 — [zyahan.blog/sanguozhi-word-explorer](https://zyahan.blog/sanguozhi-word-explorer)
+> - 《세설신어》 단어 탐색기 — [zyahan.blog/shishuo-word-explorer](https://zyahan.blog/shishuo-word-explorer) — 志人小說(正史 아님), 別途 모델 · 前四史 통합 미포함
 
 ## 웹 탐색기
 
@@ -69,6 +70,26 @@
 > 자리는 0으로 초기화하고, 한 변경이 여러 축에 걸치면 가장 높은 축만 올립니다. 앞 두 자리(`x`·`y`)는
 > 재학습으로 벡터가 바뀜을 뜻해 옛 딥링크·결과가 재현되지 않을 수 있고, `z`는 벡터가 동일합니다.
 
+## 《世說新語》 — 별도 모델 (志人小說)
+
+前四史(正史)와 별개로 劉義慶 《世說新語》(劉孝標 注 포함)를 6번째 코퍼스로 추가했습니다. 정사가
+아니므로 **前四史 통합 모델에는 포함하지 않고**, 독립 탐색기로만 공개합니다. 三國志(裴注 포함)처럼
+**本文 ＋ 劉孝標注**를 함께 학습합니다 — 劉注가 본문보다 분량이 크고 인물의 字·官職·생평·인용 일문의
+핵심 출처라, 注를 포함해야 호칭 인식이 제대로 됩니다.
+
+세설신어는 인물을 **字(茂弘)·官+姓(王丞相)·小字(阿龍)·排行(王大)** 중심으로 지칭해 한 사람의 표면형이
+매우 흩어져 있습니다. 이 프로젝트의 **별명 비정규화** 원칙(諸葛亮·孔明을 합치지 않음)을 그대로 따르되,
+가제티어를 강화해 그 표면형들을 *각각 독립 토큰으로 인식*합니다:
+
+- **官+姓 호칭 추출** — `gazetteer.extract_office_surname` 게이트로 빈출 姓 ＋ 官職 접미(丞相·太傅·
+  車騎 …) 결합을 코퍼스에서 채굴(王丞相·謝太傅 등). 위양성은 LLM 정제로 거릅니다.
+- **字·小字·諡·號** — 劉注 도입부 `{姓名}字{字}` 자동 추출 ＋ 큐레이션 시드(`seed_supplement.tsv`).
+- **非正史 페이지 구조** — 卷NNN이 아니라 3卷(上中下)/36篇 구조라, `corpus.page_prefix`로 페이지
+  발견을 일반화했습니다(前四史는 기본값 `卷` 그대로).
+
+100차원·skip-gram·epochs 25·min_count 2(소규모 코퍼스). 코퍼스·어휘 규모는 빌드 후
+`reports/shishuo/validation.md`에 기록됩니다.
+
 ## 파이썬에서 사용
 
 ```python
@@ -94,6 +115,10 @@ m.wv.most_similar("班超")   # → 西域長史·疏勒王·疏勒 …
 m = Word2Vec.load("models/sishi/w2v_sishi.model")   # 前四史 통합 (150차원)
 m.wv.most_similar("諸葛亮")   # → 蔣琬·軍師將軍·孟達 …
 m.wv.most_similar("匈奴")     # → 單于·南單于·冒頓 …  (前漢~後漢 가로질러)
+
+m = Word2Vec.load("models/shishuo/w2v_shishuo.model")   # 世說新語 (本文+劉孝標注, 別途 모델)
+m.wv.most_similar("王導")     # 王丞相(官+姓)·謝安·庾亮 등 名士가 이웃이면 정상 (빌드 후 확인)
+m.wv.most_similar("清談")     # 위진 청담 관련어
 ```
 
 ## 직접 빌드하기
@@ -122,6 +147,12 @@ python src/08_bundle_html.py      # 단일 HTML 한 장으로 묶기(web/<id>/ex
 > `CORPUS_CONFIG=config/shiji.yaml python src/01_…`처럼 전 단계를 같은 코드로 빌드하며,
 > 데이터·모델·리포트·웹이 `data/<id>/`·`models/<id>/`·`reports/<id>/`·`web/<id>/`로 분리됩니다.
 > 前四史 밖의 다른 正史(《晉書》 등)도 `config/<id>.yaml` 하나만 새로 쓰면 같은 방식으로 추가할 수 있습니다.
+
+> **《世說新語》(非正史) 추가** — `CORPUS_CONFIG=config/shishuo.yaml`로 같은 8단계를 돌립니다.
+> 卷NNN 체계가 아니라 3卷/36篇 구조라 `corpus.page_prefix`(빈 문자열)로 페이지를 발견하고
+> `page_exclude`로 序·跋 등 비본문을 거릅니다. 劉孝標注는 三國志 裴注처럼 학습에 포함하며,
+> `gazetteer.extract_office_surname`로 官+姓 호칭(王丞相 등)을 추가 채굴합니다. **첫 Stage 1 실행 시**
+> allpages 발견 로그로 실제 페이지 네이밍과 劉注 템플릿 형식을 확인해 config를 좁히세요.
 
 > **前四史 통합 모델** — `config/sishi.yaml`은 새 코퍼스를 만들지 않고 네 사서의 토큰화 결과
 > (`data/<id>/tokenized`)를 풀링해 **Stage 5~8만** 실행합니다(01~04는 사서별 config로 선행 필요).
@@ -153,6 +184,7 @@ cd web && python -m http.server    # http://localhost:8000/shiji/ · /hanshu/ ·
 | 원문 漢書 (전체 100卷) | 中文維基文庫 zh.wikisource `漢書/卷001–卷100` | CC BY-SA 4.0 |
 | 원문 後漢書 (전체 120卷) | 中文維基文庫 zh.wikisource `後漢書/卷1–卷120` | CC BY-SA 4.0 |
 | 원문 三國志 (전체 65卷) | 中文維基文庫 zh.wikisource `三國志/卷01–卷65` | CC BY-SA 4.0 |
+| 원문 世說新語 (劉孝標 注 포함) | 中文維基文庫 zh.wikisource `世說新語/…` (上中下 3卷 36篇) | CC BY-SA 4.0 |
 | 인명·관직 | CBDB [`cbdb-project/cbdb_sqlite`](https://github.com/cbdb-project/cbdb_sqlite) | CC BY-NC-SA 4.0 |
 | 지명 | CBDB ADDR_CODES (CHGIS 연계) / TGAZ | CHGIS (Harvard & Fudan) |
 
@@ -221,6 +253,13 @@ cd web && python -m http.server    # http://localhost:8000/shiji/ · /hanshu/ ·
   축소, 1위 단어 강조.
 - **v1.0.0** (2026-06-13) — 첫 공개. 네 사서 本文 풀링(三國志 裴注 포함, 약 315만 토큰, 150차원).
   「관계 유추」 탭 신설(통합 전용).
+
+### 《世說新語》 단어 탐색기 — 前四史 밖 별도 모델(志人小說)
+
+- **v1.0.0** (2026-06-15) — 첫 공개. 劉義慶 《世說新語》 本文 ＋ 劉孝標 注(100차원, skip-gram,
+  epochs 25, min_count 2). 非正史 페이지 구조(3卷/36篇) 대응으로 `corpus.page_prefix` 도입,
+  官+姓 호칭(王丞相·謝太傅 등) 추출(`extract_office_surname`) 신설, 字·小字·諡 큐레이션 시드 보강.
+  別명 비정규화 원칙 유지(王導·王丞相·茂弘·阿龍 각각 독립 토큰). 前四史 통합 모델에는 미포함.
 
 ## 제작
 

@@ -1,0 +1,108 @@
+# ============================================================================
+# 《世說新語》(志人小說) 개체 인식 토큰화 + Word2Vec — 코퍼스 설정
+# 劉義慶 撰 + 劉孝標 注. 前四史(正史)와 달리 卷NNN 체계가 아니라 36篇/3卷 구조.
+# 실행: CORPUS_CONFIG=config/shishuo.yaml python src/01_…
+# 注(劉孝標注)는 三國志 裴注처럼 학습에 포함(인물 字·官·생평·인용 일문의 핵심 출처).
+# ============================================================================
+
+seed: 42
+
+paths:
+  vendor:        vendor                     # 클론한 업스트림 소스 (CBDB 등, 공유)
+  raw:           data/shishuo/raw           # 원문 + provenance
+  interim:       data/shishuo/interim       # segments / normalized
+  gazetteer:     data/shishuo/gazetteer     # gazetteer.tsv + 시드
+  tokenized:     data/shishuo/tokenized     # corpus.jsonl
+  models:        models/shishuo             # w2v 모델 + vocab
+  reports:       reports/shishuo            # 검증 리포트
+  web:           web/shishuo                # 웹 탐색기 출력(07·08). 공통 app.js·style.css 는 web/ 공유
+
+# ----------------------------------------------------------------------------
+# Stage 1 — 원문 수집
+# ----------------------------------------------------------------------------
+corpus:
+  # 정본: 中文維基文庫(zh.wikisource) 世說新語 — 劉義慶 撰, 劉孝標 注. 표점 포함.
+  #   劉孝標 注 = {{*|...}} 인라인 注로 명시 구분(三國志 裴注와 동일 마크업 전제 — Stage 1
+  #   첫 실행 시 한 페이지 wikitext 로 注 템플릿 형식을 반드시 확인. 다르면 split_main_note 분기 추가).
+  source:          "wikisource"
+  wikisource_api:  "https://zh.wikisource.org/w/api.php"
+  id:              "ssx"         # segment_id 접두
+  book_title:      "世說新語"    # allpages 접두 — `世說新語/…` 실페이지 발견
+  provenance:      "世說新語 — 劉義慶 撰, 劉孝標 注 (上中下 3卷 36篇)"
+  # 非正史 페이지 발견: 前四史는 `/卷NNN`이라 page_prefix='卷'(기본)이지만, 世說新語는
+  #   `/卷上·卷中·卷下`(3卷) 또는 `/德行第一`…(36篇)일 수 있다. 빈 문자열이면 `世說新語/`
+  #   하위 전체를 발견하므로 卷·篇 어느 구조든 포괄(序 등 비본문 페이지는 page_exclude 로 거른다).
+  #   실제 구조는 Stage 1 첫 실행 로그(allpages 발견)로 확인 후 좁힐 것.
+  page_prefix:     ""
+  page_exclude:    "序|附錄|凡例|目錄|跋"   # 발견 페이지 중 비본문(序·跋 등) 제외 정규식
+  # 문장 경계 표점(三國志와 동일). 모두 경계 겸 토큰으로 보존.
+  sentence_close: "。！？」』"
+  sentence_open:  "「『"
+  # 劉孝標 注 학습 포함 (항상 is_peizhu 플래그로 구분 보존; 字·官 추출의 주 무대).
+  include_peizhu_in_training: true
+
+# ----------------------------------------------------------------------------
+# Stage 2 — 정규화
+# ----------------------------------------------------------------------------
+normalize:
+  # wikisource 텍스트는 번체+간체가 혼합될 수 있어 번체로 통일하되, 고전 의미가 다른 글자는
+  # 보호(于≠於·云≠雲 등). 三國志와 동일 정책.
+  corpus_opencc:   "s2t"
+  opencc_protect:  "于云后里征咸并辟游范干余谷系凶沈表面松制致卜丑"
+  variant_map:     "data/shishuo/gazetteer/variant_map.tsv"
+
+# ----------------------------------------------------------------------------
+# Stage 3 — 가제티어
+# ----------------------------------------------------------------------------
+gazetteer:
+  cbdb_repo:       "https://github.com/cbdb-project/cbdb_sqlite.git"
+  year_start:      150          # 後漢 말
+  year_end:        420          # 東晉 말 — 年代 중첩 절(extract_per)이 晉 인물 재현의 주력
+  # 後漢~晉 왕조 코드. 25=東漢,3=三國,26=魏,53=蜀,42=吳,83=漢(generic), 6/14/15=晉/西晉/東晉.
+  #   ※ 晉 코드(6·14·15)는 CBDB DYNASTIES 실측으로 확인할 것
+  #     (SELECT c_dy,c_dynasty_chn FROM DYNASTIES). year_start/end 중첩 절이 backstop 이라
+  #     코드가 일부 빠져도 [150,420] 활동 인물은 잡힌다.
+  dynasty_codes:   [25, 3, 26, 53, 42, 83, 6, 14, 15]
+  min_surface_len: 2
+  extract_names_from_zi: true   # 劉注 도입부 '{姓名}字{字}' 추출 (世說은 字 지칭이 지배적)
+  extract_office_surname: true  # 世說式 官+姓 호칭(王丞相·謝太傅 …) 추출 — Stage 3 신규 게이트
+  surname_min_persons: 20
+  require_corpus_occurrence: true
+  cbdb_addr:     false          # ADDR(全왕조 지명) 통째 신뢰 안 함 → 코퍼스 출현 필터 + 시드
+  cbdb_altname:  zi_only        # CBDB 字/號은 코퍼스가 '字X·號曰X'로 도입한 것만 (길상 字 FP 차단)
+  corpus_extract: true          # 봉호·別名 코퍼스 패턴 추출
+  stoplist:        "data/shishuo/gazetteer/stoplist.txt"
+  seed_supplement: "data/shishuo/gazetteer/seed_supplement.tsv"
+  user_dict:       "data/shishuo/gazetteer/user_dict.tsv"
+  opencc_config:   null
+  tgaz_base:       "https://chgis.hudci.org/tgaz"
+
+# ----------------------------------------------------------------------------
+# Stage 4 — 토큰화
+# ----------------------------------------------------------------------------
+tokenize:
+  punctuation_as_token: true
+
+# ----------------------------------------------------------------------------
+# Stage 6 — 검증 센티넬 (世說新語용 강앵커)
+# ----------------------------------------------------------------------------
+validate:
+  must_single: [王導, 謝安, 嵇康, 王羲之, 桓溫, 王丞相, 謝太傅, 太傅, 清談]
+  must_char:   [導, 安, 康]              # 단자 名 — 병합 금지 확인
+  alias_pair:  [謝安, 安石]              # 名·字 독립 공존
+  title_probe: "《晉陽秋》"              # 劉注 인용 《書名》 단일 토큰 확인(첫 실행 후 실재 표제로 교정)
+  sim_probes:  [王導, 謝安, 嵇康, 王羲之, 清談, 太傅, 字]
+
+# ----------------------------------------------------------------------------
+# Stage 5 — Word2Vec (소규모 코퍼스: 本文~3만자 + 劉注 2~3배 → 前四史 단일본보다 작음)
+# ----------------------------------------------------------------------------
+word2vec:
+  sg:              1        # skip-gram
+  vector_size:     100     # 소규모 → 100 (前四史 단일본과 동일대)
+  window:          5
+  min_count:       2       # 코퍼스가 작아 字·小字 등 저빈도 개체 보존 위해 2 (첫 학습 후 vocab 보고 2~3 확정)
+  negative:        10
+  epochs:          25      # 소규모 코퍼스 노출 보강 (前四史 단일본과 동일)
+  workers:         1       # 재현성
+  seed:            42
+  model_name:      "w2v_shishuo.model"

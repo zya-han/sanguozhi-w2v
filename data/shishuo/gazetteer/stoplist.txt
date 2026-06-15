@@ -1,0 +1,20 @@
+# 가제티어 sanity 필터 stoplist (명세 §3.4 선택 필터).
+# CBDB OFFICE/ADDR 및 코퍼스 패턴 추출(字-패턴·官+姓)에서 유입된 명백한 비(非)개체만 제외한다.
+# ※ 첫 학습 전 비어 있다시피 한 상태로 시작하고, scripts/gen_llm_candidates.py →
+#   apply_llm_classification.py 의 KWIC 전수 분류로 위양성을 채워 넣는다(docs §GAZETTEER_REFINEMENT).
+#   특히 官+姓 추출(extract_office_surname)·字-패턴의 일반어 FP(예: 風流·名理 류, 王令 같은 우연 결합)는
+#   여기에 누적. 한 줄에 표면형 하나.
+
+# ── 보통명사·대명사(고유명 아님) ──
+百姓
+君子
+小人
+丈夫
+婦人
+弟子
+門生
+故吏
+賓客
+左右
+名士
+風流

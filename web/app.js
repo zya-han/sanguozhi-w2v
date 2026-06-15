@@ -235,7 +235,15 @@ function addSpyToken(raw) {
 function runSpy() {
   const box = document.getElementById('spyResult');
   if (spyTokens.length < 3) return box.innerHTML = `<p class="warn">단어를 3개 이상 모아 주세요.</p>`;
-  const idx = spyTokens.map(t => tokenToIndex.get(t));
+  // vocab(어휘) 외 토큰은 거른다 — 코퍼스에서 충분히 등장하지 않아 임베딩이 없는 단어.
+  // 그대로 두면 tokenToIndex.get()이 undefined → doesntMatch에서 NaN으로 결과가 깨진다.
+  const missing = spyTokens.filter(t => !tokenToIndex.has(t));
+  const usable = spyTokens.filter(t => tokenToIndex.has(t));
+  if (usable.length < 3) {
+    const miss = missing.map(t => `<span class="han">${esc(t)}</span>`).join('·');
+    return box.innerHTML = `<p class="warn">이 단어는 어휘에 없어요(코퍼스 출현이 너무 적음): ${miss}. 다른 단어로 3개 이상 모아 주세요.</p>`;
+  }
+  const idx = usable.map(t => tokenToIndex.get(t));
   const { worst, scored } = doesntMatch(idx);
   scored.sort((a, b) => a[1] - b[1]);
   const list = scored.map(([i, s]) =>

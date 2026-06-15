@@ -385,3 +385,8 @@
 長康	PER	LLM
 隱之	PER	LLM
 齊莊	PER	LLM
+
+# ── CBDB BIOG_MAIN 데이터 결함 보강 (王戎 등 잘못된 dy 라벨·년도 NULL로 누락) ──
+王戎	PER	죽림칠현(王戎, 234-305). CBDB c_dy=6/20 오라벨로 누락.
+向秀	PER	죽림칠현(向秀, 約 227-272). CBDB c_dy=19 오라벨로 누락.
+劉伶	PER	죽림칠현(劉伶, 約 221-300). CBDB BIOG_MAIN에 항목 없음.

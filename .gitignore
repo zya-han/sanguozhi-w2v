@@ -44,3 +44,4 @@ reports/*/audit_*.tsv
 # LLM 전수분류 중간 산출물 (후보 덤프·적용 결과 — stoplist/seed에 이미 반영됨)
 reports/*/llm_*.json
 reports/*/llm_*.jsonl
+reports/*/batches/
